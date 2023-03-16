@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/title"
+        style="@style/fragment_bar_style">
+
+        <ImageView
+            android:id="@+id/header_back"
+            android:layout_width="wrap_content"
+            android:layout_height="24dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="-80dp"
+            android:clickable="true"
+            android:src="@drawable/icon_back"
+            android:focusable="true" />
+        <TextView
+            style="@style/textview_bar_style"
+            android:text="我的对局"
+            />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/archive_item"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="?attr/actionBarSize"/> <!--解决RecyclerView下拉被底部导航栏挡住的问题 若上方有导航栏 同理改为paddingTop即可-->
+    </LinearLayout>
+
+</LinearLayout>

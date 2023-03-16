@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/whiteSmoke"
+    android:orientation="vertical"
+    android:padding="5dp">
+
+    <EditText
+        android:id="@+id/et_userName"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="160dp"
+        android:hint="账号"
+        android:paddingLeft="10dp"
+        android:maxLines="1"
+        android:maxLength="10"
+        android:textColor="@color/black"
+        android:textColorHint="@color/lightGray"
+        android:textSize="20sp"
+        android:theme="@style/MyEditText" />
+
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:hint="密码"
+        android:inputType="textPassword"
+        android:paddingLeft="10dp"
+        android:maxLines="1"
+        android:maxLength="10"
+        android:textColor="@color/black"
+        android:textColorHint="@color/lightGray"
+        android:textSize="20sp"
+        android:theme="@style/MyEditText" />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/btn_not_focus"
+        android:text="登录"
+        android:textColor="@color/white"
+        android:textSize="24sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp">
+
+        <TextView
+            android:id="@+id/tv_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="20dp"
+            android:text="新用户注册"
+            android:clickable="true"
+            android:textColor="@color/wechatText" />
+
+        <TextView
+            android:id="@+id/tv_find_psw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="20dp"
+            android:text="忘记密码？"
+            android:textColor="@color/wechatText" />
+
+    </RelativeLayout>
+</LinearLayout>

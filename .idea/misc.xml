@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="../../../../../../layout/custom_preview.xml" value="0.25913543701171876" />
+        <entry key="..\:/AndroidProject/go-robot/OpenCVLib/java/CVNativeImplement/CVNativeImplement/src/main/res/menu/activity_lab.xml" value="0.15625" />
+        <entry key="..\:/AndroidProject/go-robot/OpenCVLib/java/CVNativeImplement/src/main/res/menu/activity_lab.xml" value="0.15625" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/drawable/bar_normal.xml" value="0.157" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/drawable/bar_selector.xml" value="0.157" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/drawable/btn_login_normal.xml" value="0.1485" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/drawable/btn_login_selector.xml" value="0.1335" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/drawable/btn_normal.xml" value="0.1335" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/drawable/btn_not_focus.xml" value="0.157" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/drawable/btn_pressed.xml" value="0.157" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/drawable/btn_selector.xml" value="0.158" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/layout/activity_bluetooth.xml" value="0.2595108695652174" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/layout/activity_main.xml" value="0.2595108695652174" />
+        <entry key="..\:/AndroidProject/go-robot/base/src/main/res/layout/layout_lv_devices_item.xml" value="0.2595108695652174" />
+        <entry key="..\:/AndroidProject/go-robot/camera/src/main/res/layout/activity_camera.xml" value="0.25" />
+        <entry key="..\:/AndroidProject/go-robot/camera/src/main/res/layout/activity_camera_change.xml" value="0.12135416666666667" />
+        <entry key="..\:/AndroidProject/go-robot/camera/src/main/res/layout/activity_demo.xml" value="0.109375" />
+        <entry key="..\:/AndroidProject/go-robot/camera/src/main/res/layout/camera_activity.xml" value="0.12135416666666667" />
+        <entry key="..\:/AndroidProject/go-robot/camera/src/main/res/menu/activity_camera.xml" value="0.15625" />
+        <entry key="..\:/AndroidProject/go-robot/camera/src/main/res/menu/activity_lab.xml" value="0.2265625" />
+        <entry key="..\:/AndroidProject/go-robot/detector/src/main/res/layout/activity_credits.xml" value="0.21041666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/detector/src/main/res/layout/activity_detect_board.xml" value="0.21041666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/detector/src/main/res/layout/activity_game_information.xml" value="0.21041666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/detector/src/main/res/layout/activity_game_recording.xml" value="0.21041666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/detector/src/main/res/layout/activity_instructions.xml" value="0.21041666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/detector/src/main/res/layout/activity_layout.xml" value="0.21041666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/detector/src/main/res/layout/activity_privacy_policy.xml" value="0.21041666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/detector/src/main/res/layout/activity_start_screen.xml" value="0.21041666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/login/src/main/res/layout/activity_login.xml" value="0.165" />
+        <entry key="..\:/AndroidProject/go-robot/login/src/main/res/layout/activity_main.xml" value="0.2595108695652174" />
+        <entry key="..\:/AndroidProject/go-robot/login/src/main/res/layout/activity_register.xml" value="0.2128623188405797" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/drawable-xxhdpi/back.xml" value="0.1485" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/drawable/btn_normal.xml" value="0.143" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/drawable/btn_play.xml" value="0.1335" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/drawable/btn_selector.xml" value="0.1335" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/drawable/ic_bluetooth.xml" value="0.166" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/drawable/main_list_divider_line.xml" value="0.1805" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/drawable/progressbar.xml" value="0.166" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/drawable/setborder.xml" value="0.2285" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_add_setting.xml" value="0.2128623188405797" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_battle_info.xml" value="0.24251069900142652" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_bluetooth.xml" value="0.2977777777777778" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_camera.xml" value="0.2265625" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_define_board_position.xml" value="0.17916666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_detect_board.xml" value="0.178125" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_edit_config.xml" value="0.2128623188405797" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_instruction.xml" value="0.2984375" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_login.xml" value="0.3126520681265207" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_main.xml" value="0.2595108695652174" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_main_view.xml" value="0.2595108695652174" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_play_config.xml" value="0.2128623188405797" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_record_game.xml" value="0.4872037914691943" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_register.xml" value="0.2984375" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_select_config.xml" value="0.25815217391304346" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_setting_item.xml" value="0.165" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_sgfactivity.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/activity_test_speech.xml" value="0.18645833333333334" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/archive_item.xml" value="0.20598290598290597" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/dialog_bottom.xml" value="0.23854166666666668" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/fragment_archive.xml" value="0.2595108695652174" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/fragment_play.xml" value="0.1" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/fragment_settings.xml" value="0.2222222222222222" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/item_device_list.xml" value="0.17916666666666667" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/layout_lv_devices_item.xml" value="0.2984375" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/layout/view_empty_item.xml" value="0.29739583333333336" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/menu/activity_camera.xml" value="0.22708333333333333" />
+        <entry key="..\:/AndroidProject/go-robot/view/src/main/res/menu/activity_lab.xml" value="0.2265625" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/drawable/bg_select_default.xml" value="0.125" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/drawable/bg_select_pressed.xml" value="0.125" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/drawable/select_selector.xml" value="0.139" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/drawable/shape_underline.xml" value="0.2205" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/drawable/txt_select_selector.xml" value="0.139" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/activity_battle_info.xml" value="0.165" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/activity_bluetooth.xml" value="0.13019250253292808" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/activity_edit_config.xml" value="0.2513586956521739" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/activity_instruction.xml" value="0.25" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/activity_play_config.xml" value="0.2513586956521739" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/activity_setting_item.xml" value="0.2513586956521739" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/fragment_play.xml" value="0.2513586956521739" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/fragment_settings.xml" value="0.21458333333333332" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/function_item_layout.xml" value="0.209375" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/item_device_list.xml" value="0.2513586956521739" />
+        <entry key="..\:/AndroidProject/gobot/view/src/main/res/layout/view_empty_item.xml" value="0.2513586956521739" />
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.235" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.235" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.35989583333333336" />
+        <entry key="base/src/main/res/drawable/btn_login_normal.xml" value="0.3065" />
+        <entry key="view/src/main/res/layout/activity_battle_info.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/activity_define_board_position.xml" value="0.24020233154296874" />
+        <entry key="view/src/main/res/layout/activity_detect_board.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/activity_login.xml" value="0.5302083333333333" />
+        <entry key="view/src/main/res/layout/activity_main_view.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/activity_play_config.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/activity_record_game.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/activity_select_config.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/activity_setting_item.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/activity_sgfactivity.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/archive_item.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/fragment_archive.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/fragment_play.xml" value="0.5395833333333333" />
+        <entry key="view/src/main/res/layout/fragment_settings.xml" value="0.3710247349823322" />
+      </map>
+    </option>
+  </component>
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK" />
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

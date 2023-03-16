@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,6 +22,8 @@ import com.irlab.view.MainView;
 import com.irlab.view.R;
 import com.irlab.view.models.Board;
 import com.irlab.view.models.Point;
+import com.irlab.view.serial.SerialInter;
+import com.irlab.view.serial.SerialManager;
 import com.irlab.view.utils.Drawer;
 import com.irlab.view.utils.JsonUtil;
 import com.rosefinches.smiledialog.SmileDialog;
@@ -32,6 +33,7 @@ import com.rosefinches.smiledialog.enums.SmileDialogType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
@@ -42,7 +44,7 @@ import okhttp3.Callback;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class PlayActivity extends AppCompatActivity implements View.OnClickListener {
+public class PlayActivity extends AppCompatActivity implements View.OnClickListener, SerialInter {
 
     private static final int BOARD_WIDTH = 1000, BOARD_HEIGHT = 1000;
     public static final String Logger = "engine-Logger";
@@ -64,6 +66,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         initBoard();
         drawBoard();
         initEngine();
+        initSerial();
     }
 
     private void initView() {
@@ -75,6 +78,50 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_begin).setOnClickListener(this);
         findViewById(R.id.btn_resign).setOnClickListener(this);
     }
+
+    /**
+     * 初始化串口并打开
+     */
+    private void initSerial() {
+        // boolean ok = requestRootAccess();
+        SerialManager.getInstance().init(this);
+        SerialManager.getInstance().open();
+    }
+
+    public boolean requestRootAccess() {
+        Process process = null;
+        DataOutputStream os = null;
+
+        try {
+            process = Runtime.getRuntime().exec("su");
+            os = new DataOutputStream(process.getOutputStream());
+            os.writeBytes("echo \"root is granted\" >/dev/null\n");
+
+            os.writeBytes("exit\n");
+            os.flush();
+
+            process.waitFor();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (os != null) {
+                    os.close();
+                }
+                if (process != null) {
+                    process.destroy();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
 
     private void initBoard() {
         boardState = new int[19 + 1][19 + 1];
@@ -205,8 +252,23 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                     .setConformButton("确定", () -> {
                         layoutBeforePlay.setVisibility(View.VISIBLE);
                         layoutAfterPlay.setVisibility(View.GONE);
+                        SerialManager.getInstance().close();  // 关闭串口
                     }).build();
             dialog.show();
+        } else if (vid == R.id.btn_rules) {
+            SerialManager.getInstance().send("Z");
         }
+    }
+
+    @Override
+    public void connectMsg(String path, boolean success) {
+        String msg = success ? "成功" : "失败";
+        Log.e("Serial Port", "串口 " + path + " -连接" + msg);
+    }
+
+    // 若在串口开启的方法中 传入false 此处不会返回数据
+    @Override
+    public void readData(String path, byte[] bytes, int size) {
+        Log.e("串口数据回调","串口 "+ path + " -获取数据" + Arrays.toString(bytes));
     }
 }

@@ -83,45 +83,9 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
      * 初始化串口并打开
      */
     private void initSerial() {
-        // boolean ok = requestRootAccess();
         SerialManager.getInstance().init(this);
         SerialManager.getInstance().open();
     }
-
-    public boolean requestRootAccess() {
-        Process process = null;
-        DataOutputStream os = null;
-
-        try {
-            process = Runtime.getRuntime().exec("su");
-            os = new DataOutputStream(process.getOutputStream());
-            os.writeBytes("echo \"root is granted\" >/dev/null\n");
-
-            os.writeBytes("exit\n");
-            os.flush();
-
-            process.waitFor();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return false;
-        } finally {
-            try {
-                if (os != null) {
-                    os.close();
-                }
-                if (process != null) {
-                    process.destroy();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return true;
-    }
-
 
     private void initBoard() {
         boardState = new int[19 + 1][19 + 1];

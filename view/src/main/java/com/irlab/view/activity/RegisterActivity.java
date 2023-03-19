@@ -16,7 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.irlab.base.response.ResponseCode;
-import com.irlab.base.utils.SPUtils;
 import com.irlab.view.network.api.ApiService;
 import com.irlab.view.bean.UserResponse;
 import com.irlab.view.utils.ButtonListenerUtil;
@@ -103,12 +102,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             int code = userResponse.getCode();
                             // 用户名没有被注册
                             if (code == 200) {
-                                SPUtils.saveString("userName", username);
-                                SPUtils.saveInt("play_level", 1);
-                                SPUtils.saveString("phone_number", phoneNum);
-                                SPUtils.saveString("password", password);
-                                SPUtils.saveInt("win", 0);
-                                SPUtils.saveInt("lose", 0);
                                 msg.what = ResponseCode.ADD_USER_SUCCESSFULLY.getCode();
                             } else {    // 用户名已被注册
                                 msg.what = ResponseCode.USER_ALREADY_REGISTERED.getCode();

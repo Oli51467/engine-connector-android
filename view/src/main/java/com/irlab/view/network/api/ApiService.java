@@ -48,33 +48,7 @@ public interface ApiService {
     /**
      * 更新用户信息
      */
-    @HTTP(method = "POST", path = "/api/updateUser", hasBody = true)
-    Observable<UserResponse> updateUser(@Body RequestBody requestBody);
-
-    /**
-     * 更新用户密码
-     */
-    @HTTP(method = "POST", path = "/api/updatePassword", hasBody = true)
-    Observable<UserResponse> updatePassword(@Body JSONObject requestBody);
-
-    /**
-     * 获取一个用户的所有对局信息
-     */
-    @HTTP(method = "POST", path = "/api/getGames", hasBody = true)
-    Observable<JsonArray> getGames(@Body RequestBody requestBody);
-
-    /**
-     * 删除一个用户的某个对局信息
-     */
-    @HTTP(method = "DELETE", path = "/api/deleteGame", hasBody = true)
-    Observable<UserResponse> deleteGame(@Body RequestBody requestBody);
-
-    @HTTP(method = "POST", path = "/api/updateAvatar", hasBody = true)
-    Observable<UserResponse> updateAvatar(@Body RequestBody requestBody);
-
-    @HTTP(method = "POST", path = "/api/loadAvatar", hasBody = true)
-    Observable<UserResponse> loadAvatar(@Body RequestBody requestBody);
-
-
+    @POST("/api/user/updateInfo/")
+    Observable<UserResponse> updateUser(@Header("Authorization") String token, @Query("username") String username, @Query("profile") String profile, @Query("phone") String phone);
 }
 

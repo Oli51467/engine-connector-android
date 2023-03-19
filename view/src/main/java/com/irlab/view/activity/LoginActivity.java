@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -93,12 +92,15 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                                             public void onSuccess(UserResponse userResponse) {
                                                 if (userResponse.getCode() == 200) {
                                                     Map<String, String> userinfo = (Map<String, String>) userResponse.getData();
-                                                    Log.d("djn", String.valueOf(userinfo));
                                                     saveString("user_id", userinfo.get("id"));
                                                     saveString("user_avatar", userinfo.get("avatar"));
                                                     saveString("username", userinfo.get("username"));
                                                     saveString("win", userinfo.get("win"));
                                                     saveString("lose", userinfo.get("lose"));
+                                                    saveString("phone", userinfo.get("phone"));
+                                                    saveString("profile", userinfo.get("profile"));
+                                                    msg.what = ResponseCode.LOGIN_SUCCESSFULLY.getCode();
+                                                    handler.sendMessage(msg);
                                                 }
                                             }
 
@@ -107,11 +109,10 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
                                             }
                                         }));
-                                msg.what = ResponseCode.LOGIN_SUCCESSFULLY.getCode();
                             } else {
                                 msg.what = ResponseCode.SERVER_FAILED.getCode();
+                                handler.sendMessage(msg);
                             }
-                            handler.sendMessage(msg);
                         }
 
                         @Override

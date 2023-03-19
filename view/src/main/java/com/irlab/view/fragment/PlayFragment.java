@@ -85,7 +85,6 @@ public class PlayFragment extends Fragment implements View.OnClickListener {
     private void setView(View view) {
         this.view = view;
         userName = SPUtils.getString("username");
-        System.out.println(userName);
         TextView tv_username = view.findViewById(R.id.tv_username);
         TextView playLevel = view.findViewById(R.id.play_level);
         TextView battleRecord = view.findViewById(R.id.battle_record);

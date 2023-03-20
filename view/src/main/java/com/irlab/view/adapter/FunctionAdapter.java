@@ -19,6 +19,7 @@ import com.irlab.view.activity.GameRecordActivity;
 import com.irlab.view.activity.InstructionActivity;
 import com.irlab.view.activity.PlayActivity;
 import com.irlab.view.activity.SelectConfigActivity;
+import com.irlab.view.activity.SerialPortActivity;
 import com.irlab.view.bean.MyFunction;
 
 import java.util.List;
@@ -68,12 +69,12 @@ public class FunctionAdapter extends RecyclerView.Adapter<FunctionAdapter.ViewHo
                 Intent intent = new Intent(context, SelectConfigActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 context.startActivity(intent);
-            } else if (function.getName().equals("下棋说明")) {
-                Intent intent = new Intent(context, InstructionActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                context.startActivity(intent);
             } else if (function.getName().equals("我的对局")) {
                 Intent intent = new Intent(context, GameRecordActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                context.startActivity(intent);
+            } else if (function.getName().equals("检测串口")) {
+                Intent intent = new Intent(context, SerialPortActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(intent);
             }

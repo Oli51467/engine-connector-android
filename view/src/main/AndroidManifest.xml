@@ -9,6 +9,13 @@
         android:theme="@style/Theme.Robotgo"
         tools:remove="android:appComponentFactory">
         <activity
+            android:name=".activity.SerialPortActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".activity.PlayActivity"
             android:exported="false">
             <meta-data

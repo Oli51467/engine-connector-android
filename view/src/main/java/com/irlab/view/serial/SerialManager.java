@@ -1,5 +1,7 @@
 package com.irlab.view.serial;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -17,7 +19,7 @@ public class SerialManager {
     private static SerialManager instance;
     private ScheduledExecutorService scheduledExecutor;  // 线程池 同一管理保证只有一个
     private SerialHandler serialHandle;  // 串口连接 发送 读取处理对象
-    private final Queue<String> queueMsg = new ConcurrentLinkedQueue<String>();  // 线程安全到队列
+    private final Queue<String> queueMsg = new ConcurrentLinkedQueue<>();  // 线程安全到队列
     private ScheduledFuture sendStrTask;  // 循环发送任务
     private boolean isConnect = false;  // 串口是否连接
 
@@ -62,8 +64,18 @@ public class SerialManager {
     /**
      * 打开串口
      */
-    public void open() {
-        isConnect = serialHandle.open("/dev/ttys1", 115200, true);  // 设置地址，波特率，开启读取串口数据
+    public String open() {
+        List<String> devices = new ArrayList<>();
+        String d = "";
+        devices.add("/dev/ttyS1");
+        for (String device : devices) {
+            isConnect = serialHandle.open(device, 115200, true);  // 设置地址，波特率，开启读取串口数据
+            if (isConnect) {
+                d = device;
+                break;
+            }
+        }
+        return isConnect ? "yes" + d : "no";
     }
 
     /**

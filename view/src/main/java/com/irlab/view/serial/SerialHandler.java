@@ -94,7 +94,7 @@ public class SerialHandler implements Runnable {
         }
         readTask = SerialManager
                 .getInstance()
-                .getScheduledExecutor()//获取线程池
+                .getScheduledExecutor()  // 获取线程池
                 .scheduleAtFixedRate(this, 0, 150, TimeUnit.MILLISECONDS);  // 执行一个循环任务
     }
 
@@ -116,22 +116,22 @@ public class SerialHandler implements Runnable {
     /**
      * 关闭串口
      */
-    public void close(){
-        try{
+    public void close() {
+        try {
             if (mInputStream != null) mInputStream.close();
-        }catch (Exception e){
-            Log.e(TAG,"串口输入流对象关闭异常：" + e);
+        } catch (Exception e) {
+            Log.e(TAG, "串口输入流对象关闭异常：" + e);
         }
-        try{
+        try {
             if (mOutputStream != null) mOutputStream.close();
-        }catch (Exception e){
-            Log.e(TAG,"串口输出流对象关闭异常：" + e);
+        } catch (Exception e) {
+            Log.e(TAG, "串口输出流对象关闭异常：" + e);
         }
-        try{
+        try {
             if (mSerialPort != null) mSerialPort.close();
             mSerialPort = null;
-        }catch (Exception e){
-            Log.e(TAG,"串口对象关闭异常：" + e);
+        } catch (Exception e) {
+            Log.e(TAG, "串口对象关闭异常：" + e);
         }
     }
 
@@ -149,6 +149,7 @@ public class SerialHandler implements Runnable {
 
     /**
      * 把十六进制表示的字节数组字符串，转换成十六进制字节数组
+     *
      * @param hex 十六进制表示的字节数组字符串
      * @return byte[]
      */

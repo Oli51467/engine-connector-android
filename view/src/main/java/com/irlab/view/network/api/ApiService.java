@@ -36,12 +36,32 @@ public interface ApiService {
     @GET("/api/account/info/")
     Observable<UserResponse> getInfo(@Header("Authorization") String token);
 
+    /**
+     * 获取自己的棋谱信息
+     * @param token jwt-token
+     * @param userid 用户id
+     * @param page 分页 移动端为-1
+     * @return 棋谱信息Json
+     */
     @GET("/api/record/getMy/")
     Observable<JSONObject> getMyRecords(@Header("Authorization") String token, @Query("user_id") Long userid, @Query("page") Integer page);
 
+    /**
+     * 获取其他人棋谱信息
+     * @param token jwt-token
+     * @param userid 用户id
+     * @param page 分页 移动端为-1
+     * @return 棋谱信息Json
+     */
     @GET("/api/record/getAll/")
     Observable<JSONObject> getAllRecords(@Header("Authorization") String token, @Query("user_id") Long userid, @Query("page") Integer page);
 
+    /**
+     * 获取棋谱的详细信息
+     * @param token jwt-token
+     * @param recordId 棋谱id
+     * @return 棋谱详细信息 主要是steps
+     */
     @GET("/api/record/detail/")
     Observable<JSONObject> getRecordDetail(@Header("Authorization") String token, @Query("record_id") Long recordId);
 

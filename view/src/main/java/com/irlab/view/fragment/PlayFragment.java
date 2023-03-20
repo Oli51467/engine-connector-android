@@ -36,7 +36,7 @@ public class PlayFragment extends Fragment implements View.OnClickListener {
             new MyFunction("开始对弈", R.drawable.play),
             new MyFunction("选择棋力", R.drawable.icon_set_level),
             new MyFunction("我的对局", R.drawable.icon_mygame),
-            new MyFunction("下棋说明", R.drawable.icon_introduction)
+            new MyFunction("检测串口", R.drawable.icon_speech)
     };
     private final List<MyFunction> funcList = new ArrayList<>();
 
@@ -103,7 +103,7 @@ public class PlayFragment extends Fragment implements View.OnClickListener {
     @Override
     @SuppressLint("InflateParams")
     public void onClick(View v) {
-        //获取editText控件的数据
+        // 获取editText控件的数据
         int vid = v.getId();
         if (vid == R.id.personal_info) {
             Intent intent = new Intent(this.getActivity(), UserInfoActivity.class);

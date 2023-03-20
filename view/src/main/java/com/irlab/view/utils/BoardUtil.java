@@ -1,6 +1,12 @@
 package com.irlab.view.utils;
 
+import static com.irlab.view.common.Constants.EMPTY;
+import static com.irlab.view.common.Constants.WIDTH;
+
 import android.util.Pair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BoardUtil {
     /**
@@ -31,5 +37,39 @@ public class BoardUtil {
             cnt ++;
         }
         return new Pair<>(20 - Integer.parseInt(number), cnt);
+    }
+
+    public static List<Integer> checkState(int[][] curState, int[][] board) {
+        // res[0]=-2:缺少棋子 res[0]=-1多余棋子 res[0]=0:没有落子 res[0]=1:正常落子 -> res[1]=x,res[2]=y
+        List<Integer> res = new ArrayList<>();
+        int potentialPlayPositionCount = 0;
+        int potentialPlayPositionX = 0, potentialPlayPositionY = 0;
+        for (int x = 1; x <= WIDTH; x++) {
+            for (int y = 1; y <= WIDTH; y++) {
+                // 如果棋盘的某个位置上一回合为EMPTY 这回合不为空 则可能是一个潜在的落子位置
+                if (board[x][y] == EMPTY && curState[x][y] != EMPTY) {
+                    potentialPlayPositionCount++;
+                    potentialPlayPositionX = x;
+                    potentialPlayPositionY = y;
+                }
+                // 如果棋盘的某个位置上一回合不为EMPTY 这回合为EMPTY 则用户可能将该棋子拿走 暂时不考虑同时提子的可能性
+                else if (board[x][y] != EMPTY &&
+                        curState[x][y] == EMPTY) {
+                    res.add(-2);
+                    return res;
+                }
+            }
+        }
+
+        if (potentialPlayPositionCount == 0) {
+            res.add(0);
+        } else if (potentialPlayPositionCount == 1) {
+            res.add(1);
+            res.add(potentialPlayPositionX);
+            res.add(potentialPlayPositionY);
+        } else {
+            res.add(-1);
+        }
+        return res;
     }
 }

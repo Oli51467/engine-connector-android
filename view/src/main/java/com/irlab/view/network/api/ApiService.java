@@ -1,14 +1,10 @@
 package com.irlab.view.network.api;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonArray;
 import com.irlab.view.bean.UserResponse;
 
 import io.reactivex.Observable;
-import okhttp3.RequestBody;
-import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.HTTP;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;

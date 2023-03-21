@@ -1,7 +1,5 @@
 package com.irlab.view.serial;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -17,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class SerialManager {
 
     private static SerialManager instance;
-    private ScheduledExecutorService scheduledExecutor;  // 线程池 同一管理保证只有一个
+    private final ScheduledExecutorService scheduledExecutor;  // 线程池 同一管理保证只有一个
     private SerialHandler serialHandle;  // 串口连接 发送 读取处理对象
     private final Queue<String> queueMsg = new ConcurrentLinkedQueue<>();  // 线程安全到队列
     private ScheduledFuture sendStrTask;  // 循环发送任务
@@ -64,18 +62,9 @@ public class SerialManager {
     /**
      * 打开串口
      */
-    public String open() {
-        List<String> devices = new ArrayList<>();
-        String d = "";
-        devices.add("/dev/ttyS1");
-        for (String device : devices) {
-            isConnect = serialHandle.open(device, 115200, true);  // 设置地址，波特率，开启读取串口数据
-            if (isConnect) {
-                d = device;
-                break;
-            }
-        }
-        return isConnect ? "yes" + d : "no";
+    public boolean open() {
+        isConnect = serialHandle.open("/dev/ttyS1", 115200, true);  // 设置地址，波特率，开启读取串口数据
+        return isConnect;
     }
 
     /**
@@ -101,16 +90,16 @@ public class SerialManager {
         serialHandle.close();  // 关闭串口
     }
 
-    // 启动发送发送任务
+    // 启动发送任务
     private void startSendTask() {
         cancelSendTask();  // 先检查是否已经启动了任务 ？ 若有则取消
         // 每隔100毫秒检查一次 队列中是否有新的指令需要执行
         sendStrTask = scheduledExecutor.scheduleAtFixedRate(() -> {
-            if (!isConnect) return;//串口未连接 退出
-            if (serialHandle == null) return;//串口未初始化 退出
-            String msg = queueMsg.poll();//取出指令
-            if (msg == null || "".equals(msg)) return;//无效指令 退出
-            serialHandle.send(msg);//发送指令
+            if (!isConnect) return;  // 串口未连接 退出
+            if (serialHandle == null) return;  // 串口未初始化 退出
+            String msg = queueMsg.poll();  // 取出指令
+            if (msg == null || msg.equals("")) return;  // 无效指令 退出
+            serialHandle.send(msg);  // 发送指令
         }, 0, 100, TimeUnit.MILLISECONDS);
     }
 

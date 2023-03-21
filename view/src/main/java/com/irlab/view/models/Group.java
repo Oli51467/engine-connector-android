@@ -1,8 +1,8 @@
 package com.irlab.view.models;
 
-import static com.irlab.view.models.Board.EMPTY;
-import static com.irlab.view.models.Board.dx;
-import static com.irlab.view.models.Board.dy;
+import static com.irlab.view.common.Constants.EMPTY;
+import static com.irlab.view.common.Constants.dx;
+import static com.irlab.view.common.Constants.dy;
 
 import java.util.HashSet;
 import java.util.Set;

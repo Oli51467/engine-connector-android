@@ -32,28 +32,4 @@ public class JsonUtil {
         jsonParam.put("level", "p");
         return RequestBody.create(JSON, jsonParam.toString());
     }
-
-    public static JSONObject addUser2Json(String userName, String password) {
-        JSONObject jsonParam = new JSONObject();
-        jsonParam.put("username", userName);
-        jsonParam.put("password", password);
-        return jsonParam;
-    }
-
-    public static JSONObject userNamePhoneNumber2Json(String oldName, String oldPhone, String userName, String phoneNumber) {
-        JSONObject jsonParam = new JSONObject();
-        jsonParam.put("userId", oldName + oldPhone);
-        jsonParam.put("userName", userName);
-        jsonParam.put("phoneNumber", phoneNumber);
-        return jsonParam;
-    }
-
-    public static RequestBody updateUser2Json(String oldName, String userName, String phoneNumber) {
-        JSONObject jsonParam = new JSONObject();
-        jsonParam.put("oldName", oldName);
-        jsonParam.put("userName", userName);
-        jsonParam.put("phoneNumber", phoneNumber);
-        RequestBody requestBody = RequestBody.create(JSON, jsonParam.toString());
-        return requestBody;
-    }
 }

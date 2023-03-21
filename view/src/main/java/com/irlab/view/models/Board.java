@@ -1,5 +1,8 @@
 package com.irlab.view.models;
 
+import static com.irlab.view.common.Constants.BLACK;
+import static com.irlab.view.common.Constants.EMPTY;
+import static com.irlab.view.common.Constants.WHITE;
 
 import com.irlab.view.utils.BoardUtil;
 
@@ -9,13 +12,6 @@ import java.util.Stack;
 
 // 棋盘
 public class Board {
-
-    public final static int EMPTY = 0;
-    public final static int BLACK = 1;
-    public final static int WHITE = 2;
-    public final static int[] dx = {-1, 0, 1, 0};
-    public final static int[] dy = {0, 1, 0, -1};
-
     private final int height;
     private final int width;
 

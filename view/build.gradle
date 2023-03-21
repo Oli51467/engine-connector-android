@@ -105,7 +105,7 @@ dependencies {
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.4'
     // 串口
     implementation 'com.github.licheedev:Android-SerialPort-API:2.0.0'
-    //最新版本查看github项目
+    // 最新版本查看github项目
     implementation 'com.aill:AndroidSerialPort:1.0.8'
 
     testImplementation 'junit:junit:4.13.2'

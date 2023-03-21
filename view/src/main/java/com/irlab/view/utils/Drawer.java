@@ -16,11 +16,11 @@ public class Drawer {
     public static final int DIMENSION = 19;
     public static final int STONE_RADIUS = 20;
     public static final int STAR_RADIUS = 5;
-    public static final int LAST_MOVE_RADIUS = 23;
+    public static final int LAST_MOVE_RADIUS = 7;
     private static RectF rectF;
     private static final Scalar mRed = new Scalar(255, 0, 0);
 
-    private static Paint whitePaint, blackPaint, bluePaint, goldenPaint, paint;
+    private static Paint whitePaint, blackPaint, redPaint, goldenPaint, paint;
 
     /**
      * 初始化Drawer 包括各种画笔和形状
@@ -29,13 +29,13 @@ public class Drawer {
         rectF = new RectF(0, 0, 850, 350);
         blackPaint = new Paint();
         whitePaint = new Paint();
-        bluePaint = new Paint();
+        redPaint = new Paint();
         goldenPaint = new Paint();
         paint = new Paint();
         // 设置线宽
         blackPaint.setStrokeWidth(1);
         whitePaint.setStrokeWidth(1);
-        bluePaint.setStrokeWidth(1);
+        redPaint.setStrokeWidth(1);
         goldenPaint.setStrokeWidth(1);
         paint.setStrokeWidth(1);
         // 抗锯齿
@@ -47,7 +47,7 @@ public class Drawer {
         // 画笔颜色
         blackPaint.setColor(Color.BLACK);
         whitePaint.setColor(Color.WHITE);
-        bluePaint.setColor(Color.rgb(84, 140, 171));
+        redPaint.setColor(Color.rgb(255, 0, 0));
         goldenPaint.setColor(Color.rgb(255, 187, 26));
         paint.setColor(Color.WHITE);
 
@@ -107,7 +107,7 @@ public class Drawer {
                 if (board[i][j] != 0) {
                     if (lastMove != null) {
                         if (i == lastMove.getX() && j == lastMove.getY()) {
-                            canvas.drawCircle(centerX, centerY, LAST_MOVE_RADIUS, bluePaint);
+                            canvas.drawCircle(centerX, centerY, LAST_MOVE_RADIUS, redPaint);
                         }
                     }
                     if (board[i][j] == 1) {
@@ -133,7 +133,7 @@ public class Drawer {
      */
     public Bitmap drawPlayerInfo(Bitmap image, String blackPlayer, String whitePlayer, String rule, String komi, String engine) {
         Canvas canvas = new Canvas(image);
-        canvas.drawRoundRect(rectF, 50, 50, bluePaint);
+        canvas.drawRoundRect(rectF, 50, 50, redPaint);
 
         canvas.drawText(blackPlayer, 60, 130, paint);
         canvas.drawText("VS", 290, 130, goldenPaint);
@@ -155,7 +155,7 @@ public class Drawer {
      */
     public Bitmap drawPlayInfo(Bitmap bitmap, int player, String position) {
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawRoundRect(rectF, 50, 50, bluePaint);
+        canvas.drawRoundRect(rectF, 50, 50, redPaint);
         Paint paint = new Paint();
         paint.setStrokeWidth(1);
         paint.setAntiAlias(true);

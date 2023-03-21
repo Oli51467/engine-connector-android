@@ -29,14 +29,12 @@ public class SettingTextWatcher implements TextWatcher {
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-//		Log.e("demo", "onTextChanged start:"+start+" count:"+count+" before:"+before);
         editStart = start;
         editCount = count;
     }
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//		Log.e("demo", "beforeTextChanged start:"+start+" count:"+count+" after:"+after);
     }
 
     @Override
@@ -45,7 +43,6 @@ public class SettingTextWatcher implements TextWatcher {
             return;
         }
         String content = s.toString();
-//		Log.e("demo", "content:"+content);
         if (isNumeric(content)) {
             int num = Integer.parseInt(content);
             if (num > maxValue || num < minValue) {
@@ -67,5 +64,4 @@ public class SettingTextWatcher implements TextWatcher {
         Pattern pattern = Pattern.compile("[0-9]*");
         return pattern.matcher(str).matches();
     }
-
-};
+}

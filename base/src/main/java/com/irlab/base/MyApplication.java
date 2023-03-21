@@ -3,7 +3,6 @@ package com.irlab.base;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
@@ -21,9 +20,7 @@ public class MyApplication extends Application {
 
     public static final String ENGINE_SERVER = "http://39.98.80.11:5001"; // 阿里云服务器
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final String TAG = MyApplication.class.getName();
     public static final int THREAD_NUM = 19;
-    public static boolean initEngine = false;
     public static ThreadPoolExecutor threadPool;
     private static MyApplication MyApp; // 提供自己的唯一实例
     protected static Context context;
@@ -43,7 +40,6 @@ public class MyApplication extends Application {
         // 初始化线程池 可复用
         threadPool = new ThreadPoolExecutor(THREAD_NUM, 30, 5, TimeUnit.MINUTES,
                 new LinkedBlockingDeque<>());
-        Log.d(TAG, "onCreate");
         initImageLoader(this.getApplicationContext());
     }
 

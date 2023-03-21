@@ -1,5 +1,8 @@
 package com.irlab.view.activity;
 
+import static com.irlab.view.common.Constants.BOARD_HEIGHT;
+import static com.irlab.view.common.Constants.BOARD_WIDTH;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -25,7 +28,6 @@ import java.util.List;
 
 public class RecordReviewActivity extends Activity implements View.OnClickListener {
 
-    private static final int BOARD_WIDTH = 1000, BOARD_HEIGHT = 1000;
     private int[][][] movesState;
     private ImageView boardImageView;
     private final Drawer drawer = new Drawer();

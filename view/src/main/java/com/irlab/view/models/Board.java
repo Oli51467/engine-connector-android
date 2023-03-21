@@ -56,14 +56,14 @@ public class Board {
         gameRecord.push(tmp.toString());
         if (handicap == 0) player = BLACK;
         else player = WHITE;
-        for (int x = 4; x <= 16; x += 6) {
-            for (int y = 4; y <= 16; y += 6) {
-                if (handicap != 0) {
-                    board[x][y] = BLACK;
-                    handicap--;
-                }
-            }
-        }
+//        for (int x = 4; x <= 16; x += 6) {
+//            for (int y = 4; y <= 16; y += 6) {
+//                if (handicap != 0) {
+//                    board[x][y] = BLACK;
+//                    handicap--;
+//                }
+//            }
+//        }
     }
 
     private void changePlayer() {

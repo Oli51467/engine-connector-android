@@ -69,16 +69,11 @@ dependencies {
     implementation 'androidx.room:room-runtime:2.4.2'
     implementation 'com.github.rosefinches:smile-dialog:1.0.1'
     implementation 'com.alibaba:arouter-api:1.5.2'
-    // SGF
-    implementation "com.github.w4v3.sgfcharm:sgfcharm:v0.3.1"
-    implementation "com.github.w4v3.sgfcharm:sgfcharm-chess:v0.3.1"
     // cardView and RecycleView
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     //Google Material控件,以及迁移到AndroidX下一些控件的依赖
     implementation 'com.google.android.material:material:1.4.0'
-    //蓝牙扫描库
-    implementation 'no.nordicsemi.android.support.v18:scanner:1.5.0'
     //RecyclerView最好的适配器，让你的适配器一目了然，告别代码冗余
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.4'
     // 图片加载器
@@ -88,12 +83,6 @@ dependencies {
     implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
     implementation "io.reactivex.rxjava2:rxjava:2.0.0"
-    // cameraX
-    implementation "androidx.camera:camera-core:1.1.0-alpha11"
-    implementation "androidx.camera:camera-camera2:1.1.0-alpha11"
-    implementation "androidx.camera:camera-lifecycle:1.1.0-alpha11"
-    implementation "androidx.camera:camera-view:1.0.0-alpha31"
-    implementation "androidx.camera:camera-extensions:1.0.0-alpha31"
 
     // fastjson
     implementation 'com.alibaba:fastjson:1.1.55.android'

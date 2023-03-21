@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.irlab.base.R;
-import com.irlab.view.impl.IEditTextChangeListener;
+import com.irlab.view.watcher.IEditTextChangeListener;
 
 public class ButtonListenerUtil {
     static IEditTextChangeListener mChangeListener;

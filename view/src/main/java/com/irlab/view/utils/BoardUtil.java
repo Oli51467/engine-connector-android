@@ -39,7 +39,7 @@ public class BoardUtil {
         return new Pair<>(20 - Integer.parseInt(number), cnt);
     }
 
-    public static List<Integer> checkState(int[][] curState, int[][] board) {
+    public static List<Integer> checkState(int[][] curState, int[][] board, int lastX, int lastY) {
         // res[0]=-2:缺少棋子 res[0]=-1多余棋子 res[0]=0:没有落子 res[0]=1:正常落子 -> res[1]=x,res[2]=y
         List<Integer> res = new ArrayList<>();
         int potentialPlayPositionCount = 0;
@@ -54,7 +54,7 @@ public class BoardUtil {
                 }
                 // 如果棋盘的某个位置上一回合不为EMPTY 这回合为EMPTY 则用户可能将该棋子拿走 暂时不考虑同时提子的可能性
                 else if (board[x][y] != EMPTY &&
-                        curState[x][y] == EMPTY) {
+                        curState[x][y] == EMPTY && x != lastX && y != lastY) {
                     res.add(-2);
                     return res;
                 }

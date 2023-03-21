@@ -2,6 +2,8 @@ package com.irlab.view.activity;
 
 import static com.irlab.base.MyApplication.ENGINE_SERVER;
 import static com.irlab.view.common.Constants.BLACK;
+import static com.irlab.view.common.Constants.BOARD_HEIGHT;
+import static com.irlab.view.common.Constants.BOARD_WIDTH;
 import static com.irlab.view.common.Constants.WHITE;
 import static com.irlab.view.utils.BoardUtil.checkState;
 import static com.irlab.view.utils.BoardUtil.getPositionByIndex;
@@ -56,16 +58,16 @@ import okhttp3.Response;
 
 public class PlayActivity extends AppCompatActivity implements View.OnClickListener, SerialInter {
 
-    private static final int BOARD_WIDTH = 1000, BOARD_HEIGHT = 1000;
     public static final String Logger = "engine-Logger";
 
     private Board board;
-    int[][] boardState;
     private ImageView boardImageView;
     private final Drawer drawer = new Drawer();
     private Bitmap boardBitmap;
     private Button chooseSide;
-    private Integer side;
+    private Integer side = 1;
+    private Integer engineLastX = -1, engineLastY = -1;
+    private boolean initSerial = false;
     public static boolean resign = false;
 
     private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
@@ -99,8 +101,8 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void initSerial() {
         SerialManager.getInstance().init(this);
-        boolean ok = SerialManager.getInstance().open();
-        if (ok) {
+        initSerial = SerialManager.getInstance().open();
+        if (initSerial) {
             SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.SUCCESS)
                     .hideTitle(true)
                     .setContentText("串口已开启")
@@ -110,13 +112,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                     .setConformButton("确定").build();
             dialog.show();
         }
+        SerialManager.getInstance().send("EE34FCFF");
+        SerialManager.getInstance().send("EE35FCFF");
     }
 
     private void initBoard() {
-        boardState = new int[19 + 1][19 + 1];
-        for (int i = 1; i <= 19; i++) {
-            Arrays.fill(boardState[i], 0);
-        }
         board = new Board(19, 19, 0);
     }
 
@@ -157,7 +157,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             } else if (chooseSide.getText().equals("执白")) {
                 side = WHITE;
             }
-            initSerial();
+            if (!initSerial) initSerial();
             layoutBeforePlay.setVisibility(View.GONE);
             layoutAfterPlay.setVisibility(View.VISIBLE);
             Serial serial = new Serial();
@@ -173,10 +173,13 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                     .setCancelBgResColor(R.color.whiteSmoke)
                     .setWindowAnimations(R.style.dialog_style)
                     .setConformButton("确定", () -> {
+                        SerialManager.getInstance().send("EE34FCFF");
+                        SerialManager.getInstance().send("EE35FCFF");   // 复位
+                        resign = true;
                         layoutBeforePlay.setVisibility(View.VISIBLE);
                         layoutAfterPlay.setVisibility(View.GONE);
-                        resign = true;
                         SerialManager.getInstance().close();  // 关闭串口
+                        resign();
                     }).build();
             dialog.show();
         } else if (vid == R.id.btn_choose_side) {
@@ -196,17 +199,18 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     // 串口接收数据
     @Override
     public void readData(String path, byte[] bytes, int size) {
-        int[][] receivedBoardState = new int[20][];
+        int[][] receivedBoardState = new int[20][20];
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
         writeTxtToFile(receivedHexString.toString(), "receivedHexString.txt");
         // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState
-        for (int cnt = 0, k = 0; k < receivedHexString.size(); k++, cnt++) {
-            receivedBoardState[cnt / 19 + 1][(cnt % 19) + 1] = Integer.valueOf(receivedHexString.get(k), 16);
+        int cnt, k;
+        for (cnt = 0, k = 0; k < receivedHexString.size(); k++, cnt++) {
+            receivedBoardState[cnt / 19 + 1][(cnt % 19) + 1] = Integer.parseInt(receivedHexString.get(k), 16);
         }
-        writeTxtToFile(Arrays.deepToString(receivedBoardState), "receivedBoardState.txt");
+        writeTxtToFile(Arrays.deepToString(receivedBoardState) + "  " + cnt + " " + receivedHexString.size(), "receivedBoardState.txt");
         // 3.对比接收到的棋盘数据与维护的棋盘数据的差别
-        List<Integer> checkResp = checkState(board.board, receivedBoardState);
+        List<Integer> checkResp = checkState(receivedBoardState, board.board, engineLastX, engineLastY);
         if (checkResp.get(0).equals(-2)) {
             // 缺少棋子提示
             runOnUiThread(() -> {
@@ -265,11 +269,16 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             Pair<Integer, Integer> indexes = transformIndex(engineResp);
             // 5.数据结构记录引擎落子位置并得出下一步局面
             board.play(indexes.first, indexes.second);
+            engineLastX = indexes.first;
+            engineLastY = indexes.second;
             // 6.刷新棋盘
             drawBoard();
             // 7.将引擎的落子位置转化成16进制
             String hexX = Integer.toHexString(indexes.first);
             String hexY = Integer.toHexString(indexes.second);
+            if (indexes.first <= 15) hexX = "0" + hexX;
+            if (indexes.second <= 15) hexY = "0" + hexY;
+            writeTxtToFile("16进制坐标：" + hexX + " " + hexY, "hex16.txt");
             // 8.指示下位机落子
             sendMoves2LowerComputer(hexX, hexY);
             return true;
@@ -282,6 +291,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         if (side == 1) order.append("32");
         else order.append("31");
         order.append(hexX).append(hexY).append("FC").append("FF");
+        writeTxtToFile("send indexes: " + order, "send.txt");
         SerialManager.getInstance().send(order.toString());
     }
 
@@ -368,9 +378,24 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         return result[0];
     }
 
+    public void resign() {
+        RequestBody requestBody = JsonUtil.getResignRequestBody(SPUtils.getString("user_id"));
+        HttpUtil.sendOkHttpResponse(ENGINE_SERVER + "/finish", requestBody, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(Logger, "认输出错:" + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) {
+
+            }
+        });
+    }
+
     private void drawBoard() {
         runOnUiThread(() -> {
-            Bitmap board = drawer.drawBoard(boardBitmap, this.board.board, new Point(-1, -1), 0, 0);
+            Bitmap board = drawer.drawBoard(boardBitmap, this.board.board, new Point(engineLastX, engineLastY), 0, 0);
             boardImageView.setImageBitmap(board);
         });
     }

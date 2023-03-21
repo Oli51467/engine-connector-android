@@ -32,4 +32,14 @@ public class JsonUtil {
         jsonParam.put("level", "p");
         return RequestBody.create(JSON, jsonParam.toString());
     }
+
+    /**
+     * 将引擎指令转化为json格式
+     * @return RequestBody
+     */
+    public static RequestBody getResignRequestBody(String userid) {
+        JSONObject jsonParam = new JSONObject();
+        jsonParam.put("user_id", userid);
+        return RequestBody.create(JSON, jsonParam.toString());
+    }
 }

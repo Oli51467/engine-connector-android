@@ -6,7 +6,12 @@ public class Serial extends Thread {
 
     @Override
     public void run() {
-        while(true) {
+        while (!resign) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             SerialManager.getInstance().send("EE30FCFF");
         }
     }

@@ -1,6 +1,7 @@
 package com.irlab.view.activity;
 
 import static com.irlab.base.MyApplication.ENGINE_SERVER;
+import static com.irlab.view.utils.BoardUtil.transformIndex;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -8,9 +9,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,6 +30,9 @@ import com.irlab.view.serial.SerialInter;
 import com.irlab.view.serial.SerialManager;
 import com.irlab.view.utils.Drawer;
 import com.irlab.view.utils.JsonUtil;
+import com.rosefinches.smiledialog.SmileDialog;
+import com.rosefinches.smiledialog.SmileDialogBuilder;
+import com.rosefinches.smiledialog.enums.SmileDialogType;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +57,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     private ImageView boardImageView;
     private final Drawer drawer = new Drawer();
     private Bitmap boardBitmap;
-    private TextView show_serial;
+    private Button chooseSide;
 
     private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
 
@@ -61,21 +68,21 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         Objects.requireNonNull(getSupportActionBar()).hide();   // 去掉导航栏
         initView();
         initBoard();
-        //drawBoard();
+        drawBoard();
         initEngine();
         initSerial();
     }
 
     private void initView() {
+        chooseSide = findViewById(R.id.btn_choose_side);
         boardImageView = findViewById(R.id.iv_board);
-        show_serial = findViewById(R.id.show_serial);
-        //layoutBeforePlay = findViewById(R.id.layout_before_play);
-        //layoutAfterPlay = findViewById(R.id.layout_after_play);
+        layoutBeforePlay = findViewById(R.id.layout_before_play);
+        layoutAfterPlay = findViewById(R.id.layout_after_play);
         boardBitmap = Bitmap.createBitmap(BOARD_WIDTH, BOARD_HEIGHT, Bitmap.Config.ARGB_8888);
         findViewById(R.id.header_back).setOnClickListener(this);
-        findViewById(R.id.serial_send).setOnClickListener(this);
-        //findViewById(R.id.btn_begin).setOnClickListener(this);
-        //findViewById(R.id.btn_resign).setOnClickListener(this);
+        findViewById(R.id.btn_begin).setOnClickListener(this);
+        findViewById(R.id.btn_resign).setOnClickListener(this);
+        chooseSide.setOnClickListener(this);
     }
 
     /**
@@ -84,7 +91,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     private void initSerial() {
         SerialManager.getInstance().init(this);
         String ok = SerialManager.getInstance().open();
-        show_serial.setText(ok);
     }
 
     private void initBoard() {
@@ -194,55 +200,61 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(this, MainView.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
-        } else if (vid == R.id.serial_send) {
-            SerialManager.getInstance().send("0xEE30FCFF");
-        }
-//        } else if (vid == R.id.btn_begin) {
-//            layoutBeforePlay.setVisibility(View.GONE);
-//            layoutAfterPlay.setVisibility(View.VISIBLE);
+        } else if (vid == R.id.btn_begin) {
+            if (chooseSide.getText().equals("选择黑白")) {
+                SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
+                        .hideTitle(true)
+                        .setContentText("请选择黑白")
+                        .setConformBgResColor(R.color.warning)
+                        .setConformTextColor(Color.WHITE)
+                        .setWindowAnimations(R.style.dialog_style)
+                        .setConformButton("确定").build();
+                dialog.show();
+                return;
+            }
+            layoutBeforePlay.setVisibility(View.GONE);
+            layoutAfterPlay.setVisibility(View.VISIBLE);
 //            board.play(16, 4);
 //            drawBoard();
 //            String engineResp = enginePlay("D4", "1");
 //            Pair<Integer, Integer> indexes = transformIndex(engineResp);
 //            board.play(indexes.first, indexes.second);
 //            drawBoard();
-//        } else if (vid == R.id.btn_resign) {
-//            SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
-//                    .hideTitle(true)
-//                    .setContentText("你确定认输吗")
-//                    .setConformBgResColor(R.color.delete)
-//                    .setConformTextColor(Color.WHITE)
-//                    .setCancelTextColor(Color.BLACK)
-//                    .setCancelButton("取消")
-//                    .setCancelBgResColor(R.color.whiteSmoke)
-//                    .setWindowAnimations(R.style.dialog_style)
-//                    .setConformButton("确定", () -> {
-//                        layoutBeforePlay.setVisibility(View.VISIBLE);
-//                        layoutAfterPlay.setVisibility(View.GONE);
-//                        SerialManager.getInstance().close();  // 关闭串口
-//                    }).build();
-//            dialog.show();
-//        }
-//        } else if (vid == R.id.btn_rules) {
-//            SerialManager.getInstance().send("0xEE30FC FF");
-//        }
+        } else if (vid == R.id.btn_resign) {
+            SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
+                    .hideTitle(true)
+                    .setContentText("你确定认输吗")
+                    .setConformBgResColor(R.color.delete)
+                    .setConformTextColor(Color.WHITE)
+                    .setCancelTextColor(Color.BLACK)
+                    .setCancelButton("取消")
+                    .setCancelBgResColor(R.color.whiteSmoke)
+                    .setWindowAnimations(R.style.dialog_style)
+                    .setConformButton("确定", () -> {
+                        layoutBeforePlay.setVisibility(View.VISIBLE);
+                        layoutAfterPlay.setVisibility(View.GONE);
+                        SerialManager.getInstance().close();  // 关闭串口
+                    }).build();
+            dialog.show();
+        } else if (vid == R.id.btn_choose_side) {
+            if (chooseSide.getText().equals("选择黑白")) {
+                chooseSide.setText("执黑");
+            } else if (chooseSide.getText().equals("执黑")) {
+                chooseSide.setText("执白");
+            } else if (chooseSide.getText().equals("执白")) {
+                chooseSide.setText("执黑");
+            }
+        }
     }
 
     @Override
     public void connectMsg(String path, boolean success) {
         String resp = success ? "成功" : "失败";
-        runOnUiThread(() -> {
-            show_serial.append(resp);
-        });
     }
 
     // 若在串口开启的方法中 传入false 此处不会返回数据
     @Override
     public void readData(String path, byte[] bytes, int size) {
-        runOnUiThread(() -> {
-            show_serial.setText("");
-            show_serial.append(path + " 获取" + Arrays.toString(bytes));
-        });
-        //ToastUtil.show(this, "串口 " + path + " -获取数据" + Arrays.toString(bytes));
+
     }
 }

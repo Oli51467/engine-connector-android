@@ -81,7 +81,7 @@ public class Drawer {
         float endOfLines = 950;
         for (int i = 0; i < 19; i ++ ) {
             canvas.drawLine(x + distanceBetweenLines, y + distanceBetweenLines * (i + 1), x + endOfLines, y + distanceBetweenLines * (i + 1), blackPaint);
-            if (i == 18) {
+            if (i == 0) {
                 for (int j = 1; j <= 19; j ++ ) {
                     canvas.drawText(String.valueOf(20 - j), x + endOfLines + 10, y + distanceBetweenLines * (j + 0.25f), blackPaint);
                 }

@@ -9,17 +9,17 @@
     <RelativeLayout
         android:id="@+id/header"
         android:layout_width="fill_parent"
-        android:layout_height="54dp"
+        android:layout_height="108dp"
         android:background="#F5f5f5"
         android:gravity="center_vertical">
 
         <ImageView
             android:id="@+id/header_back"
             android:layout_width="wrap_content"
-            android:layout_height="24dp"
+            android:layout_height="48dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_marginStart="-80dp"
+            android:layout_marginStart="-60dp"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/icon_back" />
@@ -31,7 +31,7 @@
             android:layout_centerInParent="true"
             android:text="对弈"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="32sp"
             android:textStyle="bold" />
 
     </RelativeLayout>
@@ -45,17 +45,17 @@
             android:id="@+id/iv_board"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-110px" />
+            android:layout_marginTop="-150px" />
 
     </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/layout_before_play"
         android:layout_width="match_parent"
-        android:layout_height="140dp"
+        android:layout_height="200dp"
         android:orientation="vertical"
         android:visibility="visible"
-        android:layout_marginTop="-130px">
+        android:layout_marginTop="-100px">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -65,7 +65,7 @@
             <Button
                 android:id="@+id/btn_choose_side"
                 android:layout_width="0px"
-                android:layout_height="60dp"
+                android:layout_height="84dp"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@drawable/btn_update"
@@ -76,7 +76,7 @@
             <Button
                 android:id="@+id/btn_rules"
                 android:layout_width="0px"
-                android:layout_height="60dp"
+                android:layout_height="84dp"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:background="@drawable/btn_update"
@@ -88,8 +88,9 @@
 
         <Button
             android:id="@+id/btn_begin"
-            android:layout_width="150dp"
-            android:layout_height="60dp"
+            android:layout_width="240dp"
+            android:layout_height="84dp"
+            android:layout_marginTop="24dp"
             android:layout_gravity="center"
             android:background="@drawable/btn_login_normal"
             android:text="开始"
@@ -101,19 +102,19 @@
     <LinearLayout
         android:id="@+id/layout_after_play"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:layout_marginTop="-130px"
+        android:layout_height="200dp"
+        android:layout_marginTop="-100px"
         android:orientation="vertical"
         android:visibility="invisible">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="70dp">
+            android:layout_height="80dp">
 
             <Button
                 android:id="@+id/btn_resign"
                 android:layout_width="0px"
-                android:layout_height="40dp"
+                android:layout_height="84dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="12dp"
                 android:layout_weight="1"
@@ -125,7 +126,7 @@
             <Button
                 android:id="@+id/btn_regret"
                 android:layout_width="0px"
-                android:layout_height="40dp"
+                android:layout_height="84dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="12dp"
                 android:layout_weight="1"

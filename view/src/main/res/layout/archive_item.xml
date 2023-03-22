@@ -2,11 +2,11 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
-    android:layout_marginBottom="10dp"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
-    android:layout_marginTop="10dp"
+    android:layout_height="150dp"
+    android:layout_marginBottom="20dp"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp"
+    android:layout_marginTop="15dp"
     card_view:cardBackgroundColor="#fffefe"
     card_view:cardCornerRadius="10dp"
     android:orientation="horizontal">
@@ -17,13 +17,13 @@
 
         <LinearLayout
             android:id="@+id/layout_left"
-            android:layout_width="260dp"
+            android:layout_width="520dp"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
             <LinearLayout
                 style="@style/linearLayout_play_settings"
-                android:layout_marginTop="15dp">
+                android:layout_marginTop="20dp">
 
                 <TextView
                     android:id="@+id/tv_player_info"
@@ -55,7 +55,7 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:textStyle="bold"
-                android:textSize="16sp"/>
+                android:textSize="32sp"/>
         </LinearLayout>
 
     </RelativeLayout>

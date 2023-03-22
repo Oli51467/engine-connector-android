@@ -105,15 +105,15 @@ public class Drawer {
                     canvas.drawCircle(centerX, centerY, STAR_RADIUS, blackPaint);
                 }
                 if (board[i][j] != 0) {
-                    if (lastMove != null) {
-                        if (i == lastMove.getX() && j == lastMove.getY()) {
-                            canvas.drawCircle(centerX, centerY, LAST_MOVE_RADIUS, redPaint);
-                        }
-                    }
                     if (board[i][j] == 1) {
                         canvas.drawCircle(centerX, centerY, STONE_RADIUS, blackPaint);
                     } else if (board[i][j] == 2) {
                         canvas.drawCircle(centerX, centerY, STONE_RADIUS, whitePaint);
+                    }
+                    if (lastMove != null) {
+                        if (i == lastMove.getX() && j == lastMove.getY()) {
+                            canvas.drawCircle(centerX, centerY, LAST_MOVE_RADIUS, redPaint);
+                        }
                     }
                 }
             }

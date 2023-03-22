@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/iv_return"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_marginStart="25dp"
         android:paddingStart="25dp"
         android:layout_marginTop="75dp"
@@ -34,7 +34,7 @@
             android:maxLength="10"
             android:textColor="@color/black"
             android:textColorHint="@color/lightGray"
-            android:textSize="20sp"
+            android:textSize="36sp"
             android:theme="@style/MyEditText" />
         <!--输入框-->
         <EditText
@@ -51,7 +51,7 @@
             android:maxLength="11"
             android:textColor="@color/black"
             android:textColorHint="@color/lightGray"
-            android:textSize="20sp"
+            android:textSize="36sp"
             android:theme="@style/MyEditText" />
         <!--输入框-->
         <EditText
@@ -68,7 +68,7 @@
             android:maxLength="10"
             android:textColor="@color/black"
             android:textColorHint="@color/lightGray"
-            android:textSize="20sp"
+            android:textSize="36sp"
             android:theme="@style/MyEditText" />
         <EditText
             android:id="@+id/et_pswConfirm"
@@ -84,7 +84,7 @@
             android:maxLength="10"
             android:textColor="@color/black"
             android:textColorHint="@color/lightGray"
-            android:textSize="20sp"
+            android:textSize="36sp"
             android:theme="@style/MyEditText" />
         <!--按钮-->
         <Button
@@ -92,11 +92,11 @@
             android:layout_width="320dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30dp"
             android:background="@drawable/btn_not_focus"
             android:text="注册"
             android:textColor="@color/white"
-            android:textSize="24sp" />
+            android:textSize="36sp" />
 
     </LinearLayout>
 

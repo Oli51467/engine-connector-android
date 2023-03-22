@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="96dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
@@ -30,19 +30,19 @@
             <ImageView
                 android:id="@+id/img_play"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="48dp"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/tab_play_normal" />
 
             <TextView
                 android:id="@+id/tv_play"
                 android:layout_width="wrap_content"
-                android:layout_height="20dp"
+                android:layout_height="36dp"
                 android:layout_gravity="center_horizontal"
                 android:gravity="top"
                 android:text="下棋"
                 android:textColor="#82858b"
-                android:textSize="13dp" />
+                android:textSize="24sp" />
 
         </LinearLayout>
 
@@ -58,19 +58,19 @@
             <ImageView
                 android:id="@+id/img_archive"
                 android:layout_width="wrap_content"
-                android:layout_height="36dp"
+                android:layout_height="48dp"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/tab_archive_normal" />
 
             <TextView
                 android:id="@+id/tv_archive"
                 android:layout_width="wrap_content"
-                android:layout_height="20dp"
+                android:layout_height="36dp"
                 android:layout_gravity="center_horizontal"
                 android:gravity="top"
                 android:text="棋谱"
                 android:textColor="#82858b"
-                android:textSize="13dp" />
+                android:textSize="24sp" />
 
         </LinearLayout>
 

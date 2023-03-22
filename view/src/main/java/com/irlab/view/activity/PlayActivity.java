@@ -286,7 +286,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void sendMoves2LowerComputer(String hexX, String hexY) {
-        StringBuffer order = new StringBuffer();
+        StringBuilder order = new StringBuilder();
         order.append("EE");
         if (side == 1) order.append("32");
         else order.append("31");

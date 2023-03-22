@@ -18,7 +18,7 @@
         android:maxLength="10"
         android:textColor="@color/black"
         android:textColorHint="@color/lightGray"
-        android:textSize="20sp"
+        android:textSize="36sp"
         android:theme="@style/MyEditText" />
 
     <EditText
@@ -34,7 +34,7 @@
         android:maxLength="10"
         android:textColor="@color/black"
         android:textColorHint="@color/lightGray"
-        android:textSize="20sp"
+        android:textSize="36sp"
         android:theme="@style/MyEditText" />
 
     <Button
@@ -42,16 +42,16 @@
         android:layout_width="320dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="40dp"
         android:background="@drawable/btn_not_focus"
         android:text="登录"
         android:textColor="@color/white"
-        android:textSize="24sp" />
+        android:textSize="36sp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp">
+        android:layout_marginTop="30dp">
 
         <TextView
             android:id="@+id/tv_register"
@@ -60,6 +60,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginRight="20dp"
             android:text="新用户注册"
+            android:textSize="24sp"
             android:clickable="true"
             android:textColor="@color/wechatText" />
 
@@ -69,6 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="20dp"
+            android:textSize="24sp"
             android:text="忘记密码？"
             android:textColor="@color/wechatText" />
 

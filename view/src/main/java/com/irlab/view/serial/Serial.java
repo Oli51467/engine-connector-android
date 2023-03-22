@@ -1,12 +1,12 @@
 package com.irlab.view.serial;
 
-import static com.irlab.view.activity.PlayActivity.resign;
+import static com.irlab.view.activity.PlayActivity.playing;
 
 public class Serial extends Thread {
 
     @Override
     public void run() {
-        while (!resign) {
+        while (playing) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

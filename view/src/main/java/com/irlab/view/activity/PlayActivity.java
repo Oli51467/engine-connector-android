@@ -59,16 +59,16 @@ import okhttp3.Response;
 public class PlayActivity extends AppCompatActivity implements View.OnClickListener, SerialInter {
 
     public static final String Logger = "engine-Logger";
+    public static boolean playing = false;
+
+    private final Drawer drawer = new Drawer();
 
     private Board board;
     private ImageView boardImageView;
-    private final Drawer drawer = new Drawer();
     private Bitmap boardBitmap;
     private Button chooseSide;
-    private Integer side = 1;
-    private Integer engineLastX = -1, engineLastY = -1;
-    private boolean initSerial = false;
-    public static boolean resign = false;
+    private Integer side = 1, engineLastX = -1, engineLastY = -1;
+    private boolean initSerial = false, showToast = true;
 
     private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
 
@@ -85,11 +85,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
+        boardBitmap = Bitmap.createBitmap(BOARD_WIDTH, BOARD_HEIGHT, Bitmap.Config.ARGB_8888);
         chooseSide = findViewById(R.id.btn_choose_side);
         boardImageView = findViewById(R.id.iv_board);
         layoutBeforePlay = findViewById(R.id.layout_before_play);
         layoutAfterPlay = findViewById(R.id.layout_after_play);
-        boardBitmap = Bitmap.createBitmap(BOARD_WIDTH, BOARD_HEIGHT, Bitmap.Config.ARGB_8888);
         findViewById(R.id.header_back).setOnClickListener(this);
         findViewById(R.id.btn_begin).setOnClickListener(this);
         findViewById(R.id.btn_resign).setOnClickListener(this);
@@ -105,6 +105,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         if (initSerial) {
             SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.SUCCESS)
                     .hideTitle(true)
+                    .setCanceledOnTouchOutside(false)
                     .setContentText("串口已开启")
                     .setConformBgResColor(com.irlab.base.R.color.wechatGreen)
                     .setConformTextColor(Color.WHITE)
@@ -124,28 +125,36 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         int vid = v.getId();
         if (vid == R.id.header_back) {
-            SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
-                    .hideTitle(true)
-                    .setContentText("你确定认输吗")
-                    .setConformBgResColor(R.color.delete)
-                    .setConformTextColor(Color.WHITE)
-                    .setCancelTextColor(Color.BLACK)
-                    .setCancelButton("取消")
-                    .setCancelBgResColor(R.color.whiteSmoke)
-                    .setWindowAnimations(R.style.dialog_style)
-                    .setConformButton("确定", () -> {
-                        resign = true;
-                        SerialManager.getInstance().close();  // 关闭串口
-                        Intent intent = new Intent(this, MainView.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                    }).build();
-            dialog.show();
+            if (playing) {
+                SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
+                        .hideTitle(true)
+                        .setContentText("你确定认输吗")
+                        .setConformBgResColor(R.color.delete)
+                        .setCanceledOnTouchOutside(false)
+                        .setConformTextColor(Color.WHITE)
+                        .setCancelTextColor(Color.BLACK)
+                        .setCancelButton("取消")
+                        .setCancelBgResColor(R.color.whiteSmoke)
+                        .setWindowAnimations(R.style.dialog_style)
+                        .setConformButton("确定", () -> {
+                            SerialManager.getInstance().close();  // 关闭串口
+                            Intent intent = new Intent(this, MainView.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                        }).build();
+                dialog.show();
+            } else {
+                SerialManager.getInstance().close();  // 关闭串口
+                Intent intent = new Intent(this, MainView.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
         } else if (vid == R.id.btn_begin) {
             if (chooseSide.getText().equals("选择黑白")) {
                 SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                         .hideTitle(true)
                         .setContentText("请选择黑白")
+                        .setCanceledOnTouchOutside(false)
                         .setConformBgResColor(R.color.warning)
                         .setConformTextColor(Color.WHITE)
                         .setWindowAnimations(R.style.dialog_style)
@@ -158,6 +167,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                 side = WHITE;
             }
             if (!initSerial) initSerial();
+            playing = true;
             layoutBeforePlay.setVisibility(View.GONE);
             layoutAfterPlay.setVisibility(View.VISIBLE);
             Serial serial = new Serial();
@@ -166,6 +176,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
                     .hideTitle(true)
                     .setContentText("你确定认输吗")
+                    .setCanceledOnTouchOutside(false)
                     .setConformBgResColor(R.color.delete)
                     .setConformTextColor(Color.WHITE)
                     .setCancelTextColor(Color.BLACK)
@@ -175,7 +186,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                     .setConformButton("确定", () -> {
                         SerialManager.getInstance().send("EE34FCFF");
                         SerialManager.getInstance().send("EE35FCFF");   // 复位
-                        resign = true;
+                        playing = false;
                         layoutBeforePlay.setVisibility(View.VISIBLE);
                         layoutAfterPlay.setVisibility(View.GONE);
                         SerialManager.getInstance().close();  // 关闭串口
@@ -213,43 +224,52 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         List<Integer> checkResp = checkState(receivedBoardState, board.board, engineLastX, engineLastY);
         if (checkResp.get(0).equals(-2)) {
             // 缺少棋子提示
-            runOnUiThread(() -> {
-                SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                        .hideTitle(true)
-                        .setContentText("缺少棋子")
-                        .setConformBgResColor(R.color.warning)
-                        .setConformTextColor(Color.WHITE)
-                        .setWindowAnimations(R.style.dialog_style)
-                        .setConformButton("确定").build();
-                dialog.show();
-            });
+            if (showToast) {
+                runOnUiThread(() -> {
+                    SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
+                            .hideTitle(true)
+                            .setContentText("缺少棋子")
+                            .setCanceledOnTouchOutside(false)
+                            .setConformBgResColor(R.color.warning)
+                            .setConformTextColor(Color.WHITE)
+                            .setWindowAnimations(R.style.dialog_style)
+                            .setConformButton("确定", () -> showToast = false).build();
+                    dialog.show();
+                });
+            }
         } else if (checkResp.get(0).equals(-1)) {
             // 多余棋子提示
-            runOnUiThread(() -> {
-                SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                        .hideTitle(true)
-                        .setContentText("多余棋子")
-                        .setConformBgResColor(R.color.warning)
-                        .setConformTextColor(Color.WHITE)
-                        .setWindowAnimations(R.style.dialog_style)
-                        .setConformButton("确定").build();
-                dialog.show();
-            });
+            if (showToast) {
+                runOnUiThread(() -> {
+                    SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
+                            .hideTitle(true)
+                            .setContentText("多余棋子")
+                            .setCanceledOnTouchOutside(false)
+                            .setConformBgResColor(R.color.warning)
+                            .setConformTextColor(Color.WHITE)
+                            .setWindowAnimations(R.style.dialog_style)
+                            .setConformButton("确定", () -> showToast = false).build();
+                    dialog.show();
+                });
+            }
         } else if (checkResp.get(0).equals(1)) {
             Integer playX = checkResp.get(1);
             Integer playY = checkResp.get(2);
             if (!playOnBoardAndRequestEngine(playX, playY)) {
                 // 无法落子提示
-                runOnUiThread(() -> {
-                    SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                            .hideTitle(true)
-                            .setContentText("此处无法落子")
-                            .setConformBgResColor(R.color.warning)
-                            .setConformTextColor(Color.WHITE)
-                            .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton("确定").build();
-                    dialog.show();
-                });
+                if (showToast) {
+                    runOnUiThread(() -> {
+                        SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
+                                .hideTitle(true)
+                                .setContentText("此处无法落子")
+                                .setCanceledOnTouchOutside(false)
+                                .setConformBgResColor(R.color.warning)
+                                .setConformTextColor(Color.WHITE)
+                                .setWindowAnimations(R.style.dialog_style)
+                                .setConformButton("确定", () -> showToast = false).build();
+                        dialog.show();
+                    });
+                }
             }
         }
     }

@@ -317,7 +317,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initEngine() {
         RequestBody requestBody = JsonUtil.getJsonFormOfInitEngine(SPUtils.getString("user_id"));
-        HttpUtil.sendOkHttpResponse(ENGINE_SERVER + "/set", requestBody, new Callback() {
+        HttpUtil.sendOkHttpResponse(ENGINE_SERVER + "/p/set", requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.e(Logger, "初始化引擎出错:" + e.getMessage());
@@ -347,10 +347,9 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         // 异步请求 必须加锁等待
         CountDownLatch cdl = new CountDownLatch(1);
         RequestBody requestBody = JsonUtil.getEnginePlayRequestBody(SPUtils.getString("user_id"), playPosition, currentPlayer);
-        HttpUtil.sendOkHttpResponse(ENGINE_SERVER + "/go", requestBody, new Callback() {
+        HttpUtil.sendOkHttpResponse(ENGINE_SERVER + "/p/go", requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(Logger, "引擎自动走棋指令发送失败，连接失败！" + e.getMessage());
                 result[0] = "failed";
                 cdl.countDown();    // 解锁
             }
@@ -358,15 +357,16 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String responseData = Objects.requireNonNull(response.body()).string();
+                StringBuilder loggerInfo = new StringBuilder();
                 try {
                     JSONObject jsonObject = new JSONObject(responseData);
-                    Log.d(Logger, "引擎走棋回调：" + jsonObject);
+                    loggerInfo.append("引擎走棋回调：").append(jsonObject);
                     int code = jsonObject.getInt("code");
                     if (code == 1000) {
                         String playPosition;
                         JSONObject callBackData = jsonObject.getJSONObject("data");
                         playPosition = callBackData.getString("move");
-                        Log.d(Logger, "引擎落子坐标:" + playPosition);
+                        loggerInfo.append("引擎落子坐标: ").append(playPosition);
                         if (playPosition.equals("resign")) {
                             result[0] = "引擎认输";
                         } else if (playPosition.equals("pass")) {
@@ -374,18 +374,17 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                         } else {
                             result[0] = playPosition;
                         }
-                        cdl.countDown();    // 解锁
                     } else if (code == 4001) {
-                        Log.d(Logger, "这里不可以落子");
+                        loggerInfo.append("这里不可以落子");
                         result[0] = "unplayable";
-                        cdl.countDown();
                     } else {
                         result[0] = "failed";
-                        cdl.countDown();
                     }
                 } catch (JSONException e) {
-                    Log.d(Logger, e.toString());
                     result[0] = "failed";
+                } finally {
+                    cdl.countDown();  // 解锁
+                    writeTxtToFile(loggerInfo.toString(), "engineLogger.txt");
                 }
             }
         });

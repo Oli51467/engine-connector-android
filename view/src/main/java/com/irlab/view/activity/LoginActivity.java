@@ -13,7 +13,6 @@ import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
@@ -34,12 +33,8 @@ import java.util.Map;
 @Route(path = "/auth/login")
 public class LoginActivity extends Activity implements View.OnClickListener {
 
-    public static final String Logger = LoginActivity.class.getName();
-
-    private TextView register;
-    private EditText userName;
-    private EditText password;
-    private Button login;
+    private EditText userName, password;
+    private Button btnLogin, btnRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,28 +43,27 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         ARouter.getInstance().inject(this);
         initView();
         setEvent();
-        // 初始化network
-        NetworkApi.init(new NetworkRequiredInfo(MyApplication.getInstance()));
+        NetworkApi.init(new NetworkRequiredInfo(MyApplication.getInstance()));  // 初始化network
     }
 
     private void initView() {
-        register = findViewById(R.id.tv_register);
+        btnRegister = findViewById(R.id.btn_register);
         userName = findViewById(R.id.et_userName);
         password = findViewById(R.id.et_password);
-        login = findViewById(R.id.btn_login);
+        btnLogin = findViewById(R.id.btn_login);
     }
 
     private void setEvent() {
-        login.setOnClickListener(this);
-        register.setOnClickListener(this);
-        ButtonListenerUtil.buttonEnabled(2, 8, login, userName, password);
-        ButtonListenerUtil.buttonChangeColor(2, 8, this, login, userName, password);
+        btnLogin.setOnClickListener(this);
+        btnRegister.setOnClickListener(this);
+        ButtonListenerUtil.buttonEnabled(2, 8, btnLogin, userName, password);
+        ButtonListenerUtil.buttonChangeColor(2, 8, this, btnLogin, userName, password);
     }
 
     @Override
     public void onClick(View v) {
         int vid = v.getId();
-        if (vid == R.id.tv_register) {
+        if (vid == R.id.btn_register) {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
@@ -129,9 +123,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (msg.what == ResponseCode.SAVE_SGF_SUCCESSFULLY.getCode()) {
-                ToastUtil.show((Context) msg.obj, ResponseCode.SAVE_SGF_SUCCESSFULLY.getMsg());
-            } else if (msg.what == ResponseCode.LOGIN_SUCCESSFULLY.getCode()) {
+            if (msg.what == ResponseCode.LOGIN_SUCCESSFULLY.getCode()) {
                 ToastUtil.show((Context) msg.obj, ResponseCode.LOGIN_SUCCESSFULLY.getMsg());
                 ARouter.getInstance().build("/view/main").withFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP).navigation();
                 finish();

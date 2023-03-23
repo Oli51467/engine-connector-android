@@ -97,7 +97,7 @@ public class SerialHandler implements Runnable {
         readTask = SerialManager
                 .getInstance()
                 .getScheduledExecutor()  // 获取线程池
-                .scheduleAtFixedRate(this, 0, 150, TimeUnit.MILLISECONDS);  // 执行一个循环任务
+                .scheduleAtFixedRate(this, 0, 200, TimeUnit.MILLISECONDS);  // 执行一个循环任务
     }
 
     // 每隔 150 毫秒会触发一次run
@@ -119,6 +119,11 @@ public class SerialHandler implements Runnable {
      * 关闭串口
      */
     public void close() {
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         try {
             if (mInputStream != null) mInputStream.close();
         } catch (Exception e) {

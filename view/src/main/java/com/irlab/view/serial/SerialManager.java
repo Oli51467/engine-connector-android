@@ -100,7 +100,7 @@ public class SerialManager {
             String msg = queueMsg.poll();  // 取出指令
             if (msg == null || msg.equals("")) return;  // 无效指令 退出
             serialHandle.send(msg);  // 发送指令
-        }, 0, 100, TimeUnit.MILLISECONDS);
+        }, 10, 300, TimeUnit.MILLISECONDS);
     }
 
     // 取消发送任务

@@ -10,7 +10,6 @@ import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,9 +34,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     public static final int MAX_LENGTH = 11;
 
     // 声明组件
-    private ImageView imageView;
-    private EditText userName, password, passwordConfirm, phoneNumber, email;
-    private Button register;
+    private EditText userName, password, passwordConfirm, phoneNumber;
+    private Button btnRegister, btnReturn;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,9 +44,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         Objects.requireNonNull(getSupportActionBar()).hide();
         initViews();
         // 设置注册按钮是否可点击
-        ButtonListenerUtil.buttonEnabled(2, 11, register, userName, password, passwordConfirm, phoneNumber);
+        ButtonListenerUtil.buttonEnabled(2, 11, btnRegister, userName, password, passwordConfirm, phoneNumber);
         // 监听按钮变色
-        ButtonListenerUtil.buttonChangeColor(2, 11, this, register, userName, password, passwordConfirm, phoneNumber);
+        ButtonListenerUtil.buttonChangeColor(2, 11, this, btnRegister, userName, password, passwordConfirm, phoneNumber);
         // 设置点击事件
         setListener();
     }
@@ -57,17 +55,17 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     获取到每个需要用到的控件的实例
     */
     public void initViews() {
-        imageView = findViewById(R.id.iv_return);
+        btnReturn = findViewById(R.id.btn_return);
         userName = findViewById(R.id.et_userName);
         password = findViewById(R.id.et_psw);
         passwordConfirm = findViewById(R.id.et_pswConfirm);
-        register = findViewById(R.id.btn_register);
+        btnRegister = findViewById(R.id.btn_register);
         phoneNumber = findViewById(R.id.et_phone);
     }
 
     private void setListener() {
-        register.setOnClickListener(this);
-        imageView.setOnClickListener(this);
+        btnRegister.setOnClickListener(this);
+        btnReturn.setOnClickListener(this);
         userName.addTextChangedListener(new HideTextWatcher(userName, MAX_LENGTH, this));
         password.addTextChangedListener(new HideTextWatcher(password, MAX_LENGTH, this));
         phoneNumber.addTextChangedListener(new HideTextWatcher(phoneNumber, MAX_LENGTH, this));
@@ -115,7 +113,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             handler.sendMessage(msg);
                         }
                     }));
-        } else if (vid == R.id.iv_return) {
+        } else if (vid == R.id.btn_return) {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);

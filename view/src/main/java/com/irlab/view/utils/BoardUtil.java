@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BoardUtil {
+
+    private static final List<Integer> res = new ArrayList<>();
     /**
      * 由检测到的二维平面坐标转化为棋盘坐标
      */
@@ -41,7 +43,7 @@ public class BoardUtil {
 
     public static List<Integer> checkState(int[][] curState, int[][] board, int lastX, int lastY) {
         // res[0]=-2:缺少棋子 res[0]=-1多余棋子 res[0]=0:没有落子 res[0]=1:正常落子 -> res[1]=x,res[2]=y
-        List<Integer> res = new ArrayList<>();
+        res.clear();
         int potentialPlayPositionCount = 0;
         int potentialPlayPositionX = 0, potentialPlayPositionY = 0;
         for (int x = 1; x <= WIDTH; x++) {

@@ -8,7 +8,7 @@
 
     <EditText
         android:id="@+id/et_userName"
-        android:layout_width="320dp"
+        android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="160dp"
@@ -17,13 +17,13 @@
         android:maxLines="1"
         android:maxLength="10"
         android:textColor="@color/black"
-        android:textColorHint="@color/lightGray"
+        android:textColorHint="@color/hint_text_color"
         android:textSize="36sp"
         android:theme="@style/MyEditText" />
 
     <EditText
         android:id="@+id/et_password"
-        android:layout_width="320dp"
+        android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
@@ -33,13 +33,13 @@
         android:maxLines="1"
         android:maxLength="10"
         android:textColor="@color/black"
-        android:textColorHint="@color/lightGray"
+        android:textColorHint="@color/hint_text_color"
         android:textSize="36sp"
         android:theme="@style/MyEditText" />
 
     <Button
         android:id="@+id/btn_login"
-        android:layout_width="320dp"
+        android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
@@ -48,21 +48,21 @@
         android:textColor="@color/white"
         android:textSize="36sp" />
 
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/btn_update"
+        android:text="新用户注册"
+        android:textColor="@color/white"
+        android:textSize="36sp" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp">
-
-        <TextView
-            android:id="@+id/tv_register"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="20dp"
-            android:text="新用户注册"
-            android:textSize="24sp"
-            android:clickable="true"
-            android:textColor="@color/wechatText" />
 
         <TextView
             android:id="@+id/tv_find_psw"

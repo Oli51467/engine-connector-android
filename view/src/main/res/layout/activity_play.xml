@@ -116,7 +116,6 @@
                 android:layout_width="0px"
                 android:layout_height="84dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="12dp"
                 android:layout_weight="1"
                 android:background="@drawable/btn_update"
                 android:text="认输"
@@ -128,7 +127,6 @@
                 android:layout_width="0px"
                 android:layout_height="84dp"
                 android:layout_gravity="center"
-                android:layout_marginTop="12dp"
                 android:layout_weight="1"
                 android:background="@drawable/btn_update"
                 android:text="悔棋"
@@ -136,7 +134,23 @@
                 android:textSize="16sp" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/compare_position"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"/>
 
+        <TextView
+            android:id="@+id/show_order"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/engine_position"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"/>
     </LinearLayout>
 
 

@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.irlab.base.response.ResponseCode;
 import com.irlab.base.utils.HttpUtil;
@@ -46,7 +48,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -65,10 +66,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
 
     private Board board;
     private ImageView boardImageView;
+    private TextView showOrder, comparePosition, enginePosition;
     private Bitmap boardBitmap;
     private Button chooseSide;
-    private Integer side = 1, engineLastX = -1, engineLastY = -1;
-    private boolean initSerial = false, showToast = true;
+    private Integer side, engineLastX, engineLastY;
+    private boolean initSerial, showToast;
 
     private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
 
@@ -77,11 +79,21 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         Objects.requireNonNull(getSupportActionBar()).hide();   // 去掉导航栏
+        initArgs();
         initView();
         initBoard();
         drawBoard();
         initEngine();
         initSerial();
+    }
+
+    private void initArgs() {
+        playing = false;
+        side = 1;
+        engineLastX = -1;
+        engineLastY = -1;
+        initSerial = false;
+        showToast = true;
     }
 
     private void initView() {
@@ -90,6 +102,11 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         boardImageView = findViewById(R.id.iv_board);
         layoutBeforePlay = findViewById(R.id.layout_before_play);
         layoutAfterPlay = findViewById(R.id.layout_after_play);
+        //
+        showOrder = findViewById(R.id.show_order);
+        comparePosition = findViewById(R.id.compare_position);
+        enginePosition = findViewById(R.id.engine_position);
+        //
         findViewById(R.id.header_back).setOnClickListener(this);
         findViewById(R.id.btn_begin).setOnClickListener(this);
         findViewById(R.id.btn_resign).setOnClickListener(this);
@@ -122,6 +139,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onStop() {
+        SerialManager.getInstance().close();
+        super.onStop();
+    }
+
+    @Override
     public void onClick(View v) {
         int vid = v.getId();
         if (vid == R.id.header_back) {
@@ -137,14 +160,16 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                         .setCancelBgResColor(R.color.whiteSmoke)
                         .setWindowAnimations(R.style.dialog_style)
                         .setConformButton("确定", () -> {
-                            SerialManager.getInstance().close();  // 关闭串口
+                            SerialManager.getInstance().send("EE34FCFF");
+                            SerialManager.getInstance().send("EE35FCFF");
                             Intent intent = new Intent(this, MainView.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                         }).build();
                 dialog.show();
             } else {
-                SerialManager.getInstance().close();  // 关闭串口
+                SerialManager.getInstance().send("EE34FCFF");
+                SerialManager.getInstance().send("EE35FCFF");
                 Intent intent = new Intent(this, MainView.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -213,18 +238,17 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         int[][] receivedBoardState = new int[20][20];
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
-        writeTxtToFile(receivedHexString.toString(), "receivedHexString.txt");
         // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState
         int cnt, k;
         for (cnt = 0, k = 0; k < receivedHexString.size(); k++, cnt++) {
             receivedBoardState[cnt / 19 + 1][(cnt % 19) + 1] = Integer.parseInt(receivedHexString.get(k), 16);
         }
-        writeTxtToFile(Arrays.deepToString(receivedBoardState) + "  " + cnt + " " + receivedHexString.size(), "receivedBoardState.txt");
         // 3.对比接收到的棋盘数据与维护的棋盘数据的差别
         List<Integer> checkResp = checkState(receivedBoardState, board.board, engineLastX, engineLastY);
         if (checkResp.get(0).equals(-2)) {
             // 缺少棋子提示
             if (showToast) {
+                showToast = false;
                 runOnUiThread(() -> {
                     SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                             .hideTitle(true)
@@ -233,13 +257,15 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                             .setConformBgResColor(R.color.warning)
                             .setConformTextColor(Color.WHITE)
                             .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton("确定", () -> showToast = false).build();
+                            .setConformButton("确定", () -> showToast = true).build();
                     dialog.show();
                 });
+                comparePosition.setText("缺少棋子");
             }
         } else if (checkResp.get(0).equals(-1)) {
             // 多余棋子提示
             if (showToast) {
+                showToast = false;
                 runOnUiThread(() -> {
                     SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                             .hideTitle(true)
@@ -248,9 +274,10 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                             .setConformBgResColor(R.color.warning)
                             .setConformTextColor(Color.WHITE)
                             .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton("确定", () -> showToast = false).build();
+                            .setConformButton("确定", () -> showToast = true).build();
                     dialog.show();
                 });
+                comparePosition.setText("多余棋子");
             }
         } else if (checkResp.get(0).equals(1)) {
             Integer playX = checkResp.get(1);
@@ -258,6 +285,7 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             if (!playOnBoardAndRequestEngine(playX, playY)) {
                 // 无法落子提示
                 if (showToast) {
+                    showToast = false;
                     runOnUiThread(() -> {
                         SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                                 .hideTitle(true)
@@ -266,19 +294,22 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
                                 .setConformBgResColor(R.color.warning)
                                 .setConformTextColor(Color.WHITE)
                                 .setWindowAnimations(R.style.dialog_style)
-                                .setConformButton("确定", () -> showToast = false).build();
+                                .setConformButton("确定", () -> showToast = true).build();
                         dialog.show();
                     });
+                    comparePosition.setText("此处无法落子");
                 }
             }
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private boolean playOnBoardAndRequestEngine(int x, int y) {
         // 0.判断该位置是否可以落子
         boolean ok = board.play(x, y);
         if (!ok) return false;  // 不能落子 直接返回 给出错误提示
         else {
+            runOnUiThread(() -> comparePosition.setText("比较落子位置:" + x + " " + y));
             // 1.将可以落下的棋子标记在棋盘上并刷新棋盘
             drawBoard();
             // 2.将落子的轴坐标转化为引擎可接受的棋盘坐标
@@ -298,7 +329,12 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
             String hexY = Integer.toHexString(indexes.second);
             if (indexes.first <= 15) hexX = "0" + hexX;
             if (indexes.second <= 15) hexY = "0" + hexY;
-            writeTxtToFile("16进制坐标：" + hexX + " " + hexY, "hex16.txt");
+            final String finalHexX = hexX;
+            final String finalHexY = hexY;
+            runOnUiThread(() -> {
+                enginePosition.setText("引擎落子：" + engineLastX + " " + engineLastY);
+                showOrder.setText("发给下位机：" + finalHexX + " " + finalHexY);
+            });
             // 8.指示下位机落子
             sendMoves2LowerComputer(hexX, hexY);
             return true;
@@ -311,7 +347,9 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         if (side == 1) order.append("32");
         else order.append("31");
         order.append(hexX).append(hexY).append("FC").append("FF");
-        writeTxtToFile("send indexes: " + order, "send.txt");
+//        writeTxtToFile("send indexes: " + order, "send.txt");
+        SerialManager.getInstance().send(order.toString());
+        SerialManager.getInstance().send(order.toString());
         SerialManager.getInstance().send(order.toString());
     }
 

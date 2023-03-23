@@ -3,7 +3,6 @@ package com.irlab.view.activity;
 import static com.irlab.base.utils.SPUtils.saveInt;
 import static com.irlab.base.utils.SPUtils.saveString;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -13,6 +12,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.irlab.base.BaseActivity;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
 import com.irlab.view.adapter.RecyclerViewAdapter;
@@ -20,9 +20,8 @@ import com.irlab.view.adapter.RecyclerViewAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
-public class SelectConfigActivity extends AppCompatActivity implements View.OnClickListener, RecyclerViewAdapter.setClick {
+public class SelectConfigActivity extends BaseActivity implements View.OnClickListener, RecyclerViewAdapter.setClick {
 
     public static final String TAG = SelectConfigActivity.class.getName();
     public static final String[] LEVELS = {"10k", "9k", "8k", "7k", "6k", "5k", "4k", "3k", "2k", "1k",
@@ -35,7 +34,6 @@ public class SelectConfigActivity extends AppCompatActivity implements View.OnCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_config);
-        Objects.requireNonNull(getSupportActionBar()).hide();   // 去掉导航栏
         initData();
     }
 

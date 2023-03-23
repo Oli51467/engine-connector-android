@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -13,11 +12,12 @@ import android.os.Bundle;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.irlab.base.BaseActivity;
 import com.irlab.base.utils.PermissionUtil;
 import com.irlab.base.utils.SPUtils;
 
 @Route(path = "/app/main")
-public class MainActivity extends Activity {
+public class MainActivity extends BaseActivity {
 
     private Context mContext;
     private final int PERMISSION_REQUEST_CODE = 0x183;

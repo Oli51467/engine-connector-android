@@ -1,23 +1,19 @@
 package com.irlab.view.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.irlab.base.BaseActivity;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
 
-import java.util.Objects;
-
-public class InstructionActivity extends AppCompatActivity implements View.OnClickListener {
+public class InstructionActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_instruction);
-        Objects.requireNonNull(getSupportActionBar()).hide();
         initViews();
     }
 

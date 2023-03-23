@@ -36,25 +36,25 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:gravity">center</item>
-        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginStart">32dp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/black</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">32sp</item>
     </style>
 
     <!--对局设置编辑框的样式-->
     <style name="edittext_style">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_height">96dp</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:layout_marginStart">8dp</item>
-        <item name="android:layout_marginEnd">8dp</item>
-        <item name="android:paddingLeft">12dp</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="android:paddingLeft">24dp</item>
         <item name="android:maxLines">1</item>
         <item name="android:maxLength">30</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:textColorHint">@color/lightGray</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">32sp</item>
         <item name="theme">@style/EditText</item>
     </style>
 

@@ -14,6 +14,7 @@ import android.widget.EditText;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.irlab.base.BaseActivity;
 import com.irlab.base.response.ResponseCode;
 import com.irlab.view.network.api.ApiService;
 import com.irlab.view.bean.UserResponse;
@@ -25,11 +26,10 @@ import com.irlab.view.R;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 @SuppressLint("checkResult")
-public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
+public class RegisterActivity extends BaseActivity implements View.OnClickListener {
 
     public static final int MAX_LENGTH = 11;
 
@@ -41,7 +41,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        Objects.requireNonNull(getSupportActionBar()).hide();
         initViews();
         // 设置注册按钮是否可点击
         ButtonListenerUtil.buttonEnabled(2, 11, btnRegister, userName, password, passwordConfirm, phoneNumber);

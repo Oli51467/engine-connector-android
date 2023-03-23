@@ -13,7 +13,6 @@ import static com.irlab.view.utils.SerialUtil.ByteArrToHexList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -28,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.irlab.base.BaseActivity;
 import com.irlab.base.response.ResponseCode;
 import com.irlab.base.utils.HttpUtil;
 import com.irlab.base.utils.SPUtils;
@@ -51,13 +51,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.ReentrantLock;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class PlayActivity extends AppCompatActivity implements View.OnClickListener, SerialInter {
+public class PlayActivity extends BaseActivity implements View.OnClickListener, SerialInter {
 
     public static final String Logger = "engine-Logger";
     public static boolean playing = false;
@@ -143,6 +144,27 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         SerialManager.getInstance().close();
         super.onStop();
     }
+//
+//    private void setSendStatus(boolean status) {
+//        while(lock.isLocked()) {
+//            lock.lock();
+//            try {
+//                send = status;
+//            } finally {
+//                lock.unlock();
+//            }
+//        }
+//    }
+//
+//    private boolean getStatus() {
+//        lock.lock();
+//        try {
+//            if (send) return true;
+//        } finally {
+//            lock.unlock();
+//        }
+//        return false;
+//    }
 
     @Override
     public void onClick(View v) {
@@ -347,7 +369,6 @@ public class PlayActivity extends AppCompatActivity implements View.OnClickListe
         if (side == 1) order.append("32");
         else order.append("31");
         order.append(hexX).append(hexY).append("FC").append("FF");
-//        writeTxtToFile("send indexes: " + order, "send.txt");
         SerialManager.getInstance().send(order.toString());
         SerialManager.getInstance().send(order.toString());
         SerialManager.getInstance().send(order.toString());

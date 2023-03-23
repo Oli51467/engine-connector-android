@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.irlab.base.BaseActivity;
 import com.irlab.base.response.ResponseCode;
 import com.irlab.base.utils.SPUtils;
 import com.irlab.view.MainView;
@@ -34,7 +35,7 @@ import java.util.List;
 import java.util.Objects;
 
 @SuppressLint("checkResult")
-public class GameRecordActivity extends AppCompatActivity implements ArchiveAdapter.setClick,
+public class GameRecordActivity extends BaseActivity implements ArchiveAdapter.setClick,
         AdapterView.OnItemClickListener, ArchiveAdapter.setLongClick, View.OnClickListener {
 
     public static final String Logger = GameRecordActivity.class.getName();
@@ -47,9 +48,7 @@ public class GameRecordActivity extends AppCompatActivity implements ArchiveAdap
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_game_record);
-        Objects.requireNonNull(getSupportActionBar()).hide();   // 去掉导航栏
         findViewById(R.id.header_back).setOnClickListener(this);
         loadData(this);
     }

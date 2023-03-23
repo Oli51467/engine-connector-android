@@ -3,7 +3,6 @@ package com.irlab.view;
 import static com.irlab.base.utils.SPUtils.remove;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -13,13 +12,13 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.irlab.base.BaseActivity;
 import com.irlab.base.MyApplication;
 import com.irlab.base.utils.SPUtils;
 import com.irlab.base.utils.ToastUtil;
@@ -32,7 +31,7 @@ import com.sdu.network.NetworkApi;
 import java.util.Objects;
 
 @Route(path = "/view/main")
-public class MainView extends AppCompatActivity implements View.OnClickListener {
+public class MainView extends BaseActivity implements View.OnClickListener {
 
     // 布局界面
     private PlayFragment playFragment = null;
@@ -51,7 +50,6 @@ public class MainView extends AppCompatActivity implements View.OnClickListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.setContentView(R.layout.activity_main_view);
         Objects.requireNonNull(getSupportActionBar()).hide();   // 要求窗口没有 title
         ARouter.getInstance().inject(this); // 注入Arouter

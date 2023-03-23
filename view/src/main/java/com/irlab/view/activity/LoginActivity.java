@@ -3,7 +3,6 @@ package com.irlab.view.activity;
 import static com.irlab.base.utils.SPUtils.saveString;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,6 +15,7 @@ import android.widget.EditText;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.irlab.base.BaseActivity;
 import com.irlab.base.MyApplication;
 import com.irlab.base.response.ResponseCode;
 import com.irlab.view.network.api.ApiService;
@@ -31,7 +31,7 @@ import java.util.Map;
 
 @SuppressLint("CheckResult")
 @Route(path = "/auth/login")
-public class LoginActivity extends Activity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
 
     private EditText userName, password;
     private Button btnLogin, btnRegister;

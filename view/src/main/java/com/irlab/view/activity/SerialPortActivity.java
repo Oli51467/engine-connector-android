@@ -1,9 +1,8 @@
 package com.irlab.view.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 
+import com.irlab.base.BaseActivity;
 import com.irlab.view.R;
 import com.irlab.view.serial.SerialPortFinder;
 
@@ -13,7 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class SerialPortActivity extends AppCompatActivity {
+public class SerialPortActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

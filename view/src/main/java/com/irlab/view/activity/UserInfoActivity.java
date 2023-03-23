@@ -11,6 +11,7 @@ import android.os.Message;
 import android.view.View;
 import android.widget.EditText;
 
+import com.irlab.base.BaseActivity;
 import com.irlab.base.response.ResponseCode;
 import com.irlab.base.utils.SPUtils;
 import com.irlab.base.utils.ToastUtil;
@@ -21,10 +22,8 @@ import com.irlab.view.network.api.ApiService;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
 
-import java.util.Objects;
-
 @SuppressLint("checkResult")
-public class UserInfoActivity extends AppCompatActivity implements View.OnClickListener {
+public class UserInfoActivity extends BaseActivity implements View.OnClickListener {
 
     private EditText et_phone, et_username;
     private final AppCompatActivity mContext = this;
@@ -33,7 +32,6 @@ public class UserInfoActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_info);
-        Objects.requireNonNull(getSupportActionBar()).hide();   // 去掉导航栏
         initViews();
     }
 

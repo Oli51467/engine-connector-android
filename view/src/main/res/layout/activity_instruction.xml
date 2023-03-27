@@ -61,16 +61,6 @@
                 android:text="@string/instructions_paragraph4"
                 style="@style/textview_instructions_style" />
 
-            <TextView
-                android:text="@string/instructions_paragraph5"
-                style="@style/textview_instructions_style" />
-
-            <TextView
-                android:text="@string/instructions_paragraph6"
-                style="@style/textview_instructions_style" />
-            <TextView
-                android:text="@string/instructions_paragraph7"
-                style="@style/textview_instructions_style" />
 
         </LinearLayout>
 

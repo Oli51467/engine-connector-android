@@ -46,6 +46,7 @@ public class BoardUtil {
         res.clear();
         int potentialPlayPositionCount = 0;
         int potentialPlayPositionX = 0, potentialPlayPositionY = 0;
+        int potentialColor = 0;
         for (int x = 1; x <= WIDTH; x++) {
             for (int y = 1; y <= WIDTH; y++) {
                 // 如果棋盘的某个位置上一回合为EMPTY 这回合不为空 则可能是一个潜在的落子位置
@@ -53,6 +54,7 @@ public class BoardUtil {
                     potentialPlayPositionCount++;
                     potentialPlayPositionX = x;
                     potentialPlayPositionY = y;
+                    potentialColor = curState[x][y];
                 }
                 // 如果棋盘的某个位置上一回合不为EMPTY 这回合为EMPTY 则用户可能将该棋子拿走 暂时不考虑同时提子的可能性
                 else if (board[x][y] != EMPTY &&
@@ -69,6 +71,7 @@ public class BoardUtil {
             res.add(1);
             res.add(potentialPlayPositionX);
             res.add(potentialPlayPositionY);
+            res.add(potentialColor);
         } else {
             res.add(-1);
         }

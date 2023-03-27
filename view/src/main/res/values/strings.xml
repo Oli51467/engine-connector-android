@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+    <string name="choose_side">请选择黑白</string>
+    <string name="confirm_resign">您确定认输吗</string>
+    <string name="lack_stone">缺少棋子</string>
+    <string name="unnecessary_stone">多余棋子</string>
+    <string name="prohibit_play">此处不允许落子</string>
     <string name="delete">删除</string>
     <string name="edit">退出</string>
     <string name="play_level">棋力</string>
     <string name="play_title">对弈</string>
-    <string name="toast_camera_permission">访问相机的权限被拒绝。这个应用程序需要使用相机才能工作。</string>
-    <string name="lbl_instructions">当提示初始化完成并检测到棋盘后，点击捕获棋盘</string>
-    <string name="btn_start_recording">开始记录</string>
-    <string name="btn_tests">测试</string>
-    <string name="btn_undo_last_move">撤销上一步落子</string>
-    <string name="btn_finish_record">完成</string>
-    <string name="dialog_undo_last_move">你确定撤销上一步吗？</string>
-    <string name="dialog_finish_recording">你想结束录制吗？</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="app_id">1710d024</string>
@@ -24,9 +23,6 @@
     <string name="instructions_paragraph2">二、添加对局设置后，单击开始对弈按钮，在所展示的已添加的对局设置中选择您所希望条目进行对弈。</string>
     <string name="instructions_paragraph3">三、单击开始后，调整您的手机。让它的摄像头可以完整地看到围棋棋盘的四个角。视角越高越好，当系统检测到棋盘后，会自动跳转到虚拟棋盘界面。</string>
     <string name="instructions_paragraph4">四、接下来正式开始对弈，该应用程序将开始检测落子动作。当检测到落子时，应用程序会在棋盘上显示检测到的落子位置。在整个过程中，尽可能地保持手机处于绝对静止状态，因为任何不必要的移动都可能造成检测的偏差。</string>
-    <string name="instructions_paragraph5"></string>
-    <string name="instructions_paragraph6"></string>
-    <string name="instructions_paragraph7"></string>
     <string name="setting">设置</string>
 
     <!-- 语言 -->

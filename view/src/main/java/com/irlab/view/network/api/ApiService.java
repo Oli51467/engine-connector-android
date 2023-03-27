@@ -66,5 +66,17 @@ public interface ApiService {
      */
     @POST("/api/user/updateInfo/")
     Observable<UserResponse> updateUser(@Header("Authorization") String token, @Query("username") String username, @Query("profile") String profile, @Query("phone") String phone);
+
+    /**
+     * 更新用户信息
+     */
+    @POST("/api/record/save/")
+    Observable<UserResponse> saveRecord(@Header("Authorization") String token,
+                                        @Query("black_id") Long blackId,
+                                        @Query("white_id") Long whiteId,
+                                        @Query("result") String result,
+                                        @Query("steps") String steps,
+                                        @Query("level") String level,
+                                        @Query("board_state") String boardState);
 }
 

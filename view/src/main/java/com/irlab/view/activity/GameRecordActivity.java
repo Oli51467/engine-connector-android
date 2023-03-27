@@ -1,7 +1,8 @@
 package com.irlab.view.activity;
 
+import static com.irlab.base.utils.SPUtils.getHeaders;
+
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,7 +15,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 
 import com.alibaba.fastjson.JSONArray;
@@ -32,7 +32,6 @@ import com.sdu.network.observer.BaseObserver;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @SuppressLint("checkResult")
 public class GameRecordActivity extends BaseActivity implements ArchiveAdapter.setClick,
@@ -64,7 +63,7 @@ public class GameRecordActivity extends BaseActivity implements ArchiveAdapter.s
         list = new ArrayList<>();
         Message msg = new Message();
         NetworkApi.createService(ApiService.class)
-                .getMyRecords("Bearer " + SPUtils.getString("jwt"), Long.parseLong(SPUtils.getString("user_id")), -1)
+                .getMyRecords(getHeaders(), Long.parseLong(SPUtils.getString("user_id")), -1)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(JSONObject resp) {
@@ -83,7 +82,7 @@ public class GameRecordActivity extends BaseActivity implements ArchiveAdapter.s
 
     private void addDataToMap(JSONObject resp, Context context) {
         list.clear();
-        JSONArray jsonArray = resp.getJSONArray("records");
+        JSONArray jsonArray = resp.getJSONObject("data").getJSONArray("records");
         for (int i = jsonArray.size() - 1; i >= 0; i -- ) {
             JSONObject record = jsonArray.getJSONObject(i);
             Long recordId = record.getLong("id");

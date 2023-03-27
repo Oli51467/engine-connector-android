@@ -12,7 +12,7 @@ public class Group {
     private int liberties;
     private int length;
     public Set<Point> stones;
-    private boolean[][] st;
+    private final boolean[][] st;
 
     public Group(int x, int y) {
         this.liberties = 0;
@@ -71,31 +71,7 @@ public class Group {
         return liberties;
     }
 
-    public void setLiberties(int liberties) {
-        this.liberties = liberties;
-    }
-
     public int getLength() {
         return length;
-    }
-
-    public void setLength(int length) {
-        this.length = length;
-    }
-
-    public Set<Point> getStones() {
-        return stones;
-    }
-
-    public void setStones(Set<Point> stones) {
-        this.stones = stones;
-    }
-
-    public boolean[][] getSt() {
-        return st;
-    }
-
-    public void setSt(boolean[][] st) {
-        this.st = st;
     }
 }

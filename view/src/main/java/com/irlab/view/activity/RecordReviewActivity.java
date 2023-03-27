@@ -1,5 +1,6 @@
 package com.irlab.view.activity;
 
+import static com.irlab.base.utils.SPUtils.getHeaders;
 import static com.irlab.view.common.Constants.BOARD_ARRAY_LENGTH;
 import static com.irlab.view.common.Constants.BOARD_HEIGHT;
 import static com.irlab.view.common.Constants.BOARD_WIDTH;
@@ -18,7 +19,6 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.irlab.base.BaseActivity;
-import com.irlab.base.utils.SPUtils;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
 import com.irlab.view.models.Board;
@@ -84,17 +84,17 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
     @SuppressLint("CheckResult")
     private void getInfo() {
         NetworkApi.createService(ApiService.class)
-                .getRecordDetail("Bearer " + SPUtils.getString("jwt"), recordId)
+                .getRecordDetail(getHeaders(), recordId)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(JSONObject resp) {
-                        List<String> steps = (List<String>) resp.get("steps");
+                        List<String> steps = (List<String>) resp.getJSONObject("data").get("steps");
                         if (null != steps) {
                             for (String step : steps) {
                                 String[] tmp = step.split(",");
                                 int x = Integer.parseInt(tmp[0]);
                                 int y = Integer.parseInt(tmp[1]);
-                                board.play(x, y);
+                                board.play(x, y, board.player);
                                 String json = JSON.toJSON(board.board).toString();
                                 int[][] tmpBoard = JSON.parseObject(json, int[][].class);
                                 movesState[ ++ cnt] = tmpBoard;

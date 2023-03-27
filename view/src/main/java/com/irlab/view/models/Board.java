@@ -14,9 +14,9 @@ import java.util.Stack;
 public class Board {
     private final int height;
     private final int width;
+    private final boolean[][] st;
 
     public int[][] board;
-    private boolean[][] st;
     public int player;
     public int playCount;
     public StringBuilder sgfRecord;
@@ -56,14 +56,6 @@ public class Board {
         gameRecord.push(tmp.toString());
         if (handicap == 0) player = BLACK;
         else player = WHITE;
-//        for (int x = 4; x <= 16; x += 6) {
-//            for (int y = 4; y <= 16; y += 6) {
-//                if (handicap != 0) {
-//                    board[x][y] = BLACK;
-//                    handicap--;
-//                }
-//            }
-//        }
     }
 
     private void changePlayer() {
@@ -121,28 +113,17 @@ public class Board {
         }
         //  形成打劫 设置对方的禁入点
         if (count == 1 && selfCount == 1) {
-            if (player == BLACK) {
-                whiteForbidden.setX(koX);
-                whiteForbidden.setY(koY);
-            } else if (player == WHITE) {
-                blackForbidden.setX(koX);
-                blackForbidden.setY(koY);
-            }
+            if (player == BLACK) whiteForbidden.setXY(koX, koY);
+            if (player == WHITE) blackForbidden.setXY(koX, koY);
         }
         return countEat;
     }
 
-    public boolean play(int x, int y) {
+    public boolean play(int x, int y, int which) {
         if (!isInBoard(x, y) || board[x][y] != EMPTY) return false;
-        if (player == BLACK) {
-            if (blackForbidden.getX() == x && blackForbidden.getY() == y) {
-                return false;
-            }
-        } else if (player == WHITE) {
-            if (whiteForbidden.getX() == x && whiteForbidden.getY() == y) {
-                return false;
-            }
-        }
+        if (which != player) return false;
+        if (player == BLACK && blackForbidden.getX() == x && blackForbidden.getY() == y)  return false;
+        if (player == WHITE && whiteForbidden.getX() == x && whiteForbidden.getY() == y) return false;
         board[x][y] = player;
         reset();
         Group curGroup = new Group(x, y);
@@ -160,13 +141,11 @@ public class Board {
         } else {
             if (player == WHITE) {
                 sgfRecord.append('W');
-                whiteForbidden.setX(-1);
-                whiteForbidden.setY(-1);
+                whiteForbidden.setXY(-1, -1);
                 forbiddenList.push(new Point(blackForbidden.getX(), blackForbidden.getY()));    // 这里一定要new新的 否则传进去的值会被修改
             } else {
                 sgfRecord.append('B');
-                blackForbidden.setX(-1);
-                blackForbidden.setY(-1);
+                blackForbidden.setXY(-1, -1);
                 forbiddenList.push(new Point(whiteForbidden.getX(), whiteForbidden.getY()));
             }
             sgfRecord.append('[').append(x).append(',').append(y).append(']');

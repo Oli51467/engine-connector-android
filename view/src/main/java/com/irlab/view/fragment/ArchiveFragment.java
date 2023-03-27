@@ -1,5 +1,6 @@
 package com.irlab.view.fragment;
 
+import static com.irlab.base.utils.SPUtils.getHeaders;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -48,9 +49,7 @@ public class ArchiveFragment extends Fragment implements ArchiveAdapter.setClick
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_archive, container, false);
-        // 获取棋谱
-        // 初始化数据
-        initData(this.getActivity());
+        initData(this.getActivity());  // 获取棋谱数据
         return view;
     }
 
@@ -64,7 +63,7 @@ public class ArchiveFragment extends Fragment implements ArchiveAdapter.setClick
         list = new ArrayList<>();
         Message msg = new Message();
         NetworkApi.createService(ApiService.class)
-                .getAllRecords("Bearer " + SPUtils.getString("jwt"), Long.parseLong(SPUtils.getString("user_id")), -1)
+                .getAllRecords(getHeaders(), Long.parseLong(SPUtils.getString("user_id")), -1)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(JSONObject resp) {
@@ -83,7 +82,7 @@ public class ArchiveFragment extends Fragment implements ArchiveAdapter.setClick
 
     private void addDataToMap(JSONObject resp, Context context) {
         list.clear();
-        JSONArray jsonArray = resp.getJSONArray("records");
+        JSONArray jsonArray = resp.getJSONObject("data").getJSONArray("records");
         for (int i = jsonArray.size() - 1; i >= 0; i -- ) {
             JSONObject record = jsonArray.getJSONObject(i);
             Long recordId = record.getLong("id");

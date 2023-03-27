@@ -1,5 +1,7 @@
 package com.irlab.view.activity;
 
+import static com.irlab.base.utils.SPUtils.getHeaders;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -70,7 +72,7 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
                 String newPhone = et_phone.getText().toString();
                 Message msg = new Message();
                 NetworkApi.createService(ApiService.class)
-                        .updateUser("Bearer " + SPUtils.getString("jwt"), newName, SPUtils.getString("profile"), newPhone)
+                        .updateUser(getHeaders(), newName, SPUtils.getString("profile"), newPhone)
                         .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                             @Override
                             public void onSuccess(UserResponse userResponse) {

@@ -1,10 +1,18 @@
 package com.irlab.view.activity;
 
 import static com.irlab.base.MyApplication.ENGINE_SERVER;
+import static com.irlab.base.utils.SPUtils.getHeaders;
 import static com.irlab.view.common.Constants.BLACK;
+import static com.irlab.view.common.Constants.BLACK_SIDE;
 import static com.irlab.view.common.Constants.BOARD_HEIGHT;
 import static com.irlab.view.common.Constants.BOARD_WIDTH;
+import static com.irlab.view.common.Constants.CHOOSE_SIDE;
+import static com.irlab.view.common.Constants.HEIGHT;
+import static com.irlab.view.common.Constants.RESET_BOARD_ORDER;
+import static com.irlab.view.common.Constants.TURN_OFF_LIGHT_ORDER;
 import static com.irlab.view.common.Constants.WHITE;
+import static com.irlab.view.common.Constants.WHITE_SIDE;
+import static com.irlab.view.common.Constants.WIDTH;
 import static com.irlab.view.utils.BoardUtil.checkState;
 import static com.irlab.view.utils.BoardUtil.getPositionByIndex;
 import static com.irlab.view.utils.BoardUtil.transformIndex;
@@ -33,8 +41,10 @@ import com.irlab.base.utils.HttpUtil;
 import com.irlab.base.utils.SPUtils;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
+import com.irlab.view.bean.UserResponse;
 import com.irlab.view.models.Board;
 import com.irlab.view.models.Point;
+import com.irlab.view.network.api.ApiService;
 import com.irlab.view.serial.Serial;
 import com.irlab.view.serial.SerialInter;
 import com.irlab.view.serial.SerialManager;
@@ -43,6 +53,8 @@ import com.irlab.view.utils.JsonUtil;
 import com.rosefinches.smiledialog.SmileDialog;
 import com.rosefinches.smiledialog.SmileDialogBuilder;
 import com.rosefinches.smiledialog.enums.SmileDialogType;
+import com.sdu.network.NetworkApi;
+import com.sdu.network.observer.BaseObserver;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +63,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.ReentrantLock;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -61,7 +72,7 @@ import okhttp3.Response;
 public class PlayActivity extends BaseActivity implements View.OnClickListener, SerialInter {
 
     public static final String Logger = "engine-Logger";
-    public static boolean playing = false;
+    public static boolean playing = false, send;
 
     private final Drawer drawer = new Drawer();
 
@@ -79,7 +90,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
-        Objects.requireNonNull(getSupportActionBar()).hide();   // 去掉导航栏
         initArgs();
         initView();
         initBoard();
@@ -90,6 +100,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     private void initArgs() {
         playing = false;
+        send = false;
         side = 1;
         engineLastX = -1;
         engineLastY = -1;
@@ -120,23 +131,11 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private void initSerial() {
         SerialManager.getInstance().init(this);
         initSerial = SerialManager.getInstance().open();
-        if (initSerial) {
-            SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.SUCCESS)
-                    .hideTitle(true)
-                    .setCanceledOnTouchOutside(false)
-                    .setContentText("串口已开启")
-                    .setConformBgResColor(com.irlab.base.R.color.wechatGreen)
-                    .setConformTextColor(Color.WHITE)
-                    .setWindowAnimations(R.style.dialog_style)
-                    .setConformButton("确定").build();
-            dialog.show();
-        }
-        SerialManager.getInstance().send("EE34FCFF");
-        SerialManager.getInstance().send("EE35FCFF");
+        if (initSerial) resetUnderMachine();
     }
 
     private void initBoard() {
-        board = new Board(19, 19, 0);
+        board = new Board(WIDTH, HEIGHT, 0);
     }
 
     @Override
@@ -144,27 +143,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         SerialManager.getInstance().close();
         super.onStop();
     }
-//
-//    private void setSendStatus(boolean status) {
-//        while(lock.isLocked()) {
-//            lock.lock();
-//            try {
-//                send = status;
-//            } finally {
-//                lock.unlock();
-//            }
-//        }
-//    }
-//
-//    private boolean getStatus() {
-//        lock.lock();
-//        try {
-//            if (send) return true;
-//        } finally {
-//            lock.unlock();
-//        }
-//        return false;
-//    }
 
     @Override
     public void onClick(View v) {
@@ -173,48 +151,46 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             if (playing) {
                 SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
                         .hideTitle(true)
-                        .setContentText("你确定认输吗")
+                        .setContentText(R.string.confirm_resign)
                         .setConformBgResColor(R.color.delete)
                         .setCanceledOnTouchOutside(false)
                         .setConformTextColor(Color.WHITE)
                         .setCancelTextColor(Color.BLACK)
-                        .setCancelButton("取消")
+                        .setCancelButton(R.string.cancel)
                         .setCancelBgResColor(R.color.whiteSmoke)
                         .setWindowAnimations(R.style.dialog_style)
-                        .setConformButton("确定", () -> {
-                            SerialManager.getInstance().send("EE34FCFF");
-                            SerialManager.getInstance().send("EE35FCFF");
+                        .setConformButton(R.string.confirm, () -> {
+                            resetUnderMachine();
+                            saveRecord();
                             Intent intent = new Intent(this, MainView.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                         }).build();
                 dialog.show();
             } else {
-                SerialManager.getInstance().send("EE34FCFF");
-                SerialManager.getInstance().send("EE35FCFF");
+                resetUnderMachine();
                 Intent intent = new Intent(this, MainView.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
         } else if (vid == R.id.btn_begin) {
-            if (chooseSide.getText().equals("选择黑白")) {
+            if (chooseSide.getText().equals(CHOOSE_SIDE)) {
                 SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                         .hideTitle(true)
-                        .setContentText("请选择黑白")
+                        .setContentText(R.string.choose_side)
                         .setCanceledOnTouchOutside(false)
                         .setConformBgResColor(R.color.warning)
                         .setConformTextColor(Color.WHITE)
                         .setWindowAnimations(R.style.dialog_style)
-                        .setConformButton("确定").build();
+                        .setConformButton(R.string.confirm).build();
                 dialog.show();
                 return;
-            } else if (chooseSide.getText().equals("执黑")) {
-                side = BLACK;
-            } else if (chooseSide.getText().equals("执白")) {
-                side = WHITE;
             }
+            else if (chooseSide.getText().equals(BLACK_SIDE)) side = BLACK;
+            else if (chooseSide.getText().equals(WHITE_SIDE)) side = WHITE;
             if (!initSerial) initSerial();
             playing = true;
+            send = true;
             layoutBeforePlay.setVisibility(View.GONE);
             layoutAfterPlay.setVisibility(View.VISIBLE);
             Serial serial = new Serial();
@@ -222,18 +198,19 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         } else if (vid == R.id.btn_resign) {
             SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
                     .hideTitle(true)
-                    .setContentText("你确定认输吗")
+                    .setContentText(R.string.confirm_resign)
                     .setCanceledOnTouchOutside(false)
                     .setConformBgResColor(R.color.delete)
                     .setConformTextColor(Color.WHITE)
                     .setCancelTextColor(Color.BLACK)
-                    .setCancelButton("取消")
+                    .setCancelButton(R.string.cancel)
                     .setCancelBgResColor(R.color.whiteSmoke)
                     .setWindowAnimations(R.style.dialog_style)
-                    .setConformButton("确定", () -> {
-                        SerialManager.getInstance().send("EE34FCFF");
-                        SerialManager.getInstance().send("EE35FCFF");   // 复位
+                    .setConformButton(R.string.confirm, () -> {
+                        resetUnderMachine();
+                        saveRecord();
                         playing = false;
+                        send = false;
                         layoutBeforePlay.setVisibility(View.VISIBLE);
                         layoutAfterPlay.setVisibility(View.GONE);
                         SerialManager.getInstance().close();  // 关闭串口
@@ -241,22 +218,24 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                     }).build();
             dialog.show();
         } else if (vid == R.id.btn_choose_side) {
-            if (chooseSide.getText().equals("选择黑白")) {
-                chooseSide.setText("执黑");
-            } else if (chooseSide.getText().equals("执黑")) {
-                chooseSide.setText("执白");
-            } else if (chooseSide.getText().equals("执白")) {
-                chooseSide.setText("执黑");
-            }
+            if (chooseSide.getText().equals(CHOOSE_SIDE)) chooseSide.setText(BLACK_SIDE);
+            else if (chooseSide.getText().equals(BLACK_SIDE)) chooseSide.setText(WHITE_SIDE);
+            else if (chooseSide.getText().equals(WHITE_SIDE)) chooseSide.setText(BLACK_SIDE);
         }
     }
 
     @Override
     public void connectMsg(String path, boolean success) {}
 
+    private void resetUnderMachine() {
+        SerialManager.getInstance().send(TURN_OFF_LIGHT_ORDER);
+        SerialManager.getInstance().send(RESET_BOARD_ORDER);
+    }
+
     // 串口接收数据
     @Override
     public void readData(String path, byte[] bytes, int size) {
+        if (size > 0) send = false;
         int[][] receivedBoardState = new int[20][20];
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
@@ -270,65 +249,69 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         if (checkResp.get(0).equals(-2)) {
             // 缺少棋子提示
             if (showToast) {
+                send = true;
                 showToast = false;
                 runOnUiThread(() -> {
                     SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                             .hideTitle(true)
-                            .setContentText("缺少棋子")
+                            .setContentText(R.string.lack_stone)
                             .setCanceledOnTouchOutside(false)
                             .setConformBgResColor(R.color.warning)
                             .setConformTextColor(Color.WHITE)
                             .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton("确定", () -> showToast = true).build();
+                            .setConformButton(R.string.confirm, () -> showToast = true).build();
                     dialog.show();
                 });
-                comparePosition.setText("缺少棋子");
+                comparePosition.setText(R.string.lack_stone);
             }
         } else if (checkResp.get(0).equals(-1)) {
             // 多余棋子提示
             if (showToast) {
+                send = true;
                 showToast = false;
                 runOnUiThread(() -> {
                     SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                             .hideTitle(true)
-                            .setContentText("多余棋子")
+                            .setContentText(R.string.unnecessary_stone)
                             .setCanceledOnTouchOutside(false)
                             .setConformBgResColor(R.color.warning)
                             .setConformTextColor(Color.WHITE)
                             .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton("确定", () -> showToast = true).build();
+                            .setConformButton(R.string.confirm, () -> showToast = true).build();
                     dialog.show();
                 });
-                comparePosition.setText("多余棋子");
+                comparePosition.setText(R.string.unnecessary_stone);
             }
         } else if (checkResp.get(0).equals(1)) {
             Integer playX = checkResp.get(1);
             Integer playY = checkResp.get(2);
-            if (!playOnBoardAndRequestEngine(playX, playY)) {
+            Integer potentialColor = checkResp.get(3);
+            if (!playOnBoardAndRequestEngine(playX, playY, potentialColor)) {
                 // 无法落子提示
                 if (showToast) {
+                    send = true;
                     showToast = false;
                     runOnUiThread(() -> {
                         SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                                 .hideTitle(true)
-                                .setContentText("此处无法落子")
+                                .setContentText(R.string.prohibit_play)
                                 .setCanceledOnTouchOutside(false)
                                 .setConformBgResColor(R.color.warning)
                                 .setConformTextColor(Color.WHITE)
                                 .setWindowAnimations(R.style.dialog_style)
-                                .setConformButton("确定", () -> showToast = true).build();
+                                .setConformButton(R.string.confirm, () -> showToast = true).build();
                         dialog.show();
                     });
-                    comparePosition.setText("此处无法落子");
+                    comparePosition.setText(R.string.prohibit_play);
                 }
             }
         }
     }
 
     @SuppressLint("SetTextI18n")
-    private boolean playOnBoardAndRequestEngine(int x, int y) {
+    private boolean playOnBoardAndRequestEngine(int x, int y, int potentialColor) {
         // 0.判断该位置是否可以落子
-        boolean ok = board.play(x, y);
+        boolean ok = board.play(x, y, potentialColor);
         if (!ok) return false;  // 不能落子 直接返回 给出错误提示
         else {
             runOnUiThread(() -> comparePosition.setText("比较落子位置:" + x + " " + y));
@@ -341,7 +324,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             // 4.将棋盘坐标转回轴坐标
             Pair<Integer, Integer> indexes = transformIndex(engineResp);
             // 5.数据结构记录引擎落子位置并得出下一步局面
-            board.play(indexes.first, indexes.second);
+            board.play(indexes.first, indexes.second, board.player);
             engineLastX = indexes.first;
             engineLastY = indexes.second;
             // 6.刷新棋盘
@@ -372,6 +355,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         SerialManager.getInstance().send(order.toString());
         SerialManager.getInstance().send(order.toString());
         SerialManager.getInstance().send(order.toString());
+        send = true;
     }
 
     private void initEngine() {
@@ -469,6 +453,36 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
             }
         });
+    }
+
+    private void saveRecord() {
+        long blackId, whiteId;
+        String result;
+        if (side == 1) {
+            blackId = Long.parseLong(SPUtils.getString("user_id"));
+            whiteId = -1L;
+            result = "白中盘胜";
+        } else {
+            blackId = -1L;
+            whiteId = Long.parseLong(SPUtils.getString("user_id"));
+            result = "黑中盘胜";
+        }
+        saveRecord(blackId, whiteId, result, board.getSgf(), board.getState2Engine());
+    }
+
+    @SuppressLint("checkResult")
+    private void saveRecord(long blackId, long whiteId, String result, String steps, String boardState) {
+        NetworkApi.createService(ApiService.class)
+                .saveRecord(getHeaders(), blackId, whiteId, result, steps, "p", boardState)
+                .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
+                    @Override
+                    public void onSuccess(UserResponse userResponse) {
+                        runOnUiThread(() -> enginePosition.setText("保存棋谱成功"));
+                    }
+                    @Override
+                    public void onFailure(Throwable e) {
+                    }
+                }));
     }
 
     private void drawBoard() {

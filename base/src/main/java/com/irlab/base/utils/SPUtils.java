@@ -31,4 +31,8 @@ public class SPUtils {
         SharedPreferences.Editor editor = preferences.edit();
         editor.remove(key).apply();
     }
+
+    public static String getHeaders() {
+        return "Bearer " + getString("jwt");
+    }
 }

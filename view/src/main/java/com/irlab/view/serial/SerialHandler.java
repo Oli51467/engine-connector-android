@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
  * 串口处理类：SerialHandle ；简单概括这个类，就是通过串口对象去获取两个流(输入流、输出流)，通过者两个流来监听数据或者写入指令，硬件收到后执行。同时注意配置参数
  */
 public class SerialHandler implements Runnable {
+
     private static final String TAG = "串口处理类";
     private String path = "";  // 串口地址
     private SerialPort mSerialPort;  // 串口对象
@@ -50,11 +51,11 @@ public class SerialHandler implements Runnable {
     /**
      * 打开串口
      *
-     * @param devicePath 串口地址(根据平板的说明说填写)
-     * @param baudRate   波特率(根据对接的硬件填写 - 硬件说明书上"通讯"中会有标注)
-     * @param dataBits   数据位(根据对接的硬件填写 - 硬件说明书上"通讯"中会有标注)
-     * @param stopBits   停止位(根据对接的硬件填写 - 硬件说明书上"通讯"中会有标注)
-     * @param parity     校验位(根据对接的硬件填写 - 硬件说明书上"通讯"中会有标注)
+     * @param devicePath 串口地址
+     * @param baudRate   波特率
+     * @param dataBits   数据位
+     * @param stopBits   停止位
+     * @param parity     校验位
      * @param isRead     是否持续监听串口返回的数据
      * @return 是否打开成功
      */
@@ -119,10 +120,11 @@ public class SerialHandler implements Runnable {
      * 关闭串口
      */
     public void close() {
+        SerialManager.getInstance().cancelSendTask();
         try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            readTask.cancel(true);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
         }
         try {
             if (mInputStream != null) mInputStream.close();

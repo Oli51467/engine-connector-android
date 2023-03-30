@@ -1,7 +1,6 @@
 package com.irlab.view.serial;
 
 import static com.irlab.view.activity.PlayActivity.playing;
-import static com.irlab.view.activity.PlayActivity.send;
 
 public class Serial extends Thread {
 
@@ -9,11 +8,13 @@ public class Serial extends Thread {
     public void run() {
         while (playing) {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } finally {
+                if (playing) SerialManager.getInstance().send("EE30FCFF");
             }
-            if (send) SerialManager.getInstance().send("EE30FCFF");
         }
+        this.interrupt();
     }
 }

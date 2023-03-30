@@ -94,8 +94,8 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
                                 String[] tmp = step.split(",");
                                 int x = Integer.parseInt(tmp[0]);
                                 int y = Integer.parseInt(tmp[1]);
-                                board.play(x, y, board.player);
-                                String json = JSON.toJSON(board.board).toString();
+                                board.play(x, y);
+                                String json = JSON.toJSON(board.getBoard()).toString();
                                 int[][] tmpBoard = JSON.parseObject(json, int[][].class);
                                 movesState[ ++ cnt] = tmpBoard;
                             }

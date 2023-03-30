@@ -3,6 +3,7 @@ package com.irlab.view.models;
 import static com.irlab.view.common.Constants.BLACK;
 import static com.irlab.view.common.Constants.EMPTY;
 import static com.irlab.view.common.Constants.WHITE;
+import static com.irlab.view.common.Constants.WIDTH;
 
 import com.irlab.view.utils.BoardUtil;
 
@@ -16,8 +17,8 @@ public class Board {
     private final int width;
     private final boolean[][] st;
 
-    public int[][] board;
-    public int player;
+    private final int[][] board;
+    private int player;
     public int playCount;
     public StringBuilder sgfRecord;
     private Point blackForbidden;
@@ -119,9 +120,8 @@ public class Board {
         return countEat;
     }
 
-    public boolean play(int x, int y, int which) {
+    public boolean play(int x, int y) {
         if (!isInBoard(x, y) || board[x][y] != EMPTY) return false;
-        if (which != player) return false;
         if (player == BLACK && blackForbidden.getX() == x && blackForbidden.getY() == y)  return false;
         if (player == WHITE && whiteForbidden.getX() == x && whiteForbidden.getY() == y) return false;
         board[x][y] = player;
@@ -224,11 +224,26 @@ public class Board {
             req.append("]");
         }
         req.append("]");
-        System.out.println(req);
         return req.toString();
+    }
+
+    public int[][] getBoard() {
+        return this.board;
+    }
+
+    public void clearBoard() {
+        for (int i = 1; i <= WIDTH; i ++ ) {
+            for (int j = 1; j <= WIDTH; j ++ ) {
+                this.board[i][j] = EMPTY;
+            }
+        }
     }
 
     public int getPlayer() {
         return player;
+    }
+
+    public Set<Point> getCapturedStones() {
+        return this.capturedStones;
     }
 }

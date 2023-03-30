@@ -15,4 +15,10 @@ public class Constants {
     public static final String BLACK_SIDE = "执黑";
     public static final String WHITE_SIDE = "执白";
     public static final String CHOOSE_SIDE = "选择黑白";
+
+    public static final int DETECTION_LACK_STONE = 10001;
+    public static final int DETECTION_UNNECESSARY_STONE = 10002;
+    public static final int DETECTION_NO_STONE = 10003;
+    public static final int WRONG_SIDE = 10004;
+    public static final int NORMAL_PLAY = 20001;
 }

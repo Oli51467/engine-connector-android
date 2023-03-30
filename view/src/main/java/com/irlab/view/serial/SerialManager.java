@@ -19,7 +19,7 @@ public class SerialManager {
     private SerialHandler serialHandle;  // 串口连接 发送 读取处理对象
     private final Queue<String> queueMsg = new ConcurrentLinkedQueue<>();  // 线程安全到队列
     private ScheduledFuture sendStrTask;  // 循环发送任务
-    private boolean isConnect = false;  // 串口是否连接
+    public boolean isConnect = false;  // 串口是否连接
 
     private SerialManager() {
         scheduledExecutor = Executors.newScheduledThreadPool(8);  //  初始化8个线程
@@ -34,6 +34,16 @@ public class SerialManager {
             }
         }
         return instance;
+    }
+
+    public static void setInstance() {
+        if (null != instance) {
+            synchronized (SerialManager.class) {
+                if (null != instance) {
+                    instance = null;
+                }
+            }
+        }
     }
 
     /**
@@ -56,7 +66,6 @@ public class SerialManager {
             startSendTask();
         }
         serialHandle.addSerialInter(serialInter);
-
     }
 
     /**
@@ -87,6 +96,7 @@ public class SerialManager {
      * 关闭串口
      */
     public void close() {
+        if (null == serialHandle) return;
         serialHandle.close();  // 关闭串口
     }
 
@@ -104,7 +114,7 @@ public class SerialManager {
     }
 
     // 取消发送任务
-    private void cancelSendTask() {
+    public void cancelSendTask() {
         if (sendStrTask == null) return;
         sendStrTask.cancel(true);
         try {

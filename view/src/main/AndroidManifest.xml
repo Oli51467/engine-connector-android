@@ -9,7 +9,7 @@
         android:theme="@style/Theme.Robotgo"
         tools:remove="android:appComponentFactory">
         <activity
-            android:name=".activity.SerialPortActivity"
+            android:name=".activity.ConnectWifiActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

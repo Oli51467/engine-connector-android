@@ -31,8 +31,7 @@
             android:layout_centerInParent="true"
             android:text="对弈"
             android:textColor="@color/black"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:textSize="32sp" />
 
     </RelativeLayout>
 

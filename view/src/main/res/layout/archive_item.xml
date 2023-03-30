@@ -55,7 +55,7 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="center_vertical"
                 android:textStyle="bold"
-                android:textSize="32sp"/>
+                android:textSize="24sp"/>
         </LinearLayout>
 
     </RelativeLayout>

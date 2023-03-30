@@ -4,9 +4,10 @@
     <string name="cancel">取消</string>
     <string name="choose_side">请选择黑白</string>
     <string name="confirm_resign">您确定认输吗</string>
-    <string name="lack_stone">缺少棋子</string>
+    <string name="wrong_side">错误的落子方</string>
+    <string name="lack_stone">缺少棋子  </string>
     <string name="unnecessary_stone">多余棋子</string>
-    <string name="prohibit_play">此处不允许落子</string>
+    <string name="prohibit_play">不允许落子,请及时取走</string>
     <string name="delete">删除</string>
     <string name="edit">退出</string>
     <string name="play_level">棋力</string>

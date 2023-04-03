@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/whiteSmoke"
+    android:orientation="vertical"
+    tools:ignore="MissingDefaultResource">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="160dp">
+
+        <!--输入框-->
+        <EditText
+            android:id="@+id/et_userName"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="用户名"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:maxLines="1"
+            android:maxLength="10"
+            android:textColor="@color/black"
+            android:textColorHint="@color/hint_text_color"
+            android:textSize="18sp"
+            android:theme="@style/MyEditText" />
+        <!--输入框-->
+        <EditText
+            android:id="@+id/et_phone"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:hint="手机号"
+            android:inputType="phone"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:maxLines="1"
+            android:maxLength="11"
+            android:textColor="@color/black"
+            android:textColorHint="@color/hint_text_color"
+            android:textSize="18sp"
+            android:theme="@style/MyEditText" />
+        <!--输入框-->
+        <EditText
+            android:id="@+id/et_psw"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:hint="密码"
+            android:inputType="textPassword"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:maxLines="1"
+            android:maxLength="10"
+            android:textColor="@color/black"
+            android:textColorHint="@color/hint_text_color"
+            android:textSize="18sp"
+            android:theme="@style/MyEditText" />
+        <EditText
+            android:id="@+id/et_pswConfirm"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:hint="确认密码"
+            android:inputType="textPassword"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:maxLines="1"
+            android:maxLength="10"
+            android:textColor="@color/black"
+            android:textColorHint="@color/hint_text_color"
+            android:textSize="18sp"
+            android:theme="@style/MyEditText" />
+        <!--按钮-->
+        <Button
+            android:id="@+id/btn_register"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/btn_not_focus"
+            android:text="注册"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
+
+        <Button
+            android:id="@+id/btn_return"
+            android:layout_width="320dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/btn_update"
+            android:text="已有账号 去登陆"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+
+</LinearLayout>

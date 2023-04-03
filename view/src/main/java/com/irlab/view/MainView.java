@@ -1,16 +1,18 @@
 package com.irlab.view;
 
 import static com.irlab.base.utils.SPUtils.remove;
+import static com.irlab.view.common.iFlytekConstants.IFLYTEK_APP_ID;
+import static com.irlab.view.common.iFlytekConstants.WAKEUP_STATE;
 
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -18,45 +20,67 @@ import android.widget.TextView;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.iflytek.cloud.SpeechUtility;
 import com.irlab.base.BaseActivity;
 import com.irlab.base.MyApplication;
 import com.irlab.base.utils.SPUtils;
 import com.irlab.base.utils.ToastUtil;
 import com.irlab.view.fragment.PlayFragment;
-import com.irlab.view.fragment.ArchiveFragment;
+import com.irlab.view.fragment.RecordFragment;
 import com.irlab.view.network.NetworkRequiredInfo;
+import com.irlab.view.iflytek.speech.XunFeiWakeUp;
+import com.irlab.view.service.SpeechService;
+import com.irlab.view.service.TtsService;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sdu.network.NetworkApi;
-
-import java.util.Objects;
 
 @Route(path = "/view/main")
 public class MainView extends BaseActivity implements View.OnClickListener {
 
+    public static XunFeiWakeUp wakeUp;
+    public static SpeechService speechService;
+    public static TtsService ttsService;
+
     // 布局界面
     private PlayFragment playFragment = null;
-    private ArchiveFragment archiveFragment = null;
+    private RecordFragment recordFragment = null;
     // 显示布局
-    private View playLayout = null, archiveLayout = null;
+    private View playLayout = null, recordLayout = null;
     // 声明组件变量
-    private ImageView playImg = null, archiveImg = null;
-    private TextView playText = null, archiveText = null, showInfo = null;
+    private ImageView playImg = null, recordImg = null;
+    private TextView playText = null, recordText = null, showInfo = null;
 
     // 用于对 Fragment进行管理
     public FragmentManager fragmentManager = null;
     private String userName;
 
-    @SuppressLint("NewApi")
+    private final Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == WAKEUP_STATE) {
+                MainView.ttsService.tts("我在");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                speechService.ServiceBegin();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activity_main_view);
-        Objects.requireNonNull(getSupportActionBar()).hide();   // 要求窗口没有 title
+        SpeechUtility.createUtility(this, IFLYTEK_APP_ID);
         ARouter.getInstance().inject(this); // 注入Arouter
         userName = SPUtils.getString("username");
         initViews();    // 初始化布局元素
         setEvents();    // 设置监听事件
         initFragment(); // 初始化Fragment
+        initWakeup();   // 初始化语音唤醒
         setTabSelection(2); // 设置默认的显示界面
         NetworkApi.init(new NetworkRequiredInfo(MyApplication.getInstance()));  // 初始化network
     }
@@ -82,7 +106,7 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         if (id == 1) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment, archiveFragment)
+                    .replace(R.id.fragment, recordFragment)
                     .addToBackStack(null)
                     .commit();
         }
@@ -93,30 +117,40 @@ public class MainView extends BaseActivity implements View.OnClickListener {
      */
     public void initViews() {
         fragmentManager = getSupportFragmentManager();
-        // 初始化控件
         playLayout = findViewById(R.id.layout_play);
-        archiveLayout = findViewById(R.id.layout_archive);
+        recordLayout = findViewById(R.id.layout_record);
         playImg = findViewById(R.id.img_play);
-        archiveImg = findViewById(R.id.img_archive);
+        recordImg = findViewById(R.id.img_record);
         playText = findViewById(R.id.tv_play);
-        archiveText = findViewById(R.id.tv_archive);
+        recordText = findViewById(R.id.tv_record);
     }
 
     // 处理activity中控件的点击事件 fragment控件的点击事件必须在onStart()中进行
     public void setEvents() {
         playLayout.setOnClickListener(this);
-        archiveLayout.setOnClickListener(this);
+        recordLayout.setOnClickListener(this);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void initWakeup() {
+        // 初始化唤醒词，开启
+        wakeUp = new XunFeiWakeUp(this, handler);
+        wakeUp.startWakeup();
+        // 初始化语音转文字
+        speechService = new SpeechService(this,"cloud");
+        speechService.init();
+        // 初始化语音合成
+        ttsService = new TtsService(this);
+        MainView.ttsService.tts("你好");
+    }
+
     public void initFragment() {
         // 开启一个Fragment事务
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         playFragment = new PlayFragment();
-        archiveFragment = new ArchiveFragment();
+        recordFragment = new RecordFragment();
         // 通过事务将子fragment添加到主布局中
         transaction.add(R.id.fragment, playFragment, "play");
-        transaction.add(R.id.fragment, archiveFragment, "archive");
+        transaction.add(R.id.fragment, recordFragment, "record");
         // 提交事务
         transaction.commit();
     }
@@ -136,7 +170,7 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         int vid = v.getId();
         if (vid == R.id.layout_play) {
             setTabSelection(2);
-        } else if (vid == R.id.layout_archive) {
+        } else if (vid == R.id.layout_record) {
             setTabSelection(1);
         } else if (vid == R.id.btn_logout) {
             // 退出登录时, 清空SharedPreferences中保存的用户信息, 下次登录时不再自动登录
@@ -162,9 +196,9 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         hideFragments(transaction);
         // 棋谱界面
         if (index == 1) {
-            archiveImg.setImageResource(R.drawable.tab_archive_pressed);
-            archiveText.setTextColor(Color.parseColor("#07c160"));
-            transaction.show(archiveFragment);
+            recordImg.setImageResource(R.drawable.tab_record_pressed);
+            recordText.setTextColor(Color.parseColor("#07c160"));
+            transaction.show(recordFragment);
         }
         // 下棋界面
         else if (index == 2) {
@@ -181,8 +215,8 @@ public class MainView extends BaseActivity implements View.OnClickListener {
     private void clearSelection() {
         playImg.setImageResource(R.drawable.tab_play_normal);
         playText.setTextColor(Color.parseColor("#82858b"));
-        archiveImg.setImageResource(R.drawable.tab_archive_normal);
-        archiveText.setTextColor(Color.parseColor("#82858b"));
+        recordImg.setImageResource(R.drawable.tab_record_normal);
+        recordText.setTextColor(Color.parseColor("#82858b"));
     }
 
     /**
@@ -192,8 +226,8 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         if (playFragment != null) {
             transaction.hide(playFragment);
         }
-        if (archiveFragment != null) {
-            transaction.hide(archiveFragment);
+        if (recordFragment != null) {
+            transaction.hide(recordFragment);
         }
     }
 }

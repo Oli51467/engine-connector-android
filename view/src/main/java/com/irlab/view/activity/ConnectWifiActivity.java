@@ -95,7 +95,7 @@ public class ConnectWifiActivity extends BaseActivity implements View.OnClickLis
     // 中间显示的dialog
     public void showCentreDialog(final String wifiName, final int position) {
         // 自定义dialog显示布局
-        View inflate = LayoutInflater.from(ConnectWifiActivity.this).inflate(R.layout.dialog_centre, null);
+        View inflate = LayoutInflater.from(ConnectWifiActivity.this).inflate(R.layout.dialog_connect_wifi, null);
         // 自定义dialog显示风格
         dialog = new Dialog(ConnectWifiActivity.this, R.style.DialogCentre);
         // 点击其他区域消失
@@ -203,7 +203,7 @@ public class ConnectWifiActivity extends BaseActivity implements View.OnClickLis
                 Log.e(WifiLogger, "--NetworkInfo--" + info.toString());
                 if (NetworkInfo.State.CONNECTED == info.getState()) {//wifi连接上了
                     Log.e(WifiLogger, "wifi已连接");
-                    tv_wifiState.append("\n 连接状态：wifi以连接，wifi名称：" + MyWifiManager.getWiFiName(mWifiManager));
+                    tv_wifiState.append("\n 连接状态：wifi已连接，wifi名称：" + MyWifiManager.getWiFiName(mWifiManager));
                 } else if (NetworkInfo.State.CONNECTING == info.getState()) {//正在连接
                     Log.e(WifiLogger, "wifi正在连接");
                     tv_wifiState.append("\n 连接状态：wifi正在连接");

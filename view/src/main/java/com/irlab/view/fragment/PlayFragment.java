@@ -37,6 +37,7 @@ public class PlayFragment extends Fragment implements View.OnClickListener {
             new MyFunction("选择棋力", R.drawable.icon_set_level),
             new MyFunction("我的对局", R.drawable.icon_mygame),
             new MyFunction("连接WiFi", R.drawable.icon_wifi),
+            new MyFunction("语音对话", R.drawable.icon_speech)
     };
     private final List<MyFunction> funcList = new ArrayList<>();
 

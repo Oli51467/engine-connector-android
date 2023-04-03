@@ -229,6 +229,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     private void resetUnderMachine() {
         SerialManager.getInstance().send(TURN_OFF_LIGHT_ORDER);
+        SerialManager.getInstance().send(TURN_OFF_LIGHT_ORDER);
+        SerialManager.getInstance().send(RESET_BOARD_ORDER);
         SerialManager.getInstance().send(RESET_BOARD_ORDER);
     }
 
@@ -251,12 +253,13 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             return;
         }
         else if (checkResp.get(0).equals(WRONG_SIDE)) {
+            String wrongPosition = getPositionByIndex(checkResp.get(1), checkResp.get(2));
             if (showToast) {
                 showToast = false;
                 runOnUiThread(() -> {
                     SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                             .hideTitle(true)
-                            .setContentText(R.string.wrong_side)
+                            .setContentText("错误的落子方 " + wrongPosition)
                             .setCanceledOnTouchOutside(false)
                             .setConformBgResColor(R.color.warning)
                             .setConformTextColor(Color.WHITE)

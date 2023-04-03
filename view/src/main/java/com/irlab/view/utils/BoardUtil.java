@@ -75,6 +75,8 @@ public class BoardUtil {
                 if (board[x][y] == EMPTY && curState[x][y] != EMPTY) {
                     if (curState[x][y] != currentPlayer) {
                         res.add(WRONG_SIDE);
+                        res.add(x);
+                        res.add(y);
                         return res;
                     }
                     potentialPlayPositionCount++;

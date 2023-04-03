@@ -19,6 +19,7 @@ import com.irlab.view.activity.GameRecordActivity;
 import com.irlab.view.activity.PlayActivity;
 import com.irlab.view.activity.SelectConfigActivity;
 import com.irlab.view.activity.ConnectWifiActivity;
+import com.irlab.view.activity.SpeechActivity;
 import com.irlab.view.bean.MyFunction;
 
 import java.util.List;
@@ -74,6 +75,10 @@ public class FunctionAdapter extends RecyclerView.Adapter<FunctionAdapter.ViewHo
                 context.startActivity(intent);
             } else if (function.getName().equals("连接WiFi")) {
                 Intent intent = new Intent(context, ConnectWifiActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                context.startActivity(intent);
+            } else if (function.getName().equals("语音对话")) {
+                Intent intent = new Intent(context, SpeechActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(intent);
             }

@@ -9,6 +9,13 @@
         android:theme="@style/Theme.Robotgo"
         tools:remove="android:appComponentFactory">
         <activity
+            android:name=".activity.SpeechActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".activity.ConnectWifiActivity"
             android:exported="false">
             <meta-data
@@ -36,10 +43,6 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-        <activity
-            android:name=".activity.InstructionActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.SelectConfigActivity"
             android:exported="false"

@@ -34,12 +34,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
-//    sourceSets {
-//        main {
-//            jniLibs.srcDirs = ['libs']
-//        }
-//    }
-//    sourceSets {
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['../iFLYTEK/libs']
+        }
+    }
+    //    sourceSets {
 //        main {
 //            assets {
 //                srcDirs 'src/main/assets'
@@ -101,7 +101,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project (':base')
     implementation project (':opencv')
-//    implementation project (':iFLYTEK')
+    implementation project (':iFLYTEK')
     implementation project (':network')
-//    implementation files('../iFLYTEK/libs/Msc.jar')
+    implementation files('../iFLYTEK/libs/Msc.jar')
 }

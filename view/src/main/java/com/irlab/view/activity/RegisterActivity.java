@@ -41,7 +41,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        initViews();
+        initComponents();
         // 设置注册按钮是否可点击
         ButtonListenerUtil.buttonEnabled(2, 11, btnRegister, userName, password, passwordConfirm, phoneNumber);
         // 监听按钮变色
@@ -53,7 +53,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     /*
     获取到每个需要用到的控件的实例
     */
-    public void initViews() {
+    public void initComponents() {
         btnReturn = findViewById(R.id.btn_return);
         userName = findViewById(R.id.et_userName);
         password = findViewById(R.id.et_psw);

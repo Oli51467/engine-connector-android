@@ -1,6 +1,5 @@
 package com.irlab.view;
 
-import static com.irlab.base.utils.SPUtils.remove;
 import static com.irlab.view.common.iFlytekConstants.IFLYTEK_APP_ID;
 import static com.irlab.view.common.iFlytekConstants.WAKEUP_STATE;
 
@@ -14,7 +13,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,7 +22,6 @@ import com.iflytek.cloud.SpeechUtility;
 import com.irlab.base.BaseActivity;
 import com.irlab.base.MyApplication;
 import com.irlab.base.utils.SPUtils;
-import com.irlab.base.utils.ToastUtil;
 import com.irlab.view.fragment.PlayFragment;
 import com.irlab.view.fragment.RecordFragment;
 import com.irlab.view.network.NetworkRequiredInfo;
@@ -77,7 +74,7 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         SpeechUtility.createUtility(this, IFLYTEK_APP_ID);
         ARouter.getInstance().inject(this); // 注入Arouter
         userName = SPUtils.getString("username");
-        initViews();    // 初始化布局元素
+        initComponents();    // 初始化布局元素
         setEvents();    // 设置监听事件
         initFragment(); // 初始化Fragment
         initWakeup();   // 初始化语音唤醒
@@ -115,7 +112,7 @@ public class MainView extends BaseActivity implements View.OnClickListener {
     /**
      * 在这里面获取到每个需要用到的控件的实例
      */
-    public void initViews() {
+    public void initComponents() {
         fragmentManager = getSupportFragmentManager();
         playLayout = findViewById(R.id.layout_play);
         recordLayout = findViewById(R.id.layout_record);
@@ -157,11 +154,9 @@ public class MainView extends BaseActivity implements View.OnClickListener {
 
     // 初始化fragment中的控件并设置监听事件
     public void initFragmentViewsAndEvents() {
-        Button logout = findViewById(R.id.btn_logout);
         showInfo = findViewById(R.id.tv_username);
-        ImageView userAvatar = findViewById(R.id.iv_profile);
         showInfo.setText(userName);
-        logout.setOnClickListener(this);
+        ImageView userAvatar = findViewById(R.id.iv_profile);
         ImageLoader.getInstance().displayImage(SPUtils.getString("user_avatar"), userAvatar);
     }
 
@@ -172,15 +167,6 @@ public class MainView extends BaseActivity implements View.OnClickListener {
             setTabSelection(2);
         } else if (vid == R.id.layout_record) {
             setTabSelection(1);
-        } else if (vid == R.id.btn_logout) {
-            // 退出登录时, 清空SharedPreferences中保存的用户信息, 下次登录时不再自动登录
-            remove("userName");
-            ToastUtil.show(this, "退出登录");
-            // 跳转到登录界面
-            ARouter.getInstance().build("/auth/login")
-                    .withFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    .navigation();
-            finish();
         }
     }
 

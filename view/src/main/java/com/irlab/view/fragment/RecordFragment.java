@@ -53,7 +53,7 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
         return view;
     }
 
-    private void initViews() {
+    private void initComponents() {
         mRecyclerView = view.findViewById(R.id.record_item);
         linearLayoutManager = new LinearLayoutManager(this.getActivity(), LinearLayoutManager.VERTICAL, false);
         mAdapter.setOnItemClickListener(this);
@@ -108,7 +108,7 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
             if (msg.what == 1) {
                 // 创建自定义适配器, 设置给listview
                 mAdapter = new RecordAdapter(list);
-                initViews();
+                initComponents();
                 // 为 RecyclerView设置LayoutManger
                 mRecyclerView.setLayoutManager(linearLayoutManager);
                 // 设置item固定大小

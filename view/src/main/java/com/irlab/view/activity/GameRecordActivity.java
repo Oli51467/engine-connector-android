@@ -52,7 +52,7 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
         loadData(this);
     }
 
-    private void initViews() {
+    private void initComponents() {
         mRecyclerView = findViewById(R.id.record_item);
         linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mAdapter.setOnItemClickListener(this);
@@ -110,7 +110,7 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
             if (msg.what == 1) {
                 // 创建自定义适配器, 设置给listview
                 mAdapter = new RecordAdapter(list);
-                initViews();
+                initComponents();
                 // 为 RecyclerView设置LayoutManger
                 mRecyclerView.setLayoutManager(linearLayoutManager);
                 // 设置item固定大小

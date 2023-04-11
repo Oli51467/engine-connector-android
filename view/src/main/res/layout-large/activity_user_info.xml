@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/whiteSmoke"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:ignore="MissingDefaultResource">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -102,5 +104,14 @@
         android:text="更换密码"
         android:textColor="@color/white"
         android:textSize="32sp" />
+    <Button
+        android:id="@+id/btn_logout"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:layout_marginTop="128dp"
+        android:background="@drawable/bar_selector"
+        android:textSize="24sp"
+        android:text="退出登录"
+        android:textColor="@color/red" />
 
 </LinearLayout>

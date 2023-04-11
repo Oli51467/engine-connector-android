@@ -76,14 +76,4 @@
         android:layout_marginEnd="8dp"
         android:clipToPadding="false"
         android:paddingBottom="16dp" />
-
-    <Button
-        android:id="@+id/btn_logout"
-        android:layout_width="match_parent"
-        android:layout_height="96dp"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/bar_selector"
-        android:textSize="24sp"
-        android:text="退出登录"
-        android:textColor="@color/red" />
 </LinearLayout>

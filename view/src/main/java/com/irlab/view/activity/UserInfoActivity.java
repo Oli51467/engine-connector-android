@@ -1,6 +1,7 @@
 package com.irlab.view.activity;
 
 import static com.irlab.base.utils.SPUtils.getHeaders;
+import static com.irlab.base.utils.SPUtils.remove;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,6 +14,7 @@ import android.os.Message;
 import android.view.View;
 import android.widget.EditText;
 
+import com.alibaba.android.arouter.launcher.ARouter;
 import com.irlab.base.BaseActivity;
 import com.irlab.base.response.ResponseCode;
 import com.irlab.base.utils.SPUtils;
@@ -33,14 +35,16 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ARouter.getInstance().inject(this); // 注入Arouter
         setContentView(R.layout.activity_user_info);
-        initViews();
+        initComponents();
     }
 
-    private void initViews() {
+    private void initComponents() {
         findViewById(R.id.header_back).setOnClickListener(this);
         findViewById(R.id.btn_save).setOnClickListener(this);
         findViewById(R.id.btn_update_password).setOnClickListener(this);
+        findViewById(R.id.btn_logout).setOnClickListener(this);
         et_phone = findViewById(R.id.et_phone);
         et_username = findViewById(R.id.et_username);
         et_phone.setText(SPUtils.getString("phone"));
@@ -62,6 +66,15 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
             Intent intent = new Intent(this, MainView.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+        } else if (vid == R.id.btn_logout) {
+            // 退出登录时, 清空SharedPreferences中保存的用户信息, 下次登录时不再自动登录
+            remove("userName");
+            ToastUtil.show(this, "退出登录");
+            // 跳转到登录界面
+            ARouter.getInstance().build("/auth/login")
+                    .withFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    .navigation();
+            finish();
         } else if (vid == R.id.btn_save) {
             if (!checkInfoChanged()) {  // 用户信息没有改变
                 Intent intent = new Intent(this, MainView.class);

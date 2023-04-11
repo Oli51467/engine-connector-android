@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.irlab.view.R;
 import com.irlab.view.activity.GameRecordActivity;
+import com.irlab.view.activity.ManageDeviceActivity;
 import com.irlab.view.activity.PlayActivity;
 import com.irlab.view.activity.SelectConfigActivity;
 import com.irlab.view.activity.ConnectWifiActivity;
@@ -63,11 +64,11 @@ public class FunctionAdapter extends RecyclerView.Adapter<FunctionAdapter.ViewHo
             MyFunction function = funcList.get(position);
             if (function.getName().equals("开始对弈")) {
                 Intent intent = new Intent(context, PlayActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(intent);
             } else if (function.getName().equals("选择棋力")) {
                 Intent intent = new Intent(context, SelectConfigActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(intent);
             } else if (function.getName().equals("我的对局")) {
                 Intent intent = new Intent(context, GameRecordActivity.class);
@@ -79,6 +80,10 @@ public class FunctionAdapter extends RecyclerView.Adapter<FunctionAdapter.ViewHo
                 context.startActivity(intent);
             } else if (function.getName().equals("语音对话")) {
                 Intent intent = new Intent(context, SpeechActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                context.startActivity(intent);
+            } else if (function.getName().equals("我的棋盘")) {
+                Intent intent = new Intent(context, ManageDeviceActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 context.startActivity(intent);
             }

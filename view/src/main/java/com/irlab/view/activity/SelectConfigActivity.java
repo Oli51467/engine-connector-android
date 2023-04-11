@@ -38,7 +38,7 @@ public class SelectConfigActivity extends BaseActivity implements View.OnClickLi
     }
 
     // 初始化界面及事件
-    private void initViews() {
+    private void initComponents() {
         mRecyclerView = findViewById(R.id.play_setting_item);
         ImageView back = findViewById(R.id.header_back);
 
@@ -52,7 +52,7 @@ public class SelectConfigActivity extends BaseActivity implements View.OnClickLi
         Collections.addAll(configList, LEVELS);
         // 初始化适配器 将数据填充进去
         mAdapter = new RecyclerViewAdapter(configList);
-        initViews();
+        initComponents();
         // 线性布局 第二个参数是容器的走向, 第三个时候反转意思就是以中间为对称轴左右两边互换。
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(SelectConfigActivity.this, LinearLayoutManager.VERTICAL, false);
         // 为 RecyclerView设置LayoutManger

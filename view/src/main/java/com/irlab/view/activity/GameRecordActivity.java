@@ -25,7 +25,7 @@ import com.irlab.base.utils.SPUtils;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
 import com.irlab.view.adapter.RecordAdapter;
-import com.irlab.view.bean.GameInfo;
+import com.irlab.view.entity.GameInfo;
 import com.irlab.view.network.api.ApiService;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
@@ -39,10 +39,10 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
 
     public static final String Logger = GameRecordActivity.class.getName();
 
-    RecyclerView mRecyclerView = null;
-    RecordAdapter mAdapter = null;
-    LinearLayoutManager linearLayoutManager = null;
-    private List<GameInfo> list = new ArrayList<>();
+    private final List<GameInfo> list = new ArrayList<>();
+    private RecyclerView mRecyclerView = null;
+    private RecordAdapter mAdapter = null;
+    private LinearLayoutManager linearLayoutManager = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,6 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
     }
 
     private void loadData(Context context) {
-        list = new ArrayList<>();
         Message msg = new Message();
         NetworkApi.createService(ApiService.class)
                 .getMyRecords(getHeaders(), Long.parseLong(SPUtils.getString("user_id")), -1)

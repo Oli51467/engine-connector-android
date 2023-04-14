@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:livebutton="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activity.PlayActivity"
     tools:ignore="MissingDefaultResource">
 
     <RelativeLayout
@@ -52,50 +52,108 @@
     <LinearLayout
         android:id="@+id/layout_before_play"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="60px"
         android:orientation="vertical"
-        android:visibility="visible"
-        android:layout_marginTop="60px">
+        android:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:orientation="horizontal">
 
-            <Button
+            <ru.katso.livebutton.LiveButton
                 android:id="@+id/btn_choose_side"
-                android:layout_width="0px"
-                android:layout_height="84dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:background="@drawable/btn_update"
+                android:layout_height="40dp"
+                android:layout_width="140dp"
+                android:gravity="center"
                 android:text="选择黑白"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textColor="#ffffff"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                livebutton:corners="4dp"
+                livebutton:normalHeight="4dp"
+                livebutton:pressedHeight="2dp"
+                android:layout_marginStart="20dp"
+                livebutton:backgroundColor="@color/color_concrete"
+                livebutton:shadowColor="@color/color_asbestos"/>
 
-            <Button
+            <ru.katso.livebutton.LiveButton
                 android:id="@+id/btn_rules"
-                android:layout_width="0px"
-                android:layout_height="84dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:background="@drawable/btn_update"
+                android:layout_height="40dp"
+                android:layout_width="140dp"
+                android:gravity="center"
                 android:text="分先"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textColor="#ffffff"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                livebutton:corners="4dp"
+                livebutton:normalHeight="4dp"
+                livebutton:pressedHeight="2dp"
+                android:layout_marginLeft="40dp"
+                livebutton:backgroundColor="@color/color_carrot"
+                livebutton:shadowColor="#b16262"/>
+
 
         </LinearLayout>
 
-        <Button
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <ru.katso.livebutton.LiveButton
+                android:id="@+id/btn_choose_level"
+                android:layout_height="40dp"
+                android:layout_width="140dp"
+                android:gravity="center"
+                android:text="选择难度"
+                android:textColor="#ffffff"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                livebutton:corners="4dp"
+                livebutton:normalHeight="4dp"
+                livebutton:pressedHeight="2dp"
+                android:layout_marginStart="20dp"
+                livebutton:backgroundColor="@color/color_peter_river"
+                livebutton:shadowColor="@color/color_belize_hole"/>
+
+            <ru.katso.livebutton.LiveButton
+                android:id="@+id/btn_komi"
+                android:layout_height="40dp"
+                android:layout_width="140dp"
+                android:gravity="center"
+                android:text="黑贴3又3/4子"
+                android:textColor="#ffffff"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                livebutton:corners="4dp"
+                livebutton:normalHeight="4dp"
+                livebutton:pressedHeight="2dp"
+                android:layout_marginLeft="40dp"
+                livebutton:backgroundColor="@color/color_amethyst"
+                livebutton:shadowColor="@color/color_wisteria"/>
+
+
+        </LinearLayout>
+
+        <ru.katso.livebutton.LiveButton
             android:id="@+id/btn_begin"
-            android:layout_width="240dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="24dp"
-            android:layout_gravity="center"
-            android:background="@drawable/btn_login_normal"
+            android:layout_height="40dp"
+            android:layout_width="140dp"
+            android:gravity="center"
             android:text="开始"
-            android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            livebutton:corners="4dp"
+            livebutton:normalHeight="4dp"
+            livebutton:pressedHeight="2dp"
+            android:layout_marginTop="30dp"
+            livebutton:backgroundColor="@color/color_emerald"
+            livebutton:shadowColor="@color/color_green_sea"/>
 
     </LinearLayout>
 
@@ -103,7 +161,6 @@
         android:id="@+id/layout_after_play"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:layout_marginTop="60px"
         android:orientation="vertical"
         android:visibility="invisible">
 
@@ -111,46 +168,58 @@
             android:layout_width="match_parent"
             android:layout_height="80dp">
 
-            <Button
+            <ru.katso.livebutton.LiveButton
                 android:id="@+id/btn_resign"
-                android:layout_width="0px"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:background="@drawable/btn_update"
+                android:layout_height="40dp"
+                android:layout_width="140dp"
+                android:gravity="center"
                 android:text="认输"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/btn_regret"
-                android:layout_width="0px"
-                android:layout_height="48dp"
                 android:layout_gravity="center"
-                android:layout_weight="1"
-                android:background="@drawable/btn_update"
+                android:textColor="#ffffff"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginStart="20dp"
+                livebutton:corners="4dp"
+                livebutton:normalHeight="4dp"
+                livebutton:pressedHeight="2dp"
+                livebutton:backgroundColor="@color/color_concrete"
+                livebutton:shadowColor="@color/color_asbestos"/>
+
+            <ru.katso.livebutton.LiveButton
+                android:id="@+id/btn_regret"
+                android:layout_height="40dp"
+                android:layout_width="140dp"
+                android:gravity="center"
                 android:text="悔棋"
-                android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:layout_gravity="center"
+                android:textColor="#ffffff"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginStart="40dp"
+                livebutton:corners="4dp"
+                livebutton:normalHeight="4dp"
+                livebutton:pressedHeight="2dp"
+                livebutton:backgroundColor="@color/color_pumpkin"
+                livebutton:shadowColor="@color/color_pomegranate"/>
         </LinearLayout>
 
         <TextView
             android:id="@+id/compare_position"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"/>
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/show_order"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"/>
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/engine_position"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"/>
+            android:textSize="12sp" />
     </LinearLayout>
 
 

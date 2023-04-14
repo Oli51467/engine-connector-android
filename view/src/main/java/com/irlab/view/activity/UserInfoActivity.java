@@ -21,7 +21,7 @@ import com.irlab.base.utils.SPUtils;
 import com.irlab.base.utils.ToastUtil;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
-import com.irlab.view.bean.UserResponse;
+import com.irlab.view.entity.Response;
 import com.irlab.view.network.api.ApiService;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
@@ -88,8 +88,8 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
                         .updateUser(getHeaders(), newName, SPUtils.getString("profile"), newPhone)
                         .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                             @Override
-                            public void onSuccess(UserResponse userResponse) {
-                                String resp = userResponse.getMsg();
+                            public void onSuccess(Response response) {
+                                String resp = response.getMsg();
                                 msg.obj = mContext;
                                 if (resp.equals("success")) {
                                     msg.what = ResponseCode.UPDATE_USER_SUCCESSFULLY.getCode();

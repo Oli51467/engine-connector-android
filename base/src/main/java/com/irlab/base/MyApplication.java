@@ -10,6 +10,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +20,10 @@ import okhttp3.MediaType;
 
 public class MyApplication extends Application {
 
-    public static final String ENGINE_SERVER = "http://39.98.80.11:5001"; // 阿里云服务器
+    private static final String ENGINE_SERVER = "https://carry.fcjznkj.com/"; // 阿里云服务器
+    public static final String ENGINE_PLAY_URL = ENGINE_SERVER + "go/";
+    public static final String ENGINE_INIT_URL = ENGINE_SERVER + "set/";
+    public static final String ENGINE_RESIGN_URL = ENGINE_SERVER + "finish/";
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public static final int THREAD_NUM = 19;
     public static ThreadPoolExecutor threadPool;

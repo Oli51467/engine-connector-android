@@ -19,7 +19,7 @@ import com.irlab.base.BaseActivity;
 import com.irlab.base.MyApplication;
 import com.irlab.base.response.ResponseCode;
 import com.irlab.view.network.api.ApiService;
-import com.irlab.view.bean.UserResponse;
+import com.irlab.view.entity.Response;
 import com.irlab.view.network.NetworkRequiredInfo;
 import com.irlab.view.utils.ButtonListenerUtil;
 import com.irlab.base.utils.ToastUtil;
@@ -76,16 +76,16 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     .login(userName, password)
                     .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                         @Override
-                        public void onSuccess(UserResponse userResponse) {
-                            if (userResponse.getCode() == 200) {
-                                String jwt = (String) userResponse.getData();
+                        public void onSuccess(Response response) {
+                            if (response.getCode() == 200) {
+                                String jwt = (String) response.getData();
                                 saveString("jwt", jwt);
                                 NetworkApi.createService(ApiService.class)
-                                        .getInfo("Bearer " + jwt).compose(NetworkApi.applySchedulers(new BaseObserver<UserResponse>() {
+                                        .getInfo("Bearer " + jwt).compose(NetworkApi.applySchedulers(new BaseObserver<Response>() {
                                             @Override
-                                            public void onSuccess(UserResponse userResponse) {
-                                                if (userResponse.getCode() == 200) {
-                                                    Map<String, String> userinfo = (Map<String, String>) userResponse.getData();
+                                            public void onSuccess(Response response) {
+                                                if (response.getCode() == 200) {
+                                                    Map<String, String> userinfo = (Map<String, String>) response.getData();
                                                     saveString("user_id", userinfo.get("id"));
                                                     saveString("user_avatar", userinfo.get("avatar"));
                                                     saveString("username", userinfo.get("username"));

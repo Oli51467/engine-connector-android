@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.irlab.view.R;
-import com.irlab.view.bean.GameInfo;
+import com.irlab.view.entity.GameInfo;
 
 import java.util.List;
 

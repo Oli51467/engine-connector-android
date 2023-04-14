@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.irlab.base.BaseActivity;
 import com.irlab.base.response.ResponseCode;
 import com.irlab.view.network.api.ApiService;
-import com.irlab.view.bean.UserResponse;
+import com.irlab.view.entity.Response;
 import com.irlab.view.utils.ButtonListenerUtil;
 import com.irlab.base.utils.ToastUtil;
 import com.irlab.view.watcher.HideTextWatcher;
@@ -95,8 +95,8 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                     .register(username, password)
                     .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                         @Override
-                        public void onSuccess(UserResponse userResponse) {
-                            int code = userResponse.getCode();
+                        public void onSuccess(Response response) {
+                            int code = response.getCode();
                             // 用户名没有被注册
                             if (code == 200) {
                                 msg.what = ResponseCode.ADD_USER_SUCCESSFULLY.getCode();

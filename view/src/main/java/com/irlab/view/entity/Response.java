@@ -1,8 +1,6 @@
-package com.irlab.view.bean;
+package com.irlab.view.entity;
 
-import android.content.Intent;
-
-public class UserResponse {
+public class Response {
     private Integer code;
     private Object data;
     private String msg;

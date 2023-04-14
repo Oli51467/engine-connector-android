@@ -29,7 +29,7 @@ import com.irlab.view.R;
 import com.irlab.view.activity.RecordReviewActivity;
 import com.irlab.view.adapter.RecordAdapter;
 import com.irlab.view.network.api.ApiService;
-import com.irlab.view.bean.GameInfo;
+import com.irlab.view.entity.GameInfo;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
 

@@ -3,7 +3,7 @@
     tools:ignore="ExtraTranslation">
     <string name="confirm">确定</string>
     <string name="cancel">取消</string>
-    <string name="choose_side">请选择黑白</string>
+    <string name="choose_side">请选择黑白及段位</string>
     <string name="confirm_resign">您确定认输吗</string>
     <string name="wrong_side">错误的落子方</string>
     <string name="lack_stone">缺少棋子  </string>

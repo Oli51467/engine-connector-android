@@ -23,7 +23,7 @@ import com.irlab.base.utils.SPUtils;
 import com.irlab.view.R;
 import com.irlab.view.activity.UserInfoActivity;
 import com.irlab.view.adapter.FunctionAdapter;
-import com.irlab.view.bean.MyFunction;
+import com.irlab.view.entity.MyFunction;
 
 import java.util.ArrayList;
 import java.util.Collections;

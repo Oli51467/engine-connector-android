@@ -21,7 +21,7 @@ import com.irlab.view.activity.PlayActivity;
 import com.irlab.view.activity.SelectConfigActivity;
 import com.irlab.view.activity.ConnectWifiActivity;
 import com.irlab.view.activity.SpeechActivity;
-import com.irlab.view.bean.MyFunction;
+import com.irlab.view.entity.MyFunction;
 
 import java.util.List;
 

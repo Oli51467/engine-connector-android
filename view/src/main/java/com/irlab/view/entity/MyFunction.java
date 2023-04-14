@@ -1,4 +1,4 @@
-package com.irlab.view.bean;
+package com.irlab.view.entity;
 
 public class MyFunction {
     private String name;

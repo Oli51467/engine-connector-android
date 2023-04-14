@@ -14,7 +14,11 @@ public class Constants {
     public static final String RESET_BOARD_ORDER = "EE35FCFF";
     public static final String BLACK_SIDE = "执黑";
     public static final String WHITE_SIDE = "执白";
-    public static final String CHOOSE_SIDE = "选择黑白";
+    public static final String DEFAULT_SIDE = "选择黑白";
+    public static final String DEFAULT_LEVEL = "选择难度";
+
+    public static final String[] LEVELS = {"1段", "2段", "3段", "4段", "5段", "6段", "7段", "8段", "9段", "10段"};
+    public static final String[] ENGINE_LEVEL = { "b", "d", "f", "h", "j", "l", "m", "n", "o", "p"};
 
     public static final int DETECTION_LACK_STONE = 10001;
     public static final int DETECTION_UNNECESSARY_STONE = 10002;

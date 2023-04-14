@@ -1,23 +1,10 @@
 package com.irlab.view.activity;
 
-import static com.irlab.base.MyApplication.ENGINE_SERVER;
+import static com.irlab.base.MyApplication.ENGINE_INIT_URL;
+import static com.irlab.base.MyApplication.ENGINE_PLAY_URL;
+import static com.irlab.base.MyApplication.ENGINE_RESIGN_URL;
 import static com.irlab.base.utils.SPUtils.getHeaders;
-import static com.irlab.view.common.Constants.BLACK;
-import static com.irlab.view.common.Constants.BLACK_SIDE;
-import static com.irlab.view.common.Constants.BOARD_HEIGHT;
-import static com.irlab.view.common.Constants.BOARD_WIDTH;
-import static com.irlab.view.common.Constants.CHOOSE_SIDE;
-import static com.irlab.view.common.Constants.DETECTION_LACK_STONE;
-import static com.irlab.view.common.Constants.DETECTION_NO_STONE;
-import static com.irlab.view.common.Constants.DETECTION_UNNECESSARY_STONE;
-import static com.irlab.view.common.Constants.HEIGHT;
-import static com.irlab.view.common.Constants.NORMAL_PLAY;
-import static com.irlab.view.common.Constants.RESET_BOARD_ORDER;
-import static com.irlab.view.common.Constants.TURN_OFF_LIGHT_ORDER;
-import static com.irlab.view.common.Constants.WHITE;
-import static com.irlab.view.common.Constants.WHITE_SIDE;
-import static com.irlab.view.common.Constants.WIDTH;
-import static com.irlab.view.common.Constants.WRONG_SIDE;
+import static com.irlab.view.common.Constants.*;
 import static com.irlab.view.utils.BoardUtil.checkState;
 import static com.irlab.view.utils.BoardUtil.getPositionByIndex;
 import static com.irlab.view.utils.BoardUtil.transformIndex;
@@ -44,7 +31,7 @@ import com.irlab.base.utils.HttpUtil;
 import com.irlab.base.utils.SPUtils;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
-import com.irlab.view.bean.UserResponse;
+import com.irlab.view.entity.Response;
 import com.irlab.view.models.Board;
 import com.irlab.view.models.Point;
 import com.irlab.view.network.api.ApiService;
@@ -73,7 +60,6 @@ import java.util.concurrent.CountDownLatch;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class PlayActivity extends BaseActivity implements View.OnClickListener, SerialInter {
 
@@ -86,8 +72,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private Board board;
     private ImageView boardImageView;
     private Bitmap boardBitmap;
-    private Button chooseSide;
-    private Integer side, engineLastX, engineLastY;
+    private Button chooseSide, chooseLevel;
+    private Integer side, level, engineLastX, engineLastY;
     private int[][] receivedBoardState;
     private boolean initSerial, showToast;
 
@@ -101,12 +87,12 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         initView();
         initBoard();
         drawBoard();
-        initEngine();
     }
 
     private void initArgs() {
         playing = false;
         side = 1;
+        level = 5;
         engineLastX = -1;
         engineLastY = -1;
         initSerial = false;
@@ -117,6 +103,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private void initView() {
         boardBitmap = Bitmap.createBitmap(BOARD_WIDTH, BOARD_HEIGHT, Bitmap.Config.ARGB_8888);
         chooseSide = findViewById(R.id.btn_choose_side);
+        chooseLevel = findViewById(R.id.btn_choose_level);
         boardImageView = findViewById(R.id.iv_board);
         layoutBeforePlay = findViewById(R.id.layout_before_play);
         layoutAfterPlay = findViewById(R.id.layout_after_play);
@@ -124,6 +111,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         findViewById(R.id.btn_begin).setOnClickListener(this);
         findViewById(R.id.btn_resign).setOnClickListener(this);
         chooseSide.setOnClickListener(this);
+        chooseLevel.setOnClickListener(this);
     }
 
     /**
@@ -172,7 +160,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 timer.schedule(task, 500);
             }
         } else if (vid == R.id.btn_begin) {
-            if (chooseSide.getText().equals(CHOOSE_SIDE)) {
+            if (chooseSide.getText().equals(DEFAULT_SIDE) || chooseLevel.getText().equals(DEFAULT_LEVEL)) {
                 SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
                         .hideTitle(true)
                         .setContentText(R.string.choose_side)
@@ -183,8 +171,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                         .setConformButton(R.string.confirm).build();
                 dialog.show();
                 return;
-            }
-            else if (chooseSide.getText().equals(BLACK_SIDE)) side = BLACK;
+            } else if (chooseSide.getText().equals(BLACK_SIDE)) side = BLACK;
             else if (chooseSide.getText().equals(WHITE_SIDE)) side = WHITE;
             if (!initSerial) {
                 initSerial();
@@ -195,6 +182,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             initBoard();
             Serial serial = new Serial();
             serial.start();
+            initEngine();
         } else if (vid == R.id.btn_resign) {
             SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
                     .hideTitle(true)
@@ -218,14 +206,18 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                     }).build();
             dialog.show();
         } else if (vid == R.id.btn_choose_side) {
-            if (chooseSide.getText().equals(CHOOSE_SIDE)) chooseSide.setText(BLACK_SIDE);
+            if (chooseSide.getText().equals(DEFAULT_SIDE)) chooseSide.setText(BLACK_SIDE);
             else if (chooseSide.getText().equals(BLACK_SIDE)) chooseSide.setText(WHITE_SIDE);
             else if (chooseSide.getText().equals(WHITE_SIDE)) chooseSide.setText(BLACK_SIDE);
+        } else if (vid == R.id.btn_choose_level) {
+            chooseLevel.setText(LEVELS[level ++]);
+            level %= 10;
         }
     }
 
     @Override
-    public void connectMsg(String path, boolean success) {}
+    public void connectMsg(String path, boolean success) {
+    }
 
     private void resetUnderMachine() {
         SerialManager.getInstance().send(TURN_OFF_LIGHT_ORDER);
@@ -249,10 +241,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         Log.d(serialLogger, "上一步: " + engineLastX + " " + engineLastY);
         // 3.对比接收到的棋盘数据与维护的棋盘数据的差别
         List<Integer> checkResp = checkState(receivedBoardState, board.getBoard(), engineLastX, engineLastY, board.getPlayer(), board.getCapturedStones());
-        if (checkResp.get(0).equals(DETECTION_NO_STONE)) {
-            return;
-        }
-        else if (checkResp.get(0).equals(WRONG_SIDE)) {
+        if (checkResp.get(0).equals(WRONG_SIDE)) {
             String wrongPosition = getPositionByIndex(checkResp.get(1), checkResp.get(2));
             if (showToast) {
                 showToast = false;
@@ -268,8 +257,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                     dialog.show();
                 });
             }
-        }
-        else if (checkResp.get(0).equals(DETECTION_LACK_STONE)) {
+        } else if (checkResp.get(0).equals(DETECTION_LACK_STONE)) {
             // 缺少棋子提示
             String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
             if (showToast) {
@@ -337,7 +325,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             // 2.将落子的轴坐标转化为引擎可接受的棋盘坐标
             String playPosition = getPositionByIndex(x, y);
             // 3.请求引擎下一步的位置，并返回引擎的落子位置的棋盘坐标
-            String engineResp = enginePlay(playPosition, side.toString());
+            String engineResp = enginePlay(playPosition);
             // 4.将棋盘坐标转回轴坐标
             Pair<Integer, Integer> indexes = transformIndex(engineResp);
             // 5.数据结构记录引擎落子位置并得出下一步局面
@@ -371,15 +359,16 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     private void initEngine() {
-        RequestBody requestBody = JsonUtil.getJsonFormOfInitEngine(SPUtils.getString("user_id"));
-        HttpUtil.sendOkHttpResponse(ENGINE_SERVER + "/p/set", requestBody, new Callback() {
+        String l = ENGINE_LEVEL[level];
+        RequestBody requestBody = JsonUtil.getJsonFormOfInitEngine(SPUtils.getString("user_id"), l, side != 1);
+        HttpUtil.sendOkHttpResponse(ENGINE_INIT_URL + l, requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.e(Logger, "初始化引擎出错:" + e.getMessage());
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
                 String responseData = Objects.requireNonNull(response.body()).string();
                 try {
                     JSONObject jsonObject = new JSONObject(responseData);
@@ -387,6 +376,14 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                     int code = jsonObject.getInt("code");
                     if (code == 1000) {
                         Log.d(Logger, "初始化成功");
+                        if (side == 2) {
+                            String indexes = jsonObject.getJSONObject("data").getString("move");
+                            Pair<Integer, Integer> firstIndexes = transformIndex(indexes);
+                            engineLastX = firstIndexes.first;
+                            engineLastY = firstIndexes.second;
+                            board.play(engineLastX, engineLastY);
+                            runOnUiThread(() -> drawBoard());
+                        }
                     } else {
                         Log.e(Logger, ResponseCode.ENGINE_CONNECT_FAILED.getMsg());
                     }
@@ -397,12 +394,13 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         });
     }
 
-    private String enginePlay(String playPosition, String currentPlayer) {
+    private String enginePlay(String playPosition) {
         final String[] result = new String[1];
         // 异步请求 必须加锁等待
         CountDownLatch cdl = new CountDownLatch(1);
-        RequestBody requestBody = JsonUtil.getEnginePlayRequestBody(SPUtils.getString("user_id"), playPosition, currentPlayer);
-        HttpUtil.sendOkHttpResponse(ENGINE_SERVER + "/p/go", requestBody, new Callback() {
+        String l = ENGINE_LEVEL[level];
+        RequestBody requestBody = JsonUtil.getEnginePlayRequestBody(SPUtils.getString("user_id"), playPosition, l, side != 1);
+        HttpUtil.sendOkHttpResponse(ENGINE_PLAY_URL + l, requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 result[0] = "failed";
@@ -410,7 +408,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
                 String responseData = Objects.requireNonNull(response.body()).string();
                 try {
                     JSONObject jsonObject = new JSONObject(responseData);
@@ -452,14 +450,14 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     public void resign() {
         RequestBody requestBody = JsonUtil.getResignRequestBody(SPUtils.getString("user_id"));
-        HttpUtil.sendOkHttpResponse(ENGINE_SERVER + "/finish", requestBody, new Callback() {
+        HttpUtil.sendOkHttpResponse(ENGINE_RESIGN_URL + ENGINE_LEVEL[level], requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(Logger, "认输出错:" + e.getMessage());
+                Log.e(Logger, "结束对局出错:" + e.getMessage());
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) {
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) {
 
             }
         });
@@ -487,9 +485,10 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 .saveRecord(getHeaders(), blackId, whiteId, result, steps, "p", boardState)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
-                    public void onSuccess(UserResponse userResponse) {
+                    public void onSuccess(Response response) {
                         Log.d(Logger, "保存棋谱成功");
                     }
+
                     @Override
                     public void onFailure(Throwable e) {
                     }

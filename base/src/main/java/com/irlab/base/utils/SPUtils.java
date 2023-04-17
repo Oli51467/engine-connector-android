@@ -35,4 +35,8 @@ public class SPUtils {
     public static String getHeaders() {
         return "Bearer " + getString("jwt");
     }
+
+    public static boolean checkLogin() {
+        return SPUtils.getString("username") != null && !SPUtils.getString("username").equals("");
+    }
 }

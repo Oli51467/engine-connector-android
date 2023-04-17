@@ -1,5 +1,6 @@
 package com.irlab.view;
 
+import static com.irlab.base.utils.SPUtils.checkLogin;
 import static com.irlab.view.common.iFlytekConstants.IFLYTEK_APP_ID;
 import static com.irlab.view.common.iFlytekConstants.WAKEUP_STATE;
 
@@ -22,6 +23,8 @@ import com.iflytek.cloud.SpeechUtility;
 import com.irlab.base.BaseActivity;
 import com.irlab.base.MyApplication;
 import com.irlab.base.utils.SPUtils;
+import com.irlab.view.activity.LoginActivity;
+import com.irlab.view.activity.UserInfoActivity;
 import com.irlab.view.fragment.PlayFragment;
 import com.irlab.view.fragment.RecordFragment;
 import com.irlab.view.network.NetworkRequiredInfo;
@@ -45,13 +48,13 @@ public class MainView extends BaseActivity implements View.OnClickListener {
     private View playLayout = null, recordLayout = null;
     // 声明组件变量
     private ImageView playImg = null, recordImg = null;
-    private TextView playText = null, recordText = null, showInfo = null;
+    private TextView playText = null, recordText = null, tv_username = null;
 
     // 用于对 Fragment进行管理
     public FragmentManager fragmentManager = null;
     private String userName;
 
-    private final Handler handler = new Handler(Looper.getMainLooper()) {
+    private final Handler handler = new Handler(Looper.myLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -93,7 +96,29 @@ public class MainView extends BaseActivity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
         userName = SPUtils.getString("username");
-        showInfo.setText(userName);
+        tv_username.setText(userName);
+        wakeUp.startWakeup();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        wakeUp.stopWakeup();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        wakeUp.stopWakeup();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        wakeUp.stopWakeup();
+        wakeUp.destroy();
+        speechService.destroy();
+        ttsService.destroy();
     }
 
     @Override
@@ -154,10 +179,34 @@ public class MainView extends BaseActivity implements View.OnClickListener {
 
     // 初始化fragment中的控件并设置监听事件
     public void initFragmentViewsAndEvents() {
-        showInfo = findViewById(R.id.tv_username);
-        showInfo.setText(userName);
-        ImageView userAvatar = findViewById(R.id.iv_profile);
-        ImageLoader.getInstance().displayImage(SPUtils.getString("user_avatar"), userAvatar);
+        userName = SPUtils.getString("username");
+        tv_username = findViewById(R.id.tv_username);
+        TextView playLevel = findViewById(R.id.play_level);
+        TextView battleRecord = findViewById(R.id.battle_record);
+        TextView gotoLoginTextView = findViewById(R.id.tv_goto_login);
+        ImageView profile = findViewById(R.id.iv_profile);
+        findViewById(R.id.personal_info).setOnClickListener(this);
+
+        if (checkLogin()) {
+            ImageLoader.getInstance().displayImage(SPUtils.getString("user_avatar"), profile);
+            profile.setOnClickListener(this);
+            StringBuilder pl = new StringBuilder();
+            pl.append("棋力: ").append(SPUtils.getString("play_level"));
+            tv_username.setText(userName);
+            playLevel.setText(pl);
+            StringBuilder br = new StringBuilder();
+            br.append("战绩：").append(SPUtils.getString("win")).append("胜  ").append(SPUtils.getString("lose")).append("负");
+            battleRecord.setText(br);
+            tv_username.setVisibility(View.VISIBLE);
+            playLevel.setVisibility(View.VISIBLE);
+            battleRecord.setVisibility(View.VISIBLE);
+            gotoLoginTextView.setVisibility(View.GONE);
+        } else {
+            tv_username.setVisibility(View.GONE);
+            playLevel.setVisibility(View.GONE);
+            battleRecord.setVisibility(View.GONE);
+            gotoLoginTextView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -166,7 +215,23 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         if (vid == R.id.layout_play) {
             setTabSelection(2);
         } else if (vid == R.id.layout_record) {
-            setTabSelection(1);
+            if (checkLogin()) {
+                setTabSelection(1);
+            } else {
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
+        } else if (vid == R.id.personal_info) {
+            if (checkLogin()) {
+                Intent intent = new Intent(this, UserInfoActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
         }
     }
 

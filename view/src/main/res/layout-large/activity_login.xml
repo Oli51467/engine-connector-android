@@ -8,6 +8,34 @@
     android:padding="5dp"
     tools:ignore="MissingDefaultResource">
 
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="fill_parent"
+        android:layout_height="108dp"
+        android:background="#F5f5f5"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/header_back"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="-60dp"
+            android:clickable="true"
+            android:src="@drawable/icon_back"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="登陆"
+            android:textColor="@color/black"
+            android:textSize="32sp" />
+    </RelativeLayout>
+
     <EditText
         android:id="@+id/et_userName"
         android:layout_width="400dp"

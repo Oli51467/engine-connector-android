@@ -14,7 +14,6 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.irlab.base.BaseActivity;
 import com.irlab.base.utils.PermissionUtil;
-import com.irlab.base.utils.SPUtils;
 
 @Route(path = "/app/main")
 public class MainActivity extends BaseActivity {
@@ -25,6 +24,7 @@ public class MainActivity extends BaseActivity {
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_NETWORK_STATE,
             Manifest.permission.INTERNET,
@@ -90,23 +90,16 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     根据用户是否登录决定跳转到哪个界面
+     * 跳转到主界面
      */
     private void enter() {
         if (!PermissionUtil.isGranted(mContext, permissions)) {
             requestPermissions();
         } else {
-            if (SPUtils.getString("username") != null && !SPUtils.getString("username").equals("")) {
-                ARouter.getInstance()
-                        .build("/view/main")
-                        .withFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .navigation();
-            } else {
-                ARouter.getInstance()
-                        .build("/auth/login")
-                        .withFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .navigation();
-            }
+            ARouter.getInstance()
+                    .build("/view/main")
+                    .withFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .navigation();
             finish();
         }
     }

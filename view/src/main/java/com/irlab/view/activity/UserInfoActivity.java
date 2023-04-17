@@ -68,10 +68,11 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
             startActivity(intent);
         } else if (vid == R.id.btn_logout) {
             // 退出登录时, 清空SharedPreferences中保存的用户信息, 下次登录时不再自动登录
-            remove("userName");
+            remove("username");
+            remove("user_avatar");
             ToastUtil.show(this, "退出登录");
             // 跳转到登录界面
-            ARouter.getInstance().build("/auth/login")
+            ARouter.getInstance().build("/view/main")
                     .withFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     .navigation();
             finish();

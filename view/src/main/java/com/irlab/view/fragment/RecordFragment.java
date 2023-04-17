@@ -1,5 +1,6 @@
 package com.irlab.view.fragment;
 
+import static com.irlab.base.utils.SPUtils.checkLogin;
 import static com.irlab.base.utils.SPUtils.getHeaders;
 
 import android.annotation.SuppressLint;
@@ -49,7 +50,7 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_record, container, false);
-        initData(this.getActivity());  // 获取棋谱数据
+        if (checkLogin()) initData(this.getActivity());  // 获取棋谱数据
         return view;
     }
 

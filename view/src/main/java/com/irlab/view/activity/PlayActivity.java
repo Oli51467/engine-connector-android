@@ -147,17 +147,20 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             } else {
                 SerialManager.getInstance().close();
                 SerialManager.setInstance();
-                // 延时跳转
-                Timer timer = new Timer();
                 Intent intent = new Intent(this, MainView.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                TimerTask task = new TimerTask() {
-                    @Override
-                    public void run() {
-                        startActivity(intent);
-                    }
-                };
-                timer.schedule(task, 500);
+                startActivity(intent);
+//                // 延时跳转
+//                Timer timer = new Timer();
+//                Intent intent = new Intent(this, MainView.class);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                TimerTask task = new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        startActivity(intent);
+//                    }
+//                };
+//                timer.schedule(task, 500);
             }
         } else if (vid == R.id.btn_begin) {
             if (chooseSide.getText().equals(DEFAULT_SIDE) || chooseLevel.getText().equals(DEFAULT_LEVEL)) {

@@ -18,6 +18,7 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.irlab.base.BaseActivity;
 import com.irlab.base.MyApplication;
 import com.irlab.base.response.ResponseCode;
+import com.irlab.view.MainView;
 import com.irlab.view.network.api.ApiService;
 import com.irlab.view.entity.Response;
 import com.irlab.view.network.NetworkRequiredInfo;
@@ -51,6 +52,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         userName = findViewById(R.id.et_userName);
         password = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
+        findViewById(R.id.header_back).setOnClickListener(this);
     }
 
     private void setEvent() {
@@ -67,7 +69,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
-        } else if (vid == R.id.btn_login) {
+        } else if (vid == R.id.header_back) {
+            Intent intent = new Intent(LoginActivity.this, MainView.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+        }
+        else if (vid == R.id.btn_login) {
             String userName = this.userName.getText().toString();
             String password = this.password.getText().toString();
             Message msg = new Message();
@@ -92,6 +99,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                                     saveString("win", userinfo.get("win"));
                                                     saveString("lose", userinfo.get("lose"));
                                                     saveString("phone", userinfo.get("phone"));
+                                                    saveString("play_level", userinfo.get("rating"));
                                                     saveString("profile", userinfo.get("profile"));
                                                     msg.what = ResponseCode.LOGIN_SUCCESSFULLY.getCode();
                                                     handler.sendMessage(msg);

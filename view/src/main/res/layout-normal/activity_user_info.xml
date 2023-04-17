@@ -106,4 +106,14 @@
         android:textColor="@color/white"
         android:textSize="16sp" />
 
+    <Button
+        android:id="@+id/btn_logout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/bar_selector"
+        android:textSize="16sp"
+        android:text="退出登录"
+        android:textColor="@color/red" />
+
 </LinearLayout>

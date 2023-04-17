@@ -75,7 +75,7 @@ public class XunFeiWakeUp {
             // 如有需要，设置 NOTIFY_RECORD_DATA 以实时通过 onEvent 返回录音音频流字节
             //mIvw.setParameter( SpeechConstant.NOTIFY_RECORD_DATA, "1" );
             // 启动唤醒
-            /*	mIvw.setParameter(SpeechConstant.AUDIO_SOURCE, "-1");*/
+            //mIvw.setParameter(SpeechConstant.AUDIO_SOURCE, "-1");
 
         } else {
             Toast.makeText(context, "唤醒未初始化", Toast.LENGTH_SHORT).show();
@@ -87,25 +87,25 @@ public class XunFeiWakeUp {
         @Override
         public void onResult(WakeuperResult result) {
             Log.d(TAG, "onResult");
-            try {
-                String text = result.getResultString();
-                JSONObject object;
-                object = new JSONObject(text);
-                StringBuffer buffer = new StringBuffer();
-                buffer.append("【RAW】 ").append(text);
-                buffer.append("\n");
-                buffer.append("【操作类型】").append(object.optString("sst"));
-                buffer.append("\n");
-                buffer.append("【唤醒词id】").append(object.optString("id"));
-                buffer.append("\n");
-                buffer.append("【得分】").append(object.optString("score"));
-                buffer.append("\n");
-                buffer.append("【前端点】").append(object.optString("bos"));
-                buffer.append("\n");
-                buffer.append("【尾端点】").append(object.optString("eos"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                String text = result.getResultString();
+//                JSONObject object;
+//                object = new JSONObject(text);
+//                StringBuffer buffer = new StringBuffer();
+//                buffer.append("【RAW】 ").append(text);
+//                buffer.append("\n");
+//                buffer.append("【操作类型】").append(object.optString("sst"));
+//                buffer.append("\n");
+//                buffer.append("【唤醒词id】").append(object.optString("id"));
+//                buffer.append("\n");
+//                buffer.append("【得分】").append(object.optString("score"));
+//                buffer.append("\n");
+//                buffer.append("【前端点】").append(object.optString("bos"));
+//                buffer.append("\n");
+//                buffer.append("【尾端点】").append(object.optString("eos"));
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
             Message message = new Message();
             message.what = WAKEUP_STATE;
             handler.sendMessage(message);

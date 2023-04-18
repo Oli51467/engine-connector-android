@@ -61,7 +61,7 @@ public class MainView extends BaseActivity implements View.OnClickListener {
             if (msg.what == WAKEUP_STATE) {
                 MainView.ttsService.tts("我在");
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

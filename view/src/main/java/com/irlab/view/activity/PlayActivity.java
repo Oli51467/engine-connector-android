@@ -40,7 +40,7 @@ import com.irlab.view.serial.SerialInter;
 import com.irlab.view.serial.SerialManager;
 import com.irlab.view.utils.BoardUtil;
 import com.irlab.view.utils.Drawer;
-import com.irlab.view.utils.JsonUtil;
+import com.irlab.view.utils.RequestUtil;
 import com.rosefinches.smiledialog.SmileDialog;
 import com.rosefinches.smiledialog.SmileDialogBuilder;
 import com.rosefinches.smiledialog.enums.SmileDialogType;
@@ -53,8 +53,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 
 import okhttp3.Call;
@@ -337,20 +335,20 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             engineLastY = indexes.second;
             // 6.刷新棋盘
             drawBoard();
-            // 7.将引擎的落子位置转化成16进制
-            String hexX = Integer.toHexString(indexes.first);
-            String hexY = Integer.toHexString(indexes.second);
-            if (indexes.first <= 15) hexX = "0" + hexX;
-            if (indexes.second <= 15) hexY = "0" + hexY;
-            Log.d(serialLogger, "引擎落子：" + engineLastX + " " + engineLastY);
-            Log.d(serialLogger, "发给下位机：" + hexX + " " + hexY);
-            // 8.指示下位机落子
-            sendMoves2LowerComputer(hexX, hexY);
+            // 7.指示下位机落子
+            sendMoves2LowerComputer(engineLastX, engineLastY);
             return true;
         }
     }
 
-    private void sendMoves2LowerComputer(String hexX, String hexY) {
+    private void sendMoves2LowerComputer(Integer moveX, Integer moveY) {
+        // 将引擎的落子位置转化成16进制
+        String hexX = Integer.toHexString(moveX);
+        String hexY = Integer.toHexString(moveY);
+        if (moveX <= 15) hexX = "0" + hexX;
+        if (moveY <= 15) hexY = "0" + hexY;
+        Log.d(serialLogger, "引擎落子：" + engineLastX + " " + engineLastY);
+        Log.d(serialLogger, "发给下位机：" + hexX + " " + hexY);
         StringBuilder order = new StringBuilder();
         order.append("EE");
         if (side == 1) order.append("32");
@@ -363,7 +361,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     private void initEngine() {
         String l = ENGINE_LEVEL[level];
-        RequestBody requestBody = JsonUtil.getJsonFormOfInitEngine(SPUtils.getString("user_id"), l, side != 1);
+        RequestBody requestBody = RequestUtil.getJsonFormOfInitEngine(SPUtils.getString("user_id"), l, side != 1);
         HttpUtil.sendOkHttpResponse(ENGINE_INIT_URL + l, requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -372,9 +370,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
-                String responseData = Objects.requireNonNull(response.body()).string();
+                String resp = Objects.requireNonNull(response.body()).string();
                 try {
-                    JSONObject jsonObject = new JSONObject(responseData);
+                    JSONObject jsonObject = new JSONObject(resp);
                     Log.d(Logger, String.valueOf(jsonObject));
                     int code = jsonObject.getInt("code");
                     if (code == 1000) {
@@ -385,6 +383,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                             engineLastX = firstIndexes.first;
                             engineLastY = firstIndexes.second;
                             board.play(engineLastX, engineLastY);
+                            sendMoves2LowerComputer(engineLastX, engineLastY);
                             runOnUiThread(() -> drawBoard());
                         }
                     } else {
@@ -402,7 +401,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         // 异步请求 必须加锁等待
         CountDownLatch cdl = new CountDownLatch(1);
         String l = ENGINE_LEVEL[level];
-        RequestBody requestBody = JsonUtil.getEnginePlayRequestBody(SPUtils.getString("user_id"), playPosition, l, side != 1);
+        RequestBody requestBody = RequestUtil.getEnginePlayRequestBody(SPUtils.getString("user_id"), playPosition, l, side != 1);
         HttpUtil.sendOkHttpResponse(ENGINE_PLAY_URL + l, requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -452,7 +451,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     public void resign() {
-        RequestBody requestBody = JsonUtil.getResignRequestBody(SPUtils.getString("user_id"));
+        RequestBody requestBody = RequestUtil.getResignRequestBody(SPUtils.getString("user_id"));
         HttpUtil.sendOkHttpResponse(ENGINE_RESIGN_URL + ENGINE_LEVEL[level], requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {

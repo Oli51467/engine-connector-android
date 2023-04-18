@@ -1,12 +1,18 @@
 package com.irlab.view.service;
 
+import static com.irlab.view.common.iFlytekConstants.BACK_ENDPOINT_SILENCE_DETECTION_TIME;
+import static com.irlab.view.common.iFlytekConstants.MAX_SPEECH_TIME;
+import static com.irlab.view.common.iFlytekConstants.SET_PUNCTUATION;
+import static com.irlab.view.common.iFlytekConstants.SILENCE_TIMEOUT;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.iflytek.cloud.ErrorCode;
 import com.iflytek.cloud.InitListener;
@@ -15,31 +21,37 @@ import com.iflytek.cloud.RecognizerResult;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
+import com.irlab.base.utils.HttpUtil;
 import com.irlab.base.utils.JsonUtil;
+import com.irlab.base.utils.ToastUtil;
+import com.irlab.view.MainView;
 import com.irlab.view.activity.PlayActivity;
 import com.irlab.view.iflytek.speech.settings.IatSettings;
+import com.irlab.view.utils.RequestUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Locale;
+import java.util.Objects;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.RequestBody;
 
 public class SpeechService {
 
     private static final String TAG = "SpeechService";
+    private static final String GPT_LOGGER = "Gpt-Logger";
     private final String mEngineType;  // 引擎类型
     private final String resultType = "json";
     private final HashMap<String, String> mIatResults = new LinkedHashMap<>();  // 用HashMap存储听写结果
     private final StringBuffer buffer = new StringBuffer(); // 字符缓冲区
-    private final String[] orders = new String[]{"下棋"};
     private final Context context;
 
     private SpeechRecognizer mIat;  // 语音听写对象
-    private Toast mToast;  // 语音听写UI
     private SharedPreferences mSharedPreferences;
     private String order;
     int ret = 0; // 函数调用返回值
@@ -50,7 +62,7 @@ public class SpeechService {
     private final InitListener mInitListener = code -> {
         Log.d(TAG, "SpeechRecognizer init() code = " + code);
         if (code != ErrorCode.SUCCESS) {
-            showTip("初始化失败，错误码：" + code);
+            Log.d(TAG, "初始化失败，错误码：" + code);
         }
     };
 
@@ -62,36 +74,49 @@ public class SpeechService {
         public void onBeginOfSpeech() {
             // 此回调表示：sdk内部录音机已经准备好了，用户可以开始语音输入
             Log.d("onBeginOfSpeech", "开始说话");
-            showTip("开始说话");
+            ToastUtil.show(context.getApplicationContext(), "开始说话");
         }
 
         @Override
         public void onError(SpeechError error) {
-            // Tips：
             // 错误码：10118(您没有说话)，可能是录音机权限被禁，需要提示用户打开应用的录音权限。
             Log.e(TAG, "onError " + error.getPlainDescription(true));
-            showTip(error.getPlainDescription(true));
+            ToastUtil.show(context.getApplicationContext(), error.getPlainDescription(true));
         }
 
         @Override
         public void onEndOfSpeech() {
             // 此回调表示：检测到了语音的尾端点，已经进入识别过程，不再接受语音输入
             Log.d("onEndOfSpeech", "结束说话");
-            showTip("结束说话");
+            ToastUtil.show(context.getApplicationContext(), "结束说话");
         }
 
         @Override
         public void onResult(RecognizerResult results, boolean isLast) {
-            Log.d(TAG, results.getResultString());
             if (isLast) {
-                Log.d(TAG, "onResult 结束");
-                Log.d("Order", order);
+                Log.d(TAG, "onResult 结束 order: " + order);
                 if (!order.equals("")) {
-                    Log.d("order", "order is not null ");
-                    if (order.equals("下棋")) {
+                    if (order.equals("我要下棋")) {
                         Intent intent = new Intent(context, PlayActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         context.startActivity(intent);
+                    } else {
+                        // TODO: 调用chatglm服务 获得语句输入
+                        MainView.ttsService.tts("我可以解决");
+                        RequestBody request = RequestUtil.getGptResponse("1", order);
+                        HttpUtil.sendOkHttpResponse("http://172.25.150.45:5002/gpt", request, new Callback() {
+                            @Override
+                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                                Log.e(GPT_LOGGER, "GPT服务请求失败:" + e.getMessage());
+                            }
+
+                            @Override
+                            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
+                                String responseData = Objects.requireNonNull(response.body()).string();
+                                Log.d(GPT_LOGGER, "GPT回答： " + responseData);
+                                MainView.ttsService.tts(responseData);
+                            }
+                        });
                     }
                 }
             } else {
@@ -105,7 +130,6 @@ public class SpeechService {
                 }
             }
 //            ShowActivity.volumeUtil.setSystemVolume(ShowActivity.systemVolume); // 将声音调回原来的音量
-
         }
 
         @Override
@@ -130,7 +154,7 @@ public class SpeechService {
         this.mEngineType = mEngineType;
     }
 
-    public SpeechRecognizer init() {
+    public void init() {
         // 初始化识别无UI识别对象
         // 使用SpeechRecognizer对象，可根据回调消息自定义界面；
         mIat = SpeechRecognizer.createRecognizer(context, mInitListener);
@@ -138,9 +162,7 @@ public class SpeechService {
         // 初始化听写Dialog，如果只使用有UI听写功能，无需创建SpeechRecognizer
         // 使用UI听写功能，请根据sdk文件目录下的notice.txt,放置布局文件和图片资源
 //        mIatDialog = new RecognizerDialog(context, mInitListener);
-        mSharedPreferences = context.getSharedPreferences(IatSettings.PREFER_NAME,
-                Activity.MODE_PRIVATE);
-        return mIat;
+        mSharedPreferences = context.getSharedPreferences(IatSettings.PREFER_NAME, Activity.MODE_PRIVATE);
     }
 
 
@@ -162,7 +184,6 @@ public class SpeechService {
     /**
      * 显示结果，根据听写结果返回order
      */
-
     private void printResult(RecognizerResult results) {
         String text = JsonUtil.parseIatResult(results.getResultString());
         String sn = null;
@@ -180,26 +201,8 @@ public class SpeechService {
         for (String key : mIatResults.keySet()) {
             resultBuffer.append(mIatResults.get(key));
         }
-
-        // 生成指令
-        Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.CHINA);
-        String str = format.format(date) + ": " + resultBuffer;
-        for (String s : orders) {
-            if (resultBuffer.toString().contains(s)) {
-                order = s;
-                Log.d("order", "________ " + order + ":" + str + " __________");
-            }
-        }
-        Log.d("order", "__________" + str + " __________");
-    }
-
-    private void showTip(final String str) {
-        if (mToast != null) {
-            mToast.cancel();
-        }
-        mToast = Toast.makeText(context.getApplicationContext(), str, Toast.LENGTH_SHORT);
-        mToast.show();
+        order = resultBuffer.toString();
+        Log.d("order: ", order);
     }
 
     public void setParam() {
@@ -223,17 +226,17 @@ public class SpeechService {
         //此处用于设置dialog中不显示错误码信息
         //mIat.setParameter("view_tips_plain","false");
 
-        // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理 4000
-        mIat.setParameter(SpeechConstant.VAD_BOS, mSharedPreferences.getString("iat_vadbos_preference", "2000"));
+        // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理 3000
+        mIat.setParameter(SpeechConstant.VAD_BOS, SILENCE_TIMEOUT);
 
-        // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入， 自动停止录音 2000
-        mIat.setParameter(SpeechConstant.VAD_EOS, mSharedPreferences.getString("iat_vadeos_preference", "1000"));
+        // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入, 自动停止录音 2000
+        mIat.setParameter(SpeechConstant.VAD_EOS, BACK_ENDPOINT_SILENCE_DETECTION_TIME);
 
         // ***********设置语音最长时间***********
-        mIat.setParameter(SpeechConstant.KEY_SPEECH_TIMEOUT, "5000");
+        mIat.setParameter(SpeechConstant.KEY_SPEECH_TIMEOUT, MAX_SPEECH_TIME);
 
         // 设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
-        mIat.setParameter(SpeechConstant.ASR_PTT, mSharedPreferences.getString("iat_punc_preference", "1"));
+        mIat.setParameter(SpeechConstant.ASR_PTT, SET_PUNCTUATION);
     }
 
 

@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import okhttp3.RequestBody;
 
-public class JsonUtil {
+public class RequestUtil {
 
     public static RequestBody getJsonFormOfInitEngine(String userId, String level, boolean b) {
         JSONObject data = new JSONObject();
@@ -40,8 +40,15 @@ public class JsonUtil {
      * @return RequestBody
      */
     public static RequestBody getResignRequestBody(String userid) {
-        JSONObject jsonParam = new JSONObject();
-        jsonParam.put("user_id", userid);
-        return RequestBody.create(JSON, jsonParam.toString());
+        JSONObject data = new JSONObject();
+        data.put("user_id", userid);
+        return RequestBody.create(JSON, data.toString());
+    }
+
+    public static RequestBody getGptResponse(String userid, String message) {
+        JSONObject data = new JSONObject();
+        data.put("user_id", userid);
+        data.put("message", message);
+        return RequestBody.create(JSON, data.toString());
     }
 }

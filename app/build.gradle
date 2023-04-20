@@ -6,18 +6,13 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.irlab.go_robot"
+        applicationId "com.irlab.app"
         minSdk 24
         targetSdk 32
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()] // 指定数据库schema导出位置
-            }
-        }
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments = [AROUTER_MODULE_NAME: project.getName()]
@@ -42,12 +37,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'androidx.room:room-runtime:2.4.2'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    annotationProcessor 'androidx.room:room-compiler:2.4.2'
     implementation 'com.alibaba:arouter-api:1.5.2'
     annotationProcessor'com.alibaba:arouter-compiler:1.5.2'
     api 'com.alibaba:arouter-annotation:1.0.6'

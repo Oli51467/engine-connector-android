@@ -1,10 +1,11 @@
-package com.irlab.view.iflytek.speech;
+package com.irlab.view.service;
 
 import static com.irlab.view.common.iFlytekConstants.AUDIO_FORMAT;
 import static com.irlab.view.common.iFlytekConstants.CUR_THRESH;
 import static com.irlab.view.common.iFlytekConstants.IVW_NET_MODE;
 import static com.irlab.view.common.iFlytekConstants.KEEP_ALIVE;
 import static com.irlab.view.common.iFlytekConstants.WAKEUP_MODE;
+import static com.irlab.view.common.iFlytekConstants.WAKEUP_STATE;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -22,30 +23,25 @@ import com.iflytek.cloud.WakeuperListener;
 import com.iflytek.cloud.WakeuperResult;
 import com.iflytek.cloud.util.ResourceUtil;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class XunFeiWakeUp {
 
-    private final String TAG = "ivw";
+    private final String TAG = XunFeiWakeUp.class.getName();
+
     // 语音唤醒对象
     private VoiceWakeuper mIvw;
-    private final Context context;
     public Handler handler;
-    private static final int WAKEUP_STATE = 0x02;
 
-    public XunFeiWakeUp(Context context, Handler handler) {
-        this.context = context;
+    public XunFeiWakeUp(Handler handler) {
         this.handler = handler;
     }
 
-    public void startWakeup() {
+    public void startWakeup(Context context) {
         mIvw = VoiceWakeuper.createWakeuper(context, null);
-        setParam();
+        setParam(context);
         mIvw.startListening(mWakeupListener);
 
         // 设置是否打印MSC.jar控制台的log。
-        Setting.setShowLog(false);
+        Setting.setShowLog(true);
     }
 
     public void stopWakeup() {
@@ -54,7 +50,7 @@ public class XunFeiWakeUp {
         }
     }
 
-    public void setParam() {
+    public void setParam(Context context) {
         mIvw = VoiceWakeuper.getWakeuper();
         if (mIvw != null) {
             // 清空参数
@@ -69,13 +65,13 @@ public class XunFeiWakeUp {
             // 设置闭环优化网络模式
             mIvw.setParameter(SpeechConstant.IVW_NET_MODE, IVW_NET_MODE);
             // 设置唤醒资源路径
-            mIvw.setParameter(SpeechConstant.IVW_RES_PATH, getResource());
+            mIvw.setParameter(SpeechConstant.IVW_RES_PATH, getResource(context));
 
             mIvw.setParameter(SpeechConstant.AUDIO_FORMAT, AUDIO_FORMAT);
             // 如有需要，设置 NOTIFY_RECORD_DATA 以实时通过 onEvent 返回录音音频流字节
-            //mIvw.setParameter( SpeechConstant.NOTIFY_RECORD_DATA, "1" );
+            mIvw.setParameter( SpeechConstant.NOTIFY_RECORD_DATA, "1" );
             // 启动唤醒
-            //mIvw.setParameter(SpeechConstant.AUDIO_SOURCE, "-1");
+            // mIvw.setParameter(SpeechConstant.AUDIO_SOURCE, "-1");
 
         } else {
             Toast.makeText(context, "唤醒未初始化", Toast.LENGTH_SHORT).show();
@@ -87,25 +83,6 @@ public class XunFeiWakeUp {
         @Override
         public void onResult(WakeuperResult result) {
             Log.d(TAG, "onResult");
-//            try {
-//                String text = result.getResultString();
-//                JSONObject object;
-//                object = new JSONObject(text);
-//                StringBuffer buffer = new StringBuffer();
-//                buffer.append("【RAW】 ").append(text);
-//                buffer.append("\n");
-//                buffer.append("【操作类型】").append(object.optString("sst"));
-//                buffer.append("\n");
-//                buffer.append("【唤醒词id】").append(object.optString("id"));
-//                buffer.append("\n");
-//                buffer.append("【得分】").append(object.optString("score"));
-//                buffer.append("\n");
-//                buffer.append("【前端点】").append(object.optString("bos"));
-//                buffer.append("\n");
-//                buffer.append("【尾端点】").append(object.optString("eos"));
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
             Message message = new Message();
             message.what = WAKEUP_STATE;
             handler.sendMessage(message);
@@ -113,11 +90,12 @@ public class XunFeiWakeUp {
 
         @Override
         public void onError(SpeechError error) {
-            Toast.makeText(context, error.getPlainDescription(true), Toast.LENGTH_SHORT).show();
+            Log.e(TAG, error.getPlainDescription(true));
         }
 
         @Override
         public void onBeginOfSpeech() {
+            Log.d(TAG, "Begin Speech");
         }
 
         @Override
@@ -135,10 +113,8 @@ public class XunFeiWakeUp {
         }
     };
 
-    private String getResource() {
-        final String resPath = ResourceUtil.generateResourcePath(context, ResourceUtil.RESOURCE_TYPE.assets, "ivw/" + "1710d024" + ".jet");
-        Log.d(TAG, "resPath: " + resPath);
-        return resPath;
+    private String getResource(Context context) {
+        return ResourceUtil.generateResourcePath(context, ResourceUtil.RESOURCE_TYPE.assets, "ivw/" + "1710d024" + ".jet");
     }
 
     public void destroy() {

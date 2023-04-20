@@ -1,5 +1,6 @@
-package com.irlab.view.watcher;
+package com.irlab.view.listener;
 
 public interface IEditTextChangeListener {
+
     void textChange(boolean isHasContent);
 }

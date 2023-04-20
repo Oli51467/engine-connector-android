@@ -8,7 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.irlab.base.R;
-import com.irlab.view.watcher.IEditTextChangeListener;
+import com.irlab.view.listener.IEditTextChangeListener;
 
 public class ButtonListenerUtil {
     static IEditTextChangeListener mChangeListener;
@@ -36,18 +36,15 @@ public class ButtonListenerUtil {
 
         textChangeListener.addAllEditText(editTexts);//把所有要监听的EditText都添加进去
         // 接口回调 在这里拿到boolean变量 根据isHasContent的值决定 Button应该设置什么颜色
-        ButtonListenerUtil.setChangeListener(new IEditTextChangeListener() {
-            @Override
-            public void textChange(boolean isHasContent) {
-                if (isHasContent) {
-                    button.setEnabled(true);
-                    button.setBackgroundResource(R.drawable.btn_login_normal);
-                    button.setTextColor(context.getResources().getColor(R.color.loginButtonTextFouse));
-                } else {
-                    button.setEnabled(false);
-                    button.setBackgroundResource(R.drawable.btn_not_focus);
-                    button.setTextColor(context.getResources().getColor(R.color.loginButtonText));
-                }
+        ButtonListenerUtil.setChangeListener(isHasContent -> {
+            if (isHasContent) {
+                button.setEnabled(true);
+                button.setBackgroundResource(R.drawable.btn_login_normal);
+                button.setTextColor(context.getResources().getColor(R.color.loginButtonTextFouse));
+            } else {
+                button.setEnabled(false);
+                button.setBackgroundResource(R.drawable.btn_not_focus);
+                button.setTextColor(context.getResources().getColor(R.color.loginButtonText));
             }
         });
     }
@@ -64,10 +61,9 @@ public class ButtonListenerUtil {
             this.maxLen = maxLen;
         }
 
-        public textChangeListener addAllEditText(EditText... editTexts) {
+        public void addAllEditText(EditText... editTexts) {
             this.editTexts = editTexts;
             initEditListener();
-            return this;
         }
 
         private void initEditListener() {
@@ -108,14 +104,10 @@ public class ButtonListenerUtil {
             }
         }
 
-        //检查所有的edit是否输入了数据
+        // 检查所有的edit是否输入了数据
         private boolean checkAllEdit(int minLen, int maxLen) {
             for (EditText editText : editTexts) {
-                if (!TextUtils.isEmpty(editText.getText() + "")
-                        && editText.getText().toString().length() > minLen
-                        && editText.getText().toString().length() <= maxLen) {
-                    continue;
-                } else {
+                if (TextUtils.isEmpty(editText.getText().toString()) || editText.getText().toString().length() <= minLen || editText.getText().toString().length() > maxLen) {
                     return false;
                 }
             }

@@ -1,4 +1,4 @@
-package com.irlab.robotgo;
+package com.irlab.app;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationManagerCompat;
@@ -21,8 +21,6 @@ public class MainActivity extends BaseActivity {
     private Context mContext;
     private final int PERMISSION_REQUEST_CODE = 0x183;
     private final String[] permissions = {
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.RECORD_AUDIO,

@@ -5,10 +5,7 @@ import static com.irlab.view.common.iFlytekConstants.MAX_SPEECH_TIME;
 import static com.irlab.view.common.iFlytekConstants.SET_PUNCTUATION;
 import static com.irlab.view.common.iFlytekConstants.SILENCE_TIMEOUT;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -23,10 +20,7 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
 import com.irlab.base.utils.HttpUtil;
 import com.irlab.base.utils.JsonUtil;
-import com.irlab.base.utils.ToastUtil;
 import com.irlab.view.MainView;
-import com.irlab.view.activity.PlayActivity;
-import com.irlab.view.iflytek.speech.settings.IatSettings;
 import com.irlab.view.utils.RequestUtil;
 
 import org.json.JSONException;
@@ -43,16 +37,12 @@ import okhttp3.RequestBody;
 
 public class SpeechService {
 
-    private static final String TAG = "SpeechService";
-    private static final String GPT_LOGGER = "Gpt-Logger";
-    private final String mEngineType;  // 引擎类型
-    private final String resultType = "json";
+    private static final String TAG = SpeechService.class.getName();
+
     private final HashMap<String, String> mIatResults = new LinkedHashMap<>();  // 用HashMap存储听写结果
     private final StringBuffer buffer = new StringBuffer(); // 字符缓冲区
-    private final Context context;
 
     private SpeechRecognizer mIat;  // 语音听写对象
-    private SharedPreferences mSharedPreferences;
     private String order;
     int ret = 0; // 函数调用返回值
 
@@ -67,74 +57,61 @@ public class SpeechService {
     };
 
     /**
-     * 听写监听器，监听到的语音中存在命令则由蓝牙发送数据
+     * 听写监听器，监听到的语音中存在命令则发送给大模型
      */
-    private final RecognizerListener mRecognizerListener = new RecognizerListener() {
+    private RecognizerListener mRecognizerListener = new RecognizerListener() {
         @Override
         public void onBeginOfSpeech() {
             // 此回调表示：sdk内部录音机已经准备好了，用户可以开始语音输入
             Log.d("onBeginOfSpeech", "开始说话");
-            ToastUtil.show(context.getApplicationContext(), "开始说话");
         }
 
         @Override
         public void onError(SpeechError error) {
             // 错误码：10118(您没有说话)，可能是录音机权限被禁，需要提示用户打开应用的录音权限。
             Log.e(TAG, "onError " + error.getPlainDescription(true));
-            ToastUtil.show(context.getApplicationContext(), error.getPlainDescription(true));
         }
 
         @Override
         public void onEndOfSpeech() {
             // 此回调表示：检测到了语音的尾端点，已经进入识别过程，不再接受语音输入
             Log.d("onEndOfSpeech", "结束说话");
-            ToastUtil.show(context.getApplicationContext(), "结束说话");
         }
 
         @Override
         public void onResult(RecognizerResult results, boolean isLast) {
+            Log.d(TAG, "onResult 结束 order: " + order);
             if (isLast) {
-                Log.d(TAG, "onResult 结束 order: " + order);
-                if (!order.equals("")) {
-                    if (order.equals("我要下棋")) {
-                        Intent intent = new Intent(context, PlayActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        context.startActivity(intent);
-                    } else {
-                        // TODO: 调用chatglm服务 获得语句输入
-                        MainView.ttsService.tts("我可以解决");
-                        RequestBody request = RequestUtil.getGptResponse("1", order);
-                        HttpUtil.sendOkHttpResponse("http://172.25.150.45:5002/gpt", request, new Callback() {
-                            @Override
-                            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                                Log.e(GPT_LOGGER, "GPT服务请求失败:" + e.getMessage());
-                            }
+                Log.d(TAG, "is Last onResult 结束 order: " + order);
+                if (!order.equals("") && order.length() > 3 && !order.startsWith("我在")) {
+                    // 调用chatGlm服务 获得语句输入
+                    MainView.ttsService.tts("好的，我想一下");
+                    RequestBody request = RequestUtil.getGptResponse("2", order);
+                    HttpUtil.sendOkHttpResponse("http://192.168.31.108:5002/glm", request, new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                            Log.e(TAG, "GPT服务请求失败:" + e.getMessage());
+                            MainView.baiduWakeup.start();
+                        }
 
-                            @Override
-                            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
-                                String responseData = Objects.requireNonNull(response.body()).string();
-                                Log.d(GPT_LOGGER, "GPT回答： " + responseData);
-                                MainView.ttsService.tts(responseData);
-                            }
-                        });
-                    }
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
+                            String responseData = Objects.requireNonNull(response.body()).string();
+                            Log.d(TAG, "GPT回答： " + responseData);
+                            MainView.ttsService.tts(responseData);
+                            MainView.baiduWakeup.start();
+                        }
+                    });
+                } else {
+                    MainView.baiduWakeup.start();
                 }
             } else {
-                if (resultType.equals("json")) {
-                    Log.d("PrintResult", results.toString());
-                    printResult(results);
-                    return;
-                }
-                if (resultType.equals("plain")) {
-                    buffer.append(results.getResultString());
-                }
+                printResult(results);
             }
-//            ShowActivity.volumeUtil.setSystemVolume(ShowActivity.systemVolume); // 将声音调回原来的音量
         }
 
         @Override
         public void onVolumeChanged(int volume, byte[] data) {
-//            showTip("当前正在说话，音量大小 = " + volume + " 返回音频数据 = " + data.length);
         }
 
         @Override
@@ -149,20 +126,8 @@ public class SpeechService {
         }
     };
 
-    public SpeechService(Context context, String mEngineType) {
-        this.context = context;
-        this.mEngineType = mEngineType;
-    }
-
-    public void init() {
-        // 初始化识别无UI识别对象
-        // 使用SpeechRecognizer对象，可根据回调消息自定义界面；
+    public void init(Context context) {
         mIat = SpeechRecognizer.createRecognizer(context, mInitListener);
-
-        // 初始化听写Dialog，如果只使用有UI听写功能，无需创建SpeechRecognizer
-        // 使用UI听写功能，请根据sdk文件目录下的notice.txt,放置布局文件和图片资源
-//        mIatDialog = new RecognizerDialog(context, mInitListener);
-        mSharedPreferences = context.getSharedPreferences(IatSettings.PREFER_NAME, Activity.MODE_PRIVATE);
     }
 
 
@@ -209,19 +174,13 @@ public class SpeechService {
         // 清空参数
         mIat.setParameter(SpeechConstant.PARAMS, null);
         // 设置听写引擎
-        mIat.setParameter(SpeechConstant.ENGINE_TYPE, mEngineType);
+        mIat.setParameter(SpeechConstant.ENGINE_TYPE, "cloud");
         // 设置返回结果格式
-        mIat.setParameter(SpeechConstant.RESULT_TYPE, resultType);
-
-        String language = "zh_cn";
-        String lag = mSharedPreferences.getString("iat_language_preference",
-                "mandarin");
+        mIat.setParameter(SpeechConstant.RESULT_TYPE, "json");
         // 设置语言
-        Log.d(TAG, "language = " + language);
         mIat.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
         // 设置语言区域
-        mIat.setParameter(SpeechConstant.ACCENT, lag);
-        Log.d(TAG, "last language:" + mIat.getParameter(SpeechConstant.LANGUAGE));
+        mIat.setParameter(SpeechConstant.ACCENT, "mandarin");
 
         //此处用于设置dialog中不显示错误码信息
         //mIat.setParameter("view_tips_plain","false");

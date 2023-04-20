@@ -7,7 +7,17 @@
         android:allowBackup="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.Robotgo"
+        android:extractNativeLibs="true"
         tools:remove="android:appComponentFactory">
+        <meta-data
+            android:name="com.baidu.speech.APP_ID"
+            android:value="32617660" />
+        <meta-data
+            android:name="com.baidu.speech.API_KEY"
+            android:value="SxaansGnQMVCi93dzkBu8Ppc" />
+        <meta-data
+            android:name="com.baidu.speech.SECRET_KEY"
+            android:value="iKjx5B2DawV18PHNIeVh5QHQFp14kycd" />
         <activity
             android:name=".activity.ManageDeviceActivity"
             android:exported="false">

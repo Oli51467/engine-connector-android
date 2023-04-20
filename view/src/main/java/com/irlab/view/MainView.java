@@ -28,19 +28,21 @@ import com.irlab.view.activity.UserInfoActivity;
 import com.irlab.view.fragment.PlayFragment;
 import com.irlab.view.fragment.RecordFragment;
 import com.irlab.view.network.NetworkRequiredInfo;
-import com.irlab.view.iflytek.speech.XunFeiWakeUp;
+import com.irlab.view.service.BaiduWakeup;
 import com.irlab.view.service.SpeechService;
 import com.irlab.view.service.TtsService;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sdu.network.NetworkApi;
 
+import java.util.Random;
+
 @Route(path = "/view/main")
 public class MainView extends BaseActivity implements View.OnClickListener {
 
-    public static XunFeiWakeUp wakeUp;
+    // 语音唤醒、语音识别、语音合成全局服务
+    public static BaiduWakeup baiduWakeup;
     public static SpeechService speechService;
     public static TtsService ttsService;
-
     // 布局界面
     private PlayFragment playFragment = null;
     private RecordFragment recordFragment = null;
@@ -54,18 +56,21 @@ public class MainView extends BaseActivity implements View.OnClickListener {
     public FragmentManager fragmentManager = null;
     private String userName;
 
-    private final Handler handler = new Handler(Looper.myLooper()) {
+    private final Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == WAKEUP_STATE) {
-                MainView.ttsService.tts("我在");
+                String[] ans = new String[]{"怎么了", "嗯", "我在"};
+                Random random = new Random();
+                MainView.ttsService.tts(ans[random.nextInt(3)]);
+                MainView.baiduWakeup.stop();
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                speechService.ServiceBegin();
+                MainView.speechService.ServiceBegin();
             }
         }
     };
@@ -97,26 +102,25 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         super.onResume();
         userName = SPUtils.getString("username");
         tv_username.setText(userName);
-        wakeUp.startWakeup();
+        baiduWakeup.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        wakeUp.stopWakeup();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        wakeUp.stopWakeup();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        wakeUp.stopWakeup();
-        wakeUp.destroy();
+        baiduWakeup.stop();
+        baiduWakeup.destroy();
+        baiduWakeup = null;
         speechService.destroy();
         ttsService.destroy();
     }
@@ -154,12 +158,13 @@ public class MainView extends BaseActivity implements View.OnClickListener {
     }
 
     private void initWakeup() {
-        // 初始化唤醒词，开启
-        wakeUp = new XunFeiWakeUp(this, handler);
-        wakeUp.startWakeup();
+        // 初始化百度唤醒词，开启
+        baiduWakeup = new BaiduWakeup(handler);
+        baiduWakeup.init(this);
+        baiduWakeup.start();
         // 初始化语音转文字
-        speechService = new SpeechService(this,"cloud");
-        speechService.init();
+        speechService = new SpeechService();
+        speechService.init(this);
         // 初始化语音合成
         ttsService = new TtsService(this);
         MainView.ttsService.tts("你好");

@@ -19,9 +19,9 @@ public class iFlytekConstants {
 
     public static final String MAX_SPEECH_TIME = "100000";
 
-    public static final String SILENCE_TIMEOUT = "3000";
+    public static final String SILENCE_TIMEOUT = "2000";
 
-    public static final String BACK_ENDPOINT_SILENCE_DETECTION_TIME = "2000";
+    public static final String BACK_ENDPOINT_SILENCE_DETECTION_TIME = "1000";
 
     public static final String SET_PUNCTUATION = "1";
 }

@@ -17,23 +17,12 @@
 
         <ImageView
             android:id="@+id/header_back"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="-60dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:src="@drawable/icon_back" />
+            style="@style/large_header_imageview" />
 
         <TextView
             android:id="@+id/header_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:text="对弈"
-            android:textColor="@color/black"
-            android:textSize="32sp" />
+            style="@style/large_header_textview" />
 
     </RelativeLayout>
 

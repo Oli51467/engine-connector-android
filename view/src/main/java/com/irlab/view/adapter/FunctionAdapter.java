@@ -19,7 +19,7 @@ import com.bumptech.glide.Glide;
 import com.irlab.view.R;
 import com.irlab.view.activity.GameRecordActivity;
 import com.irlab.view.activity.LoginActivity;
-import com.irlab.view.activity.ManageDeviceActivity;
+import com.irlab.view.activity.FriendsPlayActivity;
 import com.irlab.view.activity.PlayActivity;
 import com.irlab.view.activity.SelectConfigActivity;
 import com.irlab.view.activity.ConnectWifiActivity;
@@ -105,9 +105,9 @@ public class FunctionAdapter extends RecyclerView.Adapter<FunctionAdapter.ViewHo
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(intent);
                 }
-            } else if (function.getName().equals("我的棋盘")) {
+            } else if (function.getName().equals("联机对弈")) {
                 if (checkLogin()) {
-                    Intent intent = new Intent(context, ManageDeviceActivity.class);
+                    Intent intent = new Intent(context, FriendsPlayActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(intent);
                 } else {

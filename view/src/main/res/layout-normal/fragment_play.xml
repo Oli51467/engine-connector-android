@@ -11,7 +11,7 @@
         style="@style/fragment_bar_style">
 
         <TextView
-            style="@style/textview_bar_style"
+            style="@style/normal_header_textview"
             android:text="@string/play_title" />
     </RelativeLayout>
 

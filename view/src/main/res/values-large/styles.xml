@@ -78,5 +78,23 @@
         <item name="android:backgroundDimEnabled">true</item>
     </style>
 
+    <style name="large_header_imageview">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_alignParentLeft">true</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_marginStart">-60dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:src">@drawable/icon_back</item>
+    </style>
+
+    <style name="large_header_textview">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerInParent">true</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">32sp</item>
+    </style>
+
 
 </resources>

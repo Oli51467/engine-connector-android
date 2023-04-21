@@ -12,16 +12,9 @@
 
         <ImageView
             android:id="@+id/header_back"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="-60dp"
-            android:clickable="true"
-            android:src="@drawable/icon_back"
-            android:focusable="true" />
+            style="@style/large_header_imageview"/>
         <TextView
-            style="@style/textview_bar_style"
+            style="@style/large_header_textview"
             android:text="我的对局"
             />
     </RelativeLayout>

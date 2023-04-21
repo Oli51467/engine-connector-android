@@ -17,22 +17,12 @@
 
         <ImageView
             android:id="@+id/header_back"
-            android:layout_width="wrap_content"
-            android:layout_height="24dp"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="-80dp"
-            android:clickable="true"
-            android:src="@drawable/icon_back" />
+            style="@style/normal_header_imageview" />
 
         <TextView
             android:id="@+id/header_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:text="登陆"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
+            style="@style/normal_header_textview" />
     </RelativeLayout>
 
     <EditText

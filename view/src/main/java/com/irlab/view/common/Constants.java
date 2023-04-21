@@ -18,11 +18,12 @@ public class Constants {
     public static final String DEFAULT_LEVEL = "选择难度";
 
     public static final String[] LEVELS = {"1段", "2段", "3段", "4段", "5段", "6段", "7段", "8段", "9段", "10段"};
-    public static final String[] ENGINE_LEVEL = { "b", "d", "f", "h", "j", "l", "m", "n", "o", "p"};
+    public static final String[] ENGINE_LEVEL = {"b", "d", "f", "h", "j", "l", "m", "n", "o", "p"};
 
     public static final int DETECTION_LACK_STONE = 10001;
     public static final int DETECTION_UNNECESSARY_STONE = 10002;
     public static final int DETECTION_NO_STONE = 10003;
     public static final int WRONG_SIDE = 10004;
     public static final int NORMAL_PLAY = 20001;
+    public static final int LOAD_FRIENDS_SUCCESSFULLY = 0x03;
 }

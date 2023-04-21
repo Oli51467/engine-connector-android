@@ -15,24 +15,12 @@
 
         <ImageView
             android:id="@+id/header_back"
-            android:layout_width="wrap_content"
-            android:layout_height="24dp"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="-80dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/icon_back"
-            android:clickable="true"
-            android:focusable="true" />
+            style="@style/normal_header_imageview" />
 
         <TextView
             android:id="@+id/header_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:text="对局记录"
-            android:textStyle="bold"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
+            style="@style/normal_header_textview" />
 
     </RelativeLayout>
 

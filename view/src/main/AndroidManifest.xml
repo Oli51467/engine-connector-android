@@ -19,7 +19,7 @@
             android:name="com.baidu.speech.SECRET_KEY"
             android:value="iKjx5B2DawV18PHNIeVh5QHQFp14kycd" />
         <activity
-            android:name=".activity.ManageDeviceActivity"
+            android:name=".activity.FriendsPlayActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

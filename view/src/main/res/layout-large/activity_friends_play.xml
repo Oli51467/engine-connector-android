@@ -9,28 +9,30 @@
     <RelativeLayout
         android:id="@+id/header"
         android:layout_width="fill_parent"
-        android:layout_height="54dp"
+        android:layout_height="108dp"
         android:background="#F5f5f5"
         android:gravity="center_vertical">
 
         <ImageView
             android:id="@+id/header_back"
-            android:layout_width="wrap_content"
-            android:layout_height="24dp"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="-80dp"
-            android:clickable="true"
-            android:src="@drawable/icon_back" />
+            style="@style/large_header_imageview" />
 
         <TextView
             android:id="@+id/header_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:text="棋盘管理"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
+            style="@style/large_header_textview"/>
     </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/friend_item"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="?attr/actionBarSize"/> <!--解决RecyclerView下拉被底部导航栏挡住的问题 若上方有导航栏 同理改为paddingTop即可-->
+    </LinearLayout>
 
 </LinearLayout>

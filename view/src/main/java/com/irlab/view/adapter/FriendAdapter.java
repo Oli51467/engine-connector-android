@@ -3,42 +3,44 @@ package com.irlab.view.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.irlab.view.R;
-import com.irlab.view.entity.GameInfo;
+import com.irlab.view.entity.Friend;
 
 import java.util.List;
 
 /*
-棋谱ListView的适配器
+好友ListView的适配器
  */
-public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordViewHolder> implements View.OnClickListener, View.OnLongClickListener {
+public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RecordViewHolder> implements View.OnClickListener, View.OnLongClickListener {
 
     // 数据容器
-    private final List<GameInfo> list;
+    private final List<Friend> list;
 
     private setClick onItemClickListener;
     private setLongClick onItemLongClickListener;
 
-    public RecordAdapter(List<GameInfo> list) {
+    public FriendAdapter(List<Friend> list) {
         this.list = list;
     }
 
     // 内部类实现viewHolder 拿到cardView中的布局元素
     public static class RecordViewHolder extends RecyclerView.ViewHolder {
-        private final TextView playerInfo, date, result;
+        private final TextView username, level;
+        private final Button invite;
         private final View root;
 
         public RecordViewHolder(View root) {
             super(root);
             this.root = root;
-            playerInfo = root.findViewById(R.id.tv_player_info);
-            date = root.findViewById(R.id.tv_date);
-            result = root.findViewById(R.id.tv_result);
+            username = root.findViewById(R.id.tv_friend_info);
+            level = root.findViewById(R.id.tv_friend_level);
+            invite = root.findViewById(R.id.btn_invite);
         }
     }
 
@@ -51,7 +53,7 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordView
     @Override
     public RecordViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
-        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.record_item, parent, false);
+        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_item, parent, false);
         RecordViewHolder viewHolder = new RecordViewHolder(view);
         // 为Item设置点击事件
         view.setOnClickListener(this);
@@ -61,12 +63,9 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordView
 
     @Override
     public void onBindViewHolder(@NonNull RecordViewHolder holder, int position) {
-        // 双方信息
-        holder.playerInfo.setText(list.get(position).getRecordDetail());
-        // 日期
-        holder.date.append(list.get(position).getCreateTime());
-        // 对局结果
-        holder.result.setText(list.get(position).getResult());
+        // 好友信息
+        holder.username.setText(list.get(position).getUsername());
+        holder.level.setText(list.get(position).getLevel());
         // 设置tag
         holder.root.setTag(position);
     }

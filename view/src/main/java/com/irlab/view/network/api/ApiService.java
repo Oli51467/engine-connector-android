@@ -61,6 +61,9 @@ public interface ApiService {
     @GET("/api/record/detail/")
     Observable<JSONObject> getRecordDetail(@Header("Authorization") String token, @Query("record_id") Long recordId);
 
+    @GET("/api/friend/get/")
+    Observable<JSONObject> getFriends(@Header("Authorization") String token, @Query("user_id") Long userid);
+
     /**
      * 更新用户信息
      */

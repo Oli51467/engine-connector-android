@@ -49,7 +49,7 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_record);
         findViewById(R.id.header_back).setOnClickListener(this);
-        loadData(this);
+        loadRecords(this);
     }
 
     private void initComponents() {
@@ -59,14 +59,14 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
         mAdapter.setOnItemLongClickListener(this);
     }
 
-    private void loadData(Context context) {
+    private void loadRecords(Context context) {
         Message msg = new Message();
         NetworkApi.createService(ApiService.class)
                 .getMyRecords(getHeaders(), Long.parseLong(SPUtils.getString("user_id")), -1)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(JSONObject resp) {
-                        addDataToMap(resp, context);
+                        loadRecords(resp, context);
                         handler.sendMessage(msg);
                     }
 
@@ -79,7 +79,7 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
                 }));
     }
 
-    private void addDataToMap(JSONObject resp, Context context) {
+    private void loadRecords(JSONObject resp, Context context) {
         list.clear();
         JSONArray jsonArray = resp.getJSONObject("data").getJSONArray("records");
         for (int i = jsonArray.size() - 1; i >= 0; i -- ) {
@@ -100,8 +100,6 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
         handler.sendMessage(msg);
     }
 
-
-    @SuppressLint("HandlerLeak")
     private final Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(@NonNull Message msg) {

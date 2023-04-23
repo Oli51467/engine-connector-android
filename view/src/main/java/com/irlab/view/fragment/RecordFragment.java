@@ -44,7 +44,6 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
 
     RecyclerView mRecyclerView = null;
     RecordAdapter mAdapter = null;
-    LinearLayoutManager linearLayoutManager = null;
     View view;
     private List<GameInfo> list = new ArrayList<>();
 
@@ -56,7 +55,6 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
 
     private void initComponents() {
         mRecyclerView = view.findViewById(R.id.record_item);
-        linearLayoutManager = new LinearLayoutManager(this.getActivity(), LinearLayoutManager.VERTICAL, false);
         mAdapter.setOnItemClickListener(this);
     }
 
@@ -110,12 +108,11 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
                 // 创建自定义适配器, 设置给listview
                 mAdapter = new RecordAdapter(list);
                 initComponents();
-                // 为 RecyclerView设置LayoutManger
-                mRecyclerView.setLayoutManager(linearLayoutManager);
                 // 设置item固定大小
                 mRecyclerView.setHasFixedSize(true);
+                // 为 RecyclerView设置LayoutManger
+                mRecyclerView.setLayoutManager(new LinearLayoutManager((Context) msg.obj, LinearLayoutManager.VERTICAL, false));
                 // 为视图添加适配器
-                mRecyclerView.setLayoutManager(new LinearLayoutManager((Context) msg.obj));
                 mRecyclerView.setAdapter(mAdapter);
             }
         }

@@ -1,56 +1,34 @@
 package com.irlab.view.activity;
 
-import static com.irlab.base.utils.SPUtils.getHeaders;
-import static com.irlab.view.common.Constants.LOAD_FRIENDS_SUCCESSFULLY;
-
-import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
+import android.widget.ImageView;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.irlab.base.BaseActivity;
-import com.irlab.base.response.ResponseCode;
-import com.irlab.base.utils.SPUtils;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
-import com.irlab.view.adapter.FriendAdapter;
-import com.irlab.view.entity.Friend;
+import com.irlab.view.fragment.FriendListFragment;
+import com.irlab.view.fragment.FriendPlayFragment;
 import com.irlab.view.listener.WebSocketCallback;
-import com.irlab.view.network.api.ApiService;
 import com.irlab.view.service.WebSocketService;
-import com.sdu.network.NetworkApi;
-import com.sdu.network.observer.BaseObserver;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@SuppressLint("checkResult")
-public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.setClick,
-        AdapterView.OnItemClickListener, FriendAdapter.setLongClick, View.OnClickListener {
+public class FriendsPlayActivity extends BaseActivity implements View.OnClickListener {
 
     private static final String Logger = FriendsPlayActivity.class.getName();
 
-    private final List<Friend> list = new ArrayList<>();
-    private RecyclerView mRecyclerView = null;
-    private FriendAdapter mAdapter = null;
-    private LinearLayoutManager linearLayoutManager = null;
-
-    WebSocketService webSocketService;
+    private ImageView headerBack;
+    public WebSocketService webSocketService;
+    private FriendListFragment friendListFragment = null;
+    private FriendPlayFragment friendPlayFragment = null;
+    public FragmentManager fragmentManager = null;
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -65,32 +43,20 @@ public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.s
         }
     };
 
-    private final Handler handler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == LOAD_FRIENDS_SUCCESSFULLY) {
-                // 创建自定义适配器, 设置给listview
-                mAdapter = new FriendAdapter(list);
-                initComponents();
-                // 为 RecyclerView设置LayoutManger
-                mRecyclerView.setLayoutManager(linearLayoutManager);
-                // 设置item固定大小
-                mRecyclerView.setHasFixedSize(true);
-                // 为视图添加适配器
-                mRecyclerView.setLayoutManager(new LinearLayoutManager((Context) msg.obj));
-                mRecyclerView.setAdapter(mAdapter);
-            }
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends_play);
-        findViewById(R.id.header_back).setOnClickListener(this);
         bindService(new Intent(this, WebSocketService.class), serviceConnection, BIND_AUTO_CREATE);
-        loadFriends(this);
+        initComponents();
+        initFragments();
+        setTabSelection(1);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        initFragmentComponents();
     }
 
     @Override
@@ -99,48 +65,53 @@ public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.s
         unbindService(serviceConnection);
     }
 
-    private void loadFriends(Context context) {
-        Message msg = new Message();
-        NetworkApi.createService(ApiService.class)
-                .getFriends(getHeaders(), Long.parseLong(SPUtils.getString("user_id")))
-                .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
-                    @Override
-                    public void onSuccess(JSONObject resp) {
-                        loadFriends(resp, context);
-                        handler.sendMessage(msg);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable e) {
-                        Log.e(Logger, "get friends onFailure:" + e.getMessage());
-                        msg.what = ResponseCode.SERVER_FAILED.getCode();
-                        handler.sendMessage(msg);
-                    }
-                }));
-    }
-
-    private void loadFriends(JSONObject resp, Context context) {
-        list.clear();
-        JSONArray users = resp.getJSONObject("data").getJSONArray("users");
-        for (int i = users.size() - 1; i >= 0; i--) {
-            JSONObject user = users.getJSONObject(i);
-            Long userid = user.getLong("id");
-            String username = user.getString("username");
-            String level = user.getString("level");
-            Friend friend = new Friend(userid, username, level, false, false, false);
-            list.add(friend);
-        }
-        Message msg = new Message();
-        msg.what = LOAD_FRIENDS_SUCCESSFULLY;
-        msg.obj = context;
-        handler.sendMessage(msg);
-    }
-
     private void initComponents() {
-        mRecyclerView = findViewById(R.id.friend_item);
-        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        mAdapter.setOnItemClickListener(this);
-        mAdapter.setOnItemLongClickListener(this);
+        headerBack = findViewById(R.id.header_back);
+        headerBack.setOnClickListener(this);
+        fragmentManager = getSupportFragmentManager();
+    }
+
+    public void initFragmentComponents() {
+
+    }
+
+    private void initFragments() {
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        friendListFragment = new FriendListFragment();
+        friendPlayFragment = new FriendPlayFragment();
+        transaction.add(R.id.fragment, friendListFragment, "friend_list");
+        transaction.add(R.id.fragment, friendPlayFragment, "friend_play");
+        transaction.commit();
+    }
+
+    private void setTabSelection(int index) {
+        // 开启一个Fragment事务
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // 先隐藏掉所有的Fragment, 防止有多个Fragment显示在界面上的情况
+        hideFragments(transaction);
+        // 棋谱界面
+        if (index == 1) {
+            transaction.show(friendListFragment);
+            headerBack.setVisibility(View.VISIBLE);
+        }
+        // 下棋界面
+        else if (index == 2) {
+            transaction.show(friendPlayFragment);
+            headerBack.setVisibility(View.GONE);
+        }
+        transaction.commit();
+    }
+
+    /**
+     * 将所有的Fragment都设置为隐藏状态 用于对Fragment执行操作的事务
+     */
+    private void hideFragments(FragmentTransaction transaction) {
+        if (friendListFragment != null) {
+            transaction.hide(friendListFragment);
+        }
+        if (friendPlayFragment != null) {
+            transaction.hide(friendPlayFragment);
+        }
     }
 
     @Override
@@ -150,6 +121,8 @@ public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.s
             Intent intent = new Intent(this, MainView.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
+        } else if (vid == R.id.btn_invite) {
+            setTabSelection(2);
         }
     }
 
@@ -169,17 +142,4 @@ public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.s
             Log.d(Logger, "opClosed");
         }
     };
-
-    @Override
-    public void onItemClickListener(View view, int position) {
-    }
-
-    @Override
-    public boolean onItemLongClickListener(View view, int position) {
-        return false;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    }
 }

@@ -23,16 +23,10 @@
             style="@style/normal_header_textview"/>
     </RelativeLayout>
 
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/friend_item"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="?attr/actionBarSize"/> <!--解决RecyclerView下拉被底部导航栏挡住的问题 若上方有导航栏 同理改为paddingTop即可-->
-    </LinearLayout>
+        android:background="@color/whiteSmoke" />
 
 </LinearLayout>

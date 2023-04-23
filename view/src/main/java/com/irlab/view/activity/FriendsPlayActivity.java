@@ -4,10 +4,13 @@ import static com.irlab.base.utils.SPUtils.getHeaders;
 import static com.irlab.view.common.Constants.LOAD_FRIENDS_SUCCESSFULLY;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
@@ -27,7 +30,9 @@ import com.irlab.view.MainView;
 import com.irlab.view.R;
 import com.irlab.view.adapter.FriendAdapter;
 import com.irlab.view.entity.Friend;
+import com.irlab.view.listener.WebSocketCallback;
 import com.irlab.view.network.api.ApiService;
+import com.irlab.view.service.WebSocketService;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
 
@@ -38,12 +43,27 @@ import java.util.List;
 public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.setClick,
         AdapterView.OnItemClickListener, FriendAdapter.setLongClick, View.OnClickListener {
 
-    public static final String Logger = FriendsPlayActivity.class.getName();
+    private static final String Logger = FriendsPlayActivity.class.getName();
 
     private final List<Friend> list = new ArrayList<>();
     private RecyclerView mRecyclerView = null;
     private FriendAdapter mAdapter = null;
     private LinearLayoutManager linearLayoutManager = null;
+
+    WebSocketService webSocketService;
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            webSocketService = ((WebSocketService.LocalBinder) service).getService();
+            webSocketService.setWebSocketCallback(webSocketCallback);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            webSocketService = null;
+        }
+    };
 
     private final Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -69,7 +89,14 @@ public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.s
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends_play);
         findViewById(R.id.header_back).setOnClickListener(this);
+        bindService(new Intent(this, WebSocketService.class), serviceConnection, BIND_AUTO_CREATE);
         loadFriends(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(serviceConnection);
     }
 
     private void loadFriends(Context context) {
@@ -95,7 +122,7 @@ public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.s
     private void loadFriends(JSONObject resp, Context context) {
         list.clear();
         JSONArray users = resp.getJSONObject("data").getJSONArray("users");
-        for (int i = users.size() - 1; i >= 0; i -- ) {
+        for (int i = users.size() - 1; i >= 0; i--) {
             JSONObject user = users.getJSONObject(i);
             Long userid = user.getLong("id");
             String username = user.getString("username");
@@ -126,9 +153,25 @@ public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.s
         }
     }
 
+    private final WebSocketCallback webSocketCallback = new WebSocketCallback() {
+        @Override
+        public void onMessage(final String text) {
+            Log.d(Logger, "opReceive:" + text);
+        }
+
+        @Override
+        public void onOpen() {
+            Log.d(Logger, "opOpen");
+        }
+
+        @Override
+        public void onClosed() {
+            Log.d(Logger, "opClosed");
+        }
+    };
+
     @Override
     public void onItemClickListener(View view, int position) {
-
     }
 
     @Override
@@ -138,6 +181,5 @@ public class FriendsPlayActivity extends BaseActivity implements FriendAdapter.s
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
     }
 }

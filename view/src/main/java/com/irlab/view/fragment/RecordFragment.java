@@ -40,7 +40,7 @@ import java.util.List;
 @SuppressLint("checkResult")
 public class RecordFragment extends Fragment implements RecordAdapter.setClick, AdapterView.OnItemClickListener {
 
-    public static final String Logger = RecordFragment.class.getName();
+    public final String Logger = RecordFragment.class.getName();
 
     RecyclerView mRecyclerView = null;
     RecordAdapter mAdapter = null;

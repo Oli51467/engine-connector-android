@@ -28,7 +28,7 @@ import com.irlab.view.activity.UserInfoActivity;
 import com.irlab.view.fragment.PlayFragment;
 import com.irlab.view.fragment.RecordFragment;
 import com.irlab.view.network.NetworkRequiredInfo;
-import com.irlab.view.service.BaiduWakeup;
+import com.irlab.view.wakeup.BaiduWakeup;
 import com.irlab.view.service.SpeechService;
 import com.irlab.view.service.TtsService;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -61,7 +61,7 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == WAKEUP_STATE) {
-                String[] ans = new String[]{"怎么了", "嗯", "我在"};
+                String[] ans = new String[]{"怎么了", "你好，有什么可以帮您", "我在"};
                 Random random = new Random();
                 MainView.ttsService.tts(ans[random.nextInt(3)]);
                 MainView.baiduWakeup.stop();

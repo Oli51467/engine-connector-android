@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:livebutton="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -19,5 +20,44 @@
             android:layout_marginTop="40px" />
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+
+        <ru.katso.livebutton.LiveButton
+            android:id="@+id/btn_resign"
+            android:layout_height="40dp"
+            android:layout_width="140dp"
+            android:gravity="center"
+            android:text="认输"
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginStart="20dp"
+            livebutton:corners="4dp"
+            livebutton:normalHeight="4dp"
+            livebutton:pressedHeight="2dp"
+            livebutton:backgroundColor="@color/color_concrete"
+            livebutton:shadowColor="@color/color_asbestos"/>
+
+        <ru.katso.livebutton.LiveButton
+            android:id="@+id/btn_regret"
+            android:layout_height="40dp"
+            android:layout_width="140dp"
+            android:gravity="center"
+            android:text="悔棋"
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginStart="40dp"
+            livebutton:corners="4dp"
+            livebutton:normalHeight="4dp"
+            livebutton:pressedHeight="2dp"
+            livebutton:backgroundColor="@color/color_pumpkin"
+            livebutton:shadowColor="@color/color_pomegranate"/>
+    </LinearLayout>
 
 </LinearLayout>

@@ -19,7 +19,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -28,6 +27,7 @@ import com.irlab.base.utils.SPUtils;
 import com.irlab.view.R;
 import com.irlab.view.adapter.FriendAdapter;
 import com.irlab.view.entity.Friend;
+import com.irlab.view.listener.FragmentEventListener;
 import com.irlab.view.network.api.ApiService;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
@@ -35,11 +35,13 @@ import com.sdu.network.observer.BaseObserver;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FriendListFragment extends Fragment implements FriendAdapter.setClick, AdapterView.OnItemClickListener {
+public class FriendListFragment extends Fragment {
 
     private final String Logger = FriendListFragment.class.getName();
+    private final List<Friend> friendsList = new ArrayList<>(); // 数据容器
 
-    private final List<Friend> friendsList = new ArrayList<>();
+    private FragmentEventListener mListener; // Fragment和Activity的通信接口
+
     private View view;
     private RecyclerView mRecyclerView = null;
     private FriendAdapter mAdapter = null;
@@ -64,7 +66,33 @@ public class FriendListFragment extends Fragment implements FriendAdapter.setCli
 
     private void initComponents() {
         mRecyclerView = view.findViewById(R.id.friend_item);
-        mAdapter.setOnItemClickListener(this);
+        // 为适配器设置单独的按钮监听
+        mAdapter.setOnItemButtonListener((view, position) -> {
+            // 根据点击的位置 拿到对应的用户
+            Friend friend = friendsList.get(position);
+            JSONObject request = new JSONObject();
+            request.put("event", "request_play");
+            request.put("request_id", "1");
+            request.put("friend_id", friend.getId());
+            mListener.process(request.toJSONString(), friend.getId());
+        });
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        // 父Activity需要实现这个通信接口
+        if (context instanceof FragmentEventListener) {
+            mListener = (FragmentEventListener) context;
+        } else {
+            throw new IllegalArgumentException("Activity must implements FragmentInteraction");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     @Override
@@ -115,15 +143,5 @@ public class FriendListFragment extends Fragment implements FriendAdapter.setCli
         msg.what = LOAD_FRIENDS_SUCCESSFULLY;
         msg.obj = context;
         handler.sendMessage(msg);
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-    }
-
-    @Override
-    public void onItemClickListener(View view, int position) {
-
     }
 }

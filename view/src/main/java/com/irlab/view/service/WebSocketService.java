@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.irlab.base.utils.SPUtils;
-import com.irlab.view.listener.WebSocketCallback;
+import com.irlab.view.listener.WebSocketCallbackListener;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,7 +26,7 @@ public class WebSocketService extends Service {
     private static final String TAG = WebSocketService.class.getName();
 
     private WebSocket webSocket;
-    private WebSocketCallback webSocketCallback;
+    private WebSocketCallbackListener webSocketCallbackListener;
     private boolean connected = false;
 
     private final Handler handler = new Handler();
@@ -100,23 +100,23 @@ public class WebSocketService extends Service {
 
         @Override
         public void onOpen(@NonNull WebSocket webSocket, @NonNull Response response) {
-            if (webSocketCallback != null) {
-                webSocketCallback.onOpen();
+            if (webSocketCallbackListener != null) {
+                webSocketCallbackListener.onOpen();
             }
             connected = true;
         }
 
         @Override
         public void onMessage(@NonNull WebSocket webSocket, @NonNull String text) {
-            if (webSocketCallback != null) {
-                webSocketCallback.onMessage(text);
+            if (webSocketCallbackListener != null) {
+                webSocketCallbackListener.onMessage(text);
             }
         }
 
         @Override
         public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
-            if (webSocketCallback != null) {
-                webSocketCallback.onClosed();
+            if (webSocketCallbackListener != null) {
+                webSocketCallbackListener.onClosed();
             }
             connected = false;
             //reconnect();
@@ -135,8 +135,8 @@ public class WebSocketService extends Service {
         }
     }
 
-    public void setWebSocketCallback(WebSocketCallback webSocketCallback) {
-        this.webSocketCallback = webSocketCallback;
+    public void setWebSocketCallback(WebSocketCallbackListener webSocketCallbackListener) {
+        this.webSocketCallbackListener = webSocketCallbackListener;
     }
 }
 

@@ -1,4 +1,4 @@
-package com.irlab.view.service;
+package com.irlab.view.wakeup;
 
 import static com.irlab.view.common.iFlytekConstants.AUDIO_FORMAT;
 import static com.irlab.view.common.iFlytekConstants.CUR_THRESH;

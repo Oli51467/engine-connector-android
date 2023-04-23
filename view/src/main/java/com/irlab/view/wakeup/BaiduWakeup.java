@@ -1,4 +1,4 @@
-package com.irlab.view.service;
+package com.irlab.view.wakeup;
 
 import static com.irlab.view.common.iFlytekConstants.WAKEUP_STATE;
 
@@ -10,7 +10,6 @@ import android.util.Log;
 import com.baidu.speech.asr.SpeechConstant;
 import com.irlab.view.entity.WakeUpResult;
 import com.irlab.view.listener.IWakeupListener;
-import com.irlab.view.listener.SimpleWakeupListener;
 
 import java.util.HashMap;
 

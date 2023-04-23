@@ -11,36 +11,47 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.irlab.view.R;
 import com.irlab.view.entity.Friend;
+import com.irlab.view.listener.OnItemButtonListener;
 
 import java.util.List;
 
 /*
 好友ListView的适配器
  */
-public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RecordViewHolder> implements View.OnClickListener, View.OnLongClickListener {
+public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RecordViewHolder> {
 
-    // 数据容器
-    private final List<Friend> list;
-
-    private setClick onItemClickListener;
-    private setLongClick onItemLongClickListener;
+    private final List<Friend> list;  // 数据容器
+    private OnItemButtonListener mOnItemButtonListener; // 容器内的单独按钮点击监听器
 
     public FriendAdapter(List<Friend> list) {
         this.list = list;
     }
 
+    // 设置容器内按钮的监听器
+    public void setOnItemButtonListener(OnItemButtonListener buttonListener) {
+        this.mOnItemButtonListener = buttonListener;
+    }
+
     // 内部类实现viewHolder 拿到cardView中的布局元素
     public static class RecordViewHolder extends RecyclerView.ViewHolder {
         private final TextView username, level;
-        private final Button invite;
         private final View root;
 
-        public RecordViewHolder(View root) {
+        public RecordViewHolder(View root, final OnItemButtonListener onItemButtonListener) {
             super(root);
             this.root = root;
             username = root.findViewById(R.id.tv_friend_info);
             level = root.findViewById(R.id.tv_friend_level);
-            invite = root.findViewById(R.id.btn_invite);
+            Button invite = root.findViewById(R.id.btn_invite);
+            // 为按钮单独设置监听，而不是一整个item
+            invite.setOnClickListener(v -> {
+                if (null != onItemButtonListener) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        onItemButtonListener.onButtonClicked(v, position);
+                    }
+                }
+            });
         }
     }
 
@@ -54,11 +65,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RecordView
     public RecordViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
         view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_item, parent, false);
-        RecordViewHolder viewHolder = new RecordViewHolder(view);
-        // 为Item设置点击事件
-        view.setOnClickListener(this);
-        view.setOnLongClickListener(this);
-        return viewHolder;
+        return new RecordViewHolder(view, mOnItemButtonListener);
     }
 
     @Override
@@ -68,37 +75,5 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RecordView
         holder.level.setText(list.get(position).getLevel());
         // 设置tag
         holder.root.setTag(position);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (onItemClickListener != null) {
-            // 注意这里使用getTag方法获取数据
-            onItemClickListener.onItemClickListener(v, (Integer) v.getTag());
-        }
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        return onItemLongClickListener != null && onItemLongClickListener.onItemLongClickListener(v, (Integer) v.getTag());
-    }
-
-    // 设置点击事件
-    public void setOnItemClickListener(setClick onItemClickListener) {
-        this.onItemClickListener = onItemClickListener;
-    }
-
-    // 设置长按事件
-    public void setOnItemLongClickListener(setLongClick onItemLongClickListener) {
-        this.onItemLongClickListener = onItemLongClickListener;
-    }
-
-    // 声明点击和长按接口 将当前item对应的View返回
-    public interface setClick {
-        void onItemClickListener(View view, int position);
-    }
-
-    public interface setLongClick {
-        boolean onItemLongClickListener(View view, int position);
     }
 }

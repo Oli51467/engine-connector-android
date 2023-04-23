@@ -1,8 +1,9 @@
-package com.irlab.view.listener;
+package com.irlab.view.wakeup;
 
 import android.util.Log;
 
 import com.irlab.view.entity.WakeUpResult;
+import com.irlab.view.listener.IWakeupListener;
 
 public class SimpleWakeupListener implements IWakeupListener {
 

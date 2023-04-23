@@ -1,4 +1,4 @@
-package com.irlab.view.service;
+package com.irlab.view.wakeup;
 
 import android.content.Context;
 import android.util.Log;

@@ -48,7 +48,7 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
         setContentView(R.layout.activity_record_review);
         initArgs();
         getInfo();
-        initView();
+        initComponents();
         initBoard();
         drawBoard();
     }
@@ -65,7 +65,7 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
         createTime = bundle.getString("createTime");
     }
 
-    private void initView() {
+    public void initComponents() {
         boardImageView = findViewById(R.id.iv_board);
         TextView tv_playInfo = findViewById(R.id.tv_player_info);
         TextView tv_date = findViewById(R.id.tv_date);

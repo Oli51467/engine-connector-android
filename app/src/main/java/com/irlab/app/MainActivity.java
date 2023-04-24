@@ -40,6 +40,11 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    public void initComponents() {
+
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         enter();

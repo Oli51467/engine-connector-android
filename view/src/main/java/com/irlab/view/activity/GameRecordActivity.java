@@ -52,7 +52,7 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
         loadRecords(this);
     }
 
-    private void initComponents() {
+    public void initComponents() {
         mRecyclerView = findViewById(R.id.record_item);
         linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mAdapter.setOnItemClickListener(this);

@@ -42,12 +42,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ARouter.getInstance().inject(this);
-        initView();
+        initComponents();
         setEvent();
         NetworkApi.init(new NetworkRequiredInfo(MyApplication.getInstance()));  // 初始化network
     }
 
-    private void initView() {
+    public void initComponents() {
         btnRegister = findViewById(R.id.btn_register);
         userName = findViewById(R.id.et_userName);
         password = findViewById(R.id.et_password);

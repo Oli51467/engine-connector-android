@@ -41,10 +41,10 @@ public class FriendListFragment extends Fragment {
     private final List<Friend> friendsList = new ArrayList<>(); // 数据容器
 
     private FragmentEventListener mListener; // Fragment和Activity的通信接口
-
     private View view;
     private RecyclerView mRecyclerView = null;
     private FriendAdapter mAdapter = null;
+    private String userid;
 
     private final Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -69,12 +69,12 @@ public class FriendListFragment extends Fragment {
         // 为适配器设置单独的按钮监听
         mAdapter.setOnItemButtonListener((view, position) -> {
             // 根据点击的位置 拿到对应的用户
-            Friend friend = friendsList.get(position);
             JSONObject request = new JSONObject();
             request.put("event", "request_play");
-            request.put("request_id", "1");
-            request.put("friend_id", friend.getId());
-            mListener.process(request.toJSONString(), friend.getId());
+            request.put("request_id", userid);
+            request.put("friend_id", friendsList.get(position).getId());
+            // 通过接口实现Fragment向宿主Activity传递数据，在接口在onAttach时绑定
+            mListener.process(request.toJSONString(), friendsList.get(position).getId());
         });
     }
 
@@ -98,6 +98,7 @@ public class FriendListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        userid = SPUtils.getString("user_id");
     }
 
     @Override
@@ -111,7 +112,7 @@ public class FriendListFragment extends Fragment {
     private void loadFriends(Context context) {
         Message msg = new Message();
         NetworkApi.createService(ApiService.class)
-                .getFriends(getHeaders(), Long.parseLong(SPUtils.getString("user_id")))
+                .getFriends(getHeaders(), Long.parseLong(userid))
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(JSONObject resp) {

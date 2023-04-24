@@ -17,13 +17,14 @@
             android:id="@+id/iv_board"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20px" />
+            android:layout_marginTop="-150px" />
 
     </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="80dp">
+        android:layout_height="80dp"
+        android:layout_marginTop="-100px">
 
         <ru.katso.livebutton.LiveButton
             android:id="@+id/btn_resign"

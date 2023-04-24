@@ -82,7 +82,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         initArgs();
-        initView();
+        initComponents();
         initBoard();
         drawBoard();
     }
@@ -98,7 +98,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         receivedBoardState = new int[WIDTH + 1][WIDTH + 1];
     }
 
-    private void initView() {
+    public void initComponents() {
         boardBitmap = Bitmap.createBitmap(BOARD_WIDTH, BOARD_HEIGHT, Bitmap.Config.ARGB_8888);
         chooseSide = findViewById(R.id.btn_choose_side);
         chooseLevel = findViewById(R.id.btn_choose_level);

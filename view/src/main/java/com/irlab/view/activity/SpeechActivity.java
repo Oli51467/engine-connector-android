@@ -29,7 +29,6 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Objects;
 
 public class SpeechActivity extends BaseActivity implements View.OnClickListener {
 
@@ -67,7 +66,6 @@ public class SpeechActivity extends BaseActivity implements View.OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_speech);
-        Objects.requireNonNull(getSupportActionBar()).hide();
         // appId为在开放平台注册的AppID
         SpeechUtility.createUtility(SpeechActivity.this, IFLYTEK_APP_ID);
         initComponents();
@@ -77,7 +75,7 @@ public class SpeechActivity extends BaseActivity implements View.OnClickListener
         mIatDialog = new RecognizerDialog(SpeechActivity.this, mInitListener);
     }
 
-    private void initComponents() {
+    public void initComponents() {
         mContext = this;
         tvResult = findViewById(R.id.tv_result);
         findViewById(R.id.header_back).setOnClickListener(this);

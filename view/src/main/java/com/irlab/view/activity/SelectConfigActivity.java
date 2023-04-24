@@ -38,7 +38,7 @@ public class SelectConfigActivity extends BaseActivity implements View.OnClickLi
     }
 
     // 初始化界面及事件
-    private void initComponents() {
+    public void initComponents() {
         mRecyclerView = findViewById(R.id.play_setting_item);
         ImageView back = findViewById(R.id.header_back);
 

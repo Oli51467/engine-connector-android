@@ -40,16 +40,16 @@ import java.util.List;
 @SuppressLint("checkResult")
 public class RecordFragment extends Fragment implements RecordAdapter.setClick, AdapterView.OnItemClickListener {
 
-    public final String Logger = RecordFragment.class.getName();
+    private final String Logger = RecordFragment.class.getName();
 
-    RecyclerView mRecyclerView = null;
-    RecordAdapter mAdapter = null;
-    View view;
+    private RecyclerView mRecyclerView = null;
+    private RecordAdapter mAdapter = null;
+    private View view;
     private List<GameInfo> list = new ArrayList<>();
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_record, container, false);
-        if (checkLogin()) initData(this.getActivity());  // 获取棋谱数据
+        if (checkLogin()) loadRecords(this.getActivity());  // 获取棋谱数据
         return view;
     }
 
@@ -58,7 +58,7 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
         mAdapter.setOnItemClickListener(this);
     }
 
-    private void initData(Context context) {
+    private void loadRecords(Context context) {
         list = new ArrayList<>();
         Message msg = new Message();
         NetworkApi.createService(ApiService.class)
@@ -66,7 +66,7 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(JSONObject resp) {
-                        addDataToMap(resp, context);
+                        loadRecords(resp, context);
                         handler.sendMessage(msg);
                     }
 
@@ -79,7 +79,7 @@ public class RecordFragment extends Fragment implements RecordAdapter.setClick, 
                 }));
     }
 
-    private void addDataToMap(JSONObject resp, Context context) {
+    private void loadRecords(JSONObject resp, Context context) {
         list.clear();
         JSONArray jsonArray = resp.getJSONObject("data").getJSONArray("records");
         for (int i = jsonArray.size() - 1; i >= 0; i -- ) {

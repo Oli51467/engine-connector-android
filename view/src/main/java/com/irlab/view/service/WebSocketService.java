@@ -23,6 +23,7 @@ import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 
 public class WebSocketService extends Service {
+
     private static final String TAG = WebSocketService.class.getName();
 
     private WebSocket webSocket;
@@ -85,13 +86,10 @@ public class WebSocketService extends Service {
     }
 
     private void reconnect() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "reconnect...");
-                if (!connected) {
-                    connect();
-                }
+        handler.postDelayed(() -> {
+            Log.d(TAG, "reconnect...");
+            if (!connected) {
+                connect();
             }
         }, RECONNECT_TIMEOUT);
     }
@@ -119,13 +117,11 @@ public class WebSocketService extends Service {
                 webSocketCallbackListener.onClosed();
             }
             connected = false;
-            //reconnect();
         }
 
         /**
-         * Invoked when a web socket has been closed due to an error reading from or writing to the
-         * network. Both outgoing and incoming messages may have been lost. No further calls to this
-         * listener will be made.
+         * 当WebSocket由于读取或写入错误而关闭时调用
+         * 传出和传入的消息可能都已丢失。该接口将不会进一步监听
          */
         @Override
         public void onFailure(@NonNull WebSocket webSocket, Throwable t, Response response) {

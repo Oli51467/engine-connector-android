@@ -40,7 +40,7 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         initComponents();
     }
 
-    private void initComponents() {
+    public void initComponents() {
         findViewById(R.id.header_back).setOnClickListener(this);
         findViewById(R.id.btn_save).setOnClickListener(this);
         findViewById(R.id.btn_update_password).setOnClickListener(this);

@@ -46,11 +46,16 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     public FragmentManager fragmentManager = null;
     private SmileDialog smileDialog = null;
 
+    /**
+     * 当服务绑定时，绑定是异步的．bindService()会立即返回，它不会返回IBinder给客户端．要接收IBinder，
+     * 客户端必须创建一个ServiceConnection的实例并传给bindService()，ServiceConnection包含一个回调方法，系统调用这个方法来传递要返回的IBinder
+     * 当系统调用你的onServiceConnected()方法时，你就可以使用接口定义的方法们开始调用service了
+     */
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             webSocketService = ((WebSocketService.LocalBinder) service).getService();
-            webSocketService.setWebSocketCallback(webSocketCallbackListener);
+            webSocketService.setWebSocketCallback(webSocketCallbackListener);   // 设置回调监听器
         }
 
         @Override
@@ -81,7 +86,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         unbindService(serviceConnection);
     }
 
-    private void initComponents() {
+    public void initComponents() {
         headerBack = findViewById(R.id.header_back);
         headerBack.setOnClickListener(this);
         fragmentManager = getSupportFragmentManager();
@@ -91,6 +96,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         findViewById(R.id.btn_resign).setOnClickListener(this);
     }
 
+    // 将两个Fragment绑定到主Activity上
     private void initFragments() {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         friendListFragment = new FriendListFragment();
@@ -98,6 +104,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         transaction.add(R.id.fragment, friendListFragment, "friend_list");
         transaction.add(R.id.fragment, friendPlayFragment, "friend_play");
         transaction.commit();
+        setTabSelection(1);
     }
 
     private void setTabSelection(int index) {
@@ -105,12 +112,12 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         // 先隐藏掉所有的Fragment, 防止有多个Fragment显示在界面上的情况
         hideFragments(transaction);
-        // 棋谱界面
+        // 好友列表界面
         if (index == 1) {
             transaction.show(friendListFragment);
             headerBack.setVisibility(View.VISIBLE);
         }
-        // 下棋界面
+        // 好友下棋界面
         else if (index == 2) {
             transaction.show(friendPlayFragment);
             headerBack.setVisibility(View.GONE);
@@ -137,8 +144,8 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             Intent intent = new Intent(this, MainView.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
-        } else if (vid == R.id.btn_resign) {
-            SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
+        } else if (vid == R.id.btn_resign) {    // 用户主动认输
+            smileDialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
                     .hideTitle(true)
                     .setContentText(R.string.confirm_resign)
                     .setCanceledOnTouchOutside(false)
@@ -156,16 +163,20 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                         webSocketService.send(req.toJSONString());
                         setTabSelection(1);
                     }).build();
-            dialog.show();
+            smileDialog.show();
         }
     }
 
+    /***
+     * Websocket客户端回调监听器
+     */
     private final WebSocketCallbackListener webSocketCallbackListener = new WebSocketCallbackListener() {
         @Override
         public void onMessage(final String message) {
             Log.d(Logger, "onReceive:" + message);
             JSONObject resp = JSONObject.parseObject(message);
             String type = resp.getString("event");
+            // 收到某个好友的对局邀请
             if (type.equals(REQUEST_PLAY)) {
                 Long friendId = resp.getLong("id");
                 runOnUiThread(() -> {
@@ -194,7 +205,9 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                             .build();
                     smileDialog.show();
                 });
-            } else if (type.equals(FRIEND_REFUSE)) {
+            }
+            // 好友拒绝了您的邀请
+            else if (type.equals(FRIEND_REFUSE)) {
                 runOnUiThread(() -> {
                     smileDialog.dismiss();
                     smileDialog = new SmileDialogBuilder(FriendsPlayActivity.this, SmileDialogType.WARNING)
@@ -208,14 +221,20 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                             .build();
                     smileDialog.show();
                 });
-            } else if (type.equals(CANCEL_REQUEST)) {
+            }
+            // 好友取消了邀请
+            else if (type.equals(CANCEL_REQUEST)) {
                 smileDialog.dismiss();
-            } else if (type.equals(READY_STATUS)) {
+            }
+            // 双方准备好，进入对局界面
+            else if (type.equals(READY_STATUS)) {
                 FriendsPlayActivity.this.runOnUiThread(() -> {
                     setTabSelection(2);
                     smileDialog.dismiss();
                 });
-            } else if (type.equals("result")) {
+            }
+            // 对局结束，返回好友界面
+            else if (type.equals("result")) {
                 FriendsPlayActivity.this.runOnUiThread(() -> {
                     smileDialog = new SmileDialogBuilder(FriendsPlayActivity.this, SmileDialogType.SUCCESS)
                             .hideTitle(true)
@@ -242,6 +261,11 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         }
     };
 
+    /**
+     * FriendListFragment向主Activity传递数据的接口
+     * @param str       解析的Json自妇产
+     * @param requestId 邀请的friendId
+     */
     @Override
     public void process(String str, Long requestId) {
         webSocketService.send(str);

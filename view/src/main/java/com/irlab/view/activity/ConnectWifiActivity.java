@@ -84,7 +84,7 @@ public class ConnectWifiActivity extends BaseActivity implements View.OnClickLis
         });
     }
 
-    private void initComponents() {
+    public void initComponents() {
         recyclerView = findViewById(R.id.recyclerView);
         tv_wifiState = findViewById(R.id.tv_wifiState);
         Button openWifiButton = findViewById(R.id.btn_open_wifi);

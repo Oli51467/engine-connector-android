@@ -7,6 +7,7 @@ import static com.irlab.view.common.MessageType.PLAY;
 import static com.irlab.view.common.MessageType.READY_STATUS;
 import static com.irlab.view.common.MessageType.REFUSE_INVITATION;
 import static com.irlab.view.common.MessageType.REQUEST_PLAY;
+import static com.irlab.view.common.MessageType.START;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -29,8 +31,10 @@ import com.irlab.view.R;
 import com.irlab.view.fragment.FriendListFragment;
 import com.irlab.view.fragment.FriendPlayFragment;
 import com.irlab.view.listener.FragmentEventListener;
+import com.irlab.view.listener.FragmentReceiveListener;
 import com.irlab.view.listener.WebSocketCallbackListener;
 import com.irlab.view.service.WebSocketService;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.rosefinches.smiledialog.SmileDialog;
 import com.rosefinches.smiledialog.SmileDialogBuilder;
 import com.rosefinches.smiledialog.enums.SmileDialogType;
@@ -39,12 +43,17 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
 
     private static final String Logger = FriendsPlayActivity.class.getName();
 
-    private ImageView headerBack;
+    private ImageView headerBack, blackAvatar, whiteAvatar;
+    private TextView blackInfo, whiteInfo;
+    private String userid;
+
     public WebSocketService webSocketService;
     private FriendListFragment friendListFragment = null;
     private FriendPlayFragment friendPlayFragment = null;
     public FragmentManager fragmentManager = null;
+    private FragmentReceiveListener mListener;
     private SmileDialog smileDialog = null;
+    private int[][] receivedBoardState;
 
     /**
      * 当服务绑定时，绑定是异步的．bindService()会立即返回，它不会返回IBinder给客户端．要接收IBinder，
@@ -87,6 +96,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     }
 
     public void initComponents() {
+        userid = SPUtils.getString("user_id");
         headerBack = findViewById(R.id.header_back);
         headerBack.setOnClickListener(this);
         fragmentManager = getSupportFragmentManager();
@@ -94,6 +104,10 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
 
     public void initFragmentComponents() {
         findViewById(R.id.btn_resign).setOnClickListener(this);
+        blackAvatar = findViewById(R.id.black_avatar);
+        blackInfo = findViewById(R.id.black_info);
+        whiteAvatar = findViewById(R.id.white_avatar);
+        whiteInfo = findViewById(R.id.white_info);
     }
 
     // 将两个Fragment绑定到主Activity上
@@ -101,6 +115,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         friendListFragment = new FriendListFragment();
         friendPlayFragment = new FriendPlayFragment();
+        mListener = friendPlayFragment;
         transaction.add(R.id.fragment, friendListFragment, "friend_list");
         transaction.add(R.id.fragment, friendPlayFragment, "friend_play");
         transaction.commit();
@@ -190,7 +205,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                             .setConformButton("同意", () -> {
                                 JSONObject sendReq = new JSONObject();
                                 sendReq.put("event", ACCEPT_INVITATION);
-                                sendReq.put("user_id", SPUtils.getString("user_id"));
+                                sendReq.put("user_id", userid);
                                 sendReq.put("friend_id", friendId);
                                 webSocketService.send(sendReq.toJSONString());
                             })
@@ -232,6 +247,35 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                     setTabSelection(2);
                     smileDialog.dismiss();
                 });
+            }
+            // 对局开始
+            else if (type.equals(START)) {
+                // 双方准备好后，首先解析对局信息并展示
+                String blackId = resp.getJSONObject("game").getLong("black_id").toString();
+                String opponentUsername = resp.getString("opponent_username");
+                String opponentAvatar = resp.getString("opponent_avatar");
+                // 本方执黑
+                if (blackId.equals(userid)) {
+                    runOnUiThread(() -> {
+                        ImageLoader.getInstance().displayImage(SPUtils.getString("user_avatar"), blackAvatar);
+                        ImageLoader.getInstance().displayImage(opponentAvatar, whiteAvatar);
+                        blackInfo.append(SPUtils.getString("username"));
+                        whiteInfo.append(opponentUsername);
+                    });
+                } else {
+                    runOnUiThread(() -> {
+                        ImageLoader.getInstance().displayImage(opponentAvatar, blackAvatar);
+                        ImageLoader.getInstance().displayImage(SPUtils.getString("user_avatar"), whiteAvatar);
+                        blackInfo.append(opponentUsername);
+                        whiteInfo.append(SPUtils.getString("username"));
+                    });
+                }
+                // TODO: 1.打开串口
+                //  2. 轮到本方落子时，将棋盘状态通过串口发送到Activity，
+                //  3. 通过对比算法计算用户上一步的落子，如果不合法，则不发送到服务器
+                //  4. 如果合法，Activity通过Websocket发送到服务器，服务器将局面发送给另一方
+                //  5. 另一方通过Websocket拿到局面后，通过communication接口发送到子Fragment:mListener.communication(state)
+                //  6. 子Fragment通过drawBoard更新UI
             }
             // 对局结束，返回好友界面
             else if (type.equals("result")) {

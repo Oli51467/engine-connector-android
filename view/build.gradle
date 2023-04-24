@@ -85,6 +85,8 @@ dependencies {
     implementation 'com.github.dakatso:livebutton:1.0.0'
     // okhttp
     implementation "com.squareup.okhttp3:okhttp:3.9.0"
+    // 好看的开关
+    implementation 'com.github.zcweng:switch-button:0.0.3@aar'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

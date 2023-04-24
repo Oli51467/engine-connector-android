@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:livebutton="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -29,40 +29,40 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btnOpen"
-            android:layout_width="150dp"
-            android:layout_height="100dp"
-            android:text="打开wifi" />
+        <ru.katso.livebutton.LiveButton
+            android:id="@+id/btn_open_wifi"
+            android:layout_height="90dp"
+            android:layout_width="180dp"
+            android:gravity="center"
+            android:text="开启WiFi"
+            android:layout_gravity="center"
+            android:textColor="#ffffff"
+            android:textStyle="bold"
+            android:textSize="32sp"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            livebutton:corners="12dp"
+            livebutton:normalHeight="4dp"
+            livebutton:pressedHeight="2dp"
+            livebutton:backgroundColor="@color/color_emerald"
+            livebutton:shadowColor="@color/color_green_sea"/>
 
-        <Button
-            android:id="@+id/btnGetWifi"
-            android:layout_width="150dp"
-            android:layout_height="100dp"
-            android:text="获取wifi列表"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </LinearLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="200dp">
         <TextView
             android:id="@+id/tv_wifiState"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="wifi状态监听"
-            android:textSize="24sp"
-            android:padding="3dp"/>
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:gravity="center_vertical"
+            android:textSize="24sp" />
+    </LinearLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="8dp">
 
     </androidx.recyclerview.widget.RecyclerView>
 </LinearLayout>

@@ -3,7 +3,6 @@ package com.irlab.view.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +13,8 @@ import com.irlab.view.entity.Friend;
 import com.irlab.view.listener.OnItemButtonListener;
 
 import java.util.List;
+
+import ru.katso.livebutton.LiveButton;
 
 /*
 好友ListView的适配器
@@ -34,7 +35,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RecordView
 
     // 内部类实现viewHolder 拿到cardView中的布局元素
     public static class RecordViewHolder extends RecyclerView.ViewHolder {
-        private final TextView username, level;
+        private final TextView username, level, online;
+        private final LiveButton invite;
         private final View root;
 
         public RecordViewHolder(View root, final OnItemButtonListener onItemButtonListener) {
@@ -42,7 +44,8 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RecordView
             this.root = root;
             username = root.findViewById(R.id.tv_friend_info);
             level = root.findViewById(R.id.tv_friend_level);
-            Button invite = root.findViewById(R.id.btn_invite);
+            online = root.findViewById(R.id.tv_friend_state);
+            invite = root.findViewById(R.id.btn_invite);
             // 为按钮单独设置监听，而不是一整个item
             invite.setOnClickListener(v -> {
                 if (null != onItemButtonListener) {
@@ -73,6 +76,15 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RecordView
         // 好友信息
         holder.username.setText(list.get(position).getUsername());
         holder.level.setText(list.get(position).getLevel());
+        holder.online.setText(list.get(position).getOnline() ? "在线" : "不在线");
+        if (!list.get(position).getOnline()) {
+            holder.invite.setEnabled(false);
+            holder.invite.setBackgroundColor(0xffC0C0C0);
+            holder.invite.setShadowColor(0xff7f8c8d);
+        } else {
+            holder.invite.setEnabled(true);
+        }
+
         // 设置tag
         holder.root.setTag(position);
     }

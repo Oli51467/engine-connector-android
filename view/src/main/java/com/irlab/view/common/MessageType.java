@@ -2,8 +2,6 @@ package com.irlab.view.common;
 
 public class MessageType {
 
-    public static final String CHAT = "chat";
-
     public static final String START = "start";
 
     public static final String READY_STATUS = "ready";
@@ -31,4 +29,6 @@ public class MessageType {
     public static final String ACCEPT_REGRET = "accept_regret";
 
     public static final String FRIEND_REFUSE = "friend_refuse";
+
+    public static final String FRIEND_NOT_ONLINE = "friend_not_online";
 }

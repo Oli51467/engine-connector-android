@@ -27,6 +27,8 @@ public class Constants {
     public static final int DETECTION_UNNECESSARY_STONE = 10002;
     public static final int DETECTION_NO_STONE = 10003;
     public static final int WRONG_SIDE = 10004;
+    public static final int INVALID_PLAY = 10005;
     public static final int NORMAL_PLAY = 20001;
+    public static final int PLAY_SUCCESSFULLY = 20002;
     public static final int LOAD_FRIENDS_SUCCESSFULLY = 0x03;
 }

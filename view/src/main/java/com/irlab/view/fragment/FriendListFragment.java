@@ -2,6 +2,7 @@ package com.irlab.view.fragment;
 
 import static com.irlab.base.utils.SPUtils.getHeaders;
 import static com.irlab.view.common.Constants.LOAD_FRIENDS_SUCCESSFULLY;
+import static com.irlab.view.common.MessageType.REQUEST_PLAY;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -70,7 +71,7 @@ public class FriendListFragment extends Fragment {
         mAdapter.setOnItemButtonListener((view, position) -> {
             // 根据点击的位置 拿到对应的用户
             JSONObject request = new JSONObject();
-            request.put("event", "request_play");
+            request.put("event", REQUEST_PLAY);
             request.put("request_id", userid);
             request.put("friend_id", friendsList.get(position).getId());
             // 通过接口实现Fragment向宿主Activity传递数据，在接口在onAttach时绑定
@@ -137,7 +138,8 @@ public class FriendListFragment extends Fragment {
             Long userid = user.getLong("id");
             String username = user.getString("username");
             String level = user.getString("level");
-            Friend friend = new Friend(userid, username, level, false, false, false);
+            Boolean online = user.getBoolean("state");
+            Friend friend = new Friend(userid, username, level, online, false, false);
             friendsList.add(friend);
         }
         Message msg = new Message();

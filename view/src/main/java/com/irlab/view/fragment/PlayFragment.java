@@ -1,10 +1,5 @@
 package com.irlab.view.fragment;
 
-import static com.irlab.base.utils.SPUtils.checkLogin;
-import static com.irlab.base.utils.SPUtils.getInt;
-
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,17 +9,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.google.android.material.imageview.ShapeableImageView;
-import com.irlab.base.utils.SPUtils;
 import com.irlab.view.R;
-import com.irlab.view.activity.LoginActivity;
-import com.irlab.view.activity.UserInfoActivity;
 import com.irlab.view.adapter.FunctionAdapter;
 import com.irlab.view.entity.MyFunction;
 

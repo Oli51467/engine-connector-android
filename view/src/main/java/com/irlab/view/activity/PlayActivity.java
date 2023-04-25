@@ -8,6 +8,9 @@ import static com.irlab.view.common.Constants.*;
 import static com.irlab.view.utils.BoardUtil.checkState;
 import static com.irlab.view.utils.BoardUtil.getPositionByIndex;
 import static com.irlab.view.utils.BoardUtil.transformIndex;
+import static com.irlab.view.utils.DialogUtil.buildErrorDialogWithConfirm;
+import static com.irlab.view.utils.DialogUtil.buildErrorDialogWithConfirmAndCancel;
+import static com.irlab.view.utils.DialogUtil.buildWarningDialogWithConfirm;
 import static com.irlab.view.utils.SerialUtil.ByteArrToHexList;
 
 import androidx.annotation.NonNull;
@@ -16,7 +19,6 @@ import androidx.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -42,8 +44,7 @@ import com.irlab.view.utils.BoardUtil;
 import com.irlab.view.utils.Drawer;
 import com.irlab.view.utils.RequestUtil;
 import com.rosefinches.smiledialog.SmileDialog;
-import com.rosefinches.smiledialog.SmileDialogBuilder;
-import com.rosefinches.smiledialog.enums.SmileDialogType;
+import com.rosefinches.smiledialog.interfac.OnConformClickListener;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
 
@@ -61,21 +62,25 @@ import okhttp3.RequestBody;
 
 public class PlayActivity extends BaseActivity implements View.OnClickListener, SerialInter {
 
-    public static final String Logger = "engine-Logger";
+    public static final String Logger = PlayActivity.class.getName();
     public static final String serialLogger = "serial-Logger";
     public static boolean playing = false;
 
+    public static boolean showToast;
+
     private final Drawer drawer = new Drawer();
+    private final OnConformClickListener onConformClickListener = () -> PlayActivity.showToast = true;
 
     private Board board;
     private ImageView boardImageView;
     private Bitmap boardBitmap;
+    private SmileDialog dialog;
     private Button chooseSide, chooseLevel;
+    private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
+
     private Integer side, level, engineLastX, engineLastY;
     private int[][] receivedBoardState;
-    private boolean initSerial, showToast;
-
-    private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
+    private boolean initSerial;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -133,14 +138,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         int vid = v.getId();
         if (vid == R.id.header_back) {
             if (playing) {
-                SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
-                        .hideTitle(true)
-                        .setContentText("请先结束对局")
-                        .setConformBgResColor(R.color.delete)
-                        .setCanceledOnTouchOutside(false)
-                        .setConformTextColor(Color.WHITE)
-                        .setWindowAnimations(R.style.dialog_style)
-                        .setConformButton(R.string.confirm).build();
+                dialog.dismiss();
+                dialog = buildErrorDialogWithConfirm(PlayActivity.this, "请先结束对局", null);
                 dialog.show();
             } else {
                 SerialManager.getInstance().close();
@@ -148,28 +147,10 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 Intent intent = new Intent(this, MainView.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
-//                // 延时跳转
-//                Timer timer = new Timer();
-//                Intent intent = new Intent(this, MainView.class);
-//                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                TimerTask task = new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        startActivity(intent);
-//                    }
-//                };
-//                timer.schedule(task, 500);
             }
         } else if (vid == R.id.btn_begin) {
             if (chooseSide.getText().equals(DEFAULT_SIDE) || chooseLevel.getText().equals(DEFAULT_LEVEL)) {
-                SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                        .hideTitle(true)
-                        .setContentText(R.string.choose_side)
-                        .setCanceledOnTouchOutside(false)
-                        .setConformBgResColor(R.color.warning)
-                        .setConformTextColor(Color.WHITE)
-                        .setWindowAnimations(R.style.dialog_style)
-                        .setConformButton(R.string.confirm).build();
+                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "请选择黑白及段位", null);
                 dialog.show();
                 return;
             } else if (chooseSide.getText().equals(BLACK_SIDE)) side = BLACK;
@@ -185,26 +166,18 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             serial.start();
             initEngine();
         } else if (vid == R.id.btn_resign) {
-            SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
-                    .hideTitle(true)
-                    .setContentText(R.string.confirm_resign)
-                    .setCanceledOnTouchOutside(false)
-                    .setConformBgResColor(R.color.delete)
-                    .setConformTextColor(Color.WHITE)
-                    .setCancelTextColor(Color.BLACK)
-                    .setCancelButton(R.string.cancel)
-                    .setCancelBgResColor(R.color.whiteSmoke)
-                    .setWindowAnimations(R.style.dialog_style)
-                    .setConformButton(R.string.confirm, () -> {
-                        playing = false;
-                        resetUnderMachine();
-                        board.clearBoard();
-                        drawBoard();
-                        layoutBeforePlay.setVisibility(View.VISIBLE);
-                        layoutAfterPlay.setVisibility(View.GONE);
-                        saveRecord();
-                        resign();
-                    }).build();
+            dialog.dismiss();
+            OnConformClickListener listener = () -> {
+                playing = false;
+                resetUnderMachine();
+                board.clearBoard();
+                drawBoard();
+                layoutBeforePlay.setVisibility(View.VISIBLE);
+                layoutAfterPlay.setVisibility(View.GONE);
+                saveRecord();
+                resign();
+            };
+            dialog = buildErrorDialogWithConfirmAndCancel(this, "您确定认输吗", listener);
             dialog.show();
         } else if (vid == R.id.btn_choose_side) {
             if (chooseSide.getText().equals(DEFAULT_SIDE)) chooseSide.setText(BLACK_SIDE);
@@ -247,14 +220,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             if (showToast) {
                 showToast = false;
                 runOnUiThread(() -> {
-                    SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                            .hideTitle(true)
-                            .setContentText("错误的落子方 " + wrongPosition)
-                            .setCanceledOnTouchOutside(false)
-                            .setConformBgResColor(R.color.warning)
-                            .setConformTextColor(Color.WHITE)
-                            .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton(R.string.confirm, () -> showToast = true).build();
+                    dialog.dismiss();
+                    dialog = buildWarningDialogWithConfirm(PlayActivity.this, "错误的落子方 " + wrongPosition, onConformClickListener);
                     dialog.show();
                 });
             }
@@ -264,14 +231,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             if (showToast) {
                 showToast = false;
                 runOnUiThread(() -> {
-                    SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                            .hideTitle(true)
-                            .setContentText("缺少棋子 " + lackStonePosition)
-                            .setCanceledOnTouchOutside(false)
-                            .setConformBgResColor(R.color.warning)
-                            .setConformTextColor(Color.WHITE)
-                            .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton(R.string.confirm, () -> showToast = true).build();
+                    dialog.dismiss();
+                    dialog = buildWarningDialogWithConfirm(PlayActivity.this, "缺少棋子 " + lackStonePosition, onConformClickListener);
                     dialog.show();
                 });
             }
@@ -280,14 +241,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             if (showToast) {
                 showToast = false;
                 runOnUiThread(() -> {
-                    SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                            .hideTitle(true)
-                            .setContentText(R.string.unnecessary_stone)
-                            .setCanceledOnTouchOutside(false)
-                            .setConformBgResColor(R.color.warning)
-                            .setConformTextColor(Color.WHITE)
-                            .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton(R.string.confirm, () -> showToast = true).build();
+                    dialog.dismiss();
+                    dialog = buildWarningDialogWithConfirm(PlayActivity.this, "多余棋子", onConformClickListener);
                     dialog.show();
                 });
             }
@@ -299,14 +254,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 if (showToast) {
                     showToast = false;
                     runOnUiThread(() -> {
-                        SmileDialog dialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                                .hideTitle(true)
-                                .setContentText(R.string.prohibit_play)
-                                .setCanceledOnTouchOutside(false)
-                                .setConformBgResColor(R.color.warning)
-                                .setConformTextColor(Color.WHITE)
-                                .setWindowAnimations(R.style.dialog_style)
-                                .setConformButton(R.string.confirm, () -> showToast = true).build();
+                        dialog.dismiss();
+                        dialog = buildWarningDialogWithConfirm(PlayActivity.this, "不允许落子，请及时取走", onConformClickListener);
                         dialog.show();
                     });
                 }

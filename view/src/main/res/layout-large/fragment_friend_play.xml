@@ -103,7 +103,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:layout_marginTop="32px">
+        android:layout_marginTop="0px">
 
         <ru.katso.livebutton.LiveButton
             android:id="@+id/btn_resign"
@@ -139,5 +139,10 @@
             livebutton:pressedHeight="2dp"
             livebutton:shadowColor="@color/color_pomegranate" />
     </LinearLayout>
+
+    <EditText
+        android:id="@+id/et_input"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"/>
 
 </LinearLayout>

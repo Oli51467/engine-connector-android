@@ -1,22 +1,27 @@
 package com.irlab.view.activity;
 
-import static com.irlab.view.common.MessageType.ACCEPT_INVITATION;
-import static com.irlab.view.common.MessageType.CANCEL_REQUEST;
-import static com.irlab.view.common.MessageType.FRIEND_REFUSE;
-import static com.irlab.view.common.MessageType.PLAY;
-import static com.irlab.view.common.MessageType.READY_STATUS;
-import static com.irlab.view.common.MessageType.REFUSE_INVITATION;
-import static com.irlab.view.common.MessageType.REQUEST_PLAY;
-import static com.irlab.view.common.MessageType.START;
+import static com.irlab.view.common.Constants.BLACK;
+import static com.irlab.view.common.Constants.DETECTION_LACK_STONE;
+import static com.irlab.view.common.Constants.DETECTION_UNNECESSARY_STONE;
+import static com.irlab.view.common.Constants.INVALID_PLAY;
+import static com.irlab.view.common.Constants.PLAY_SUCCESSFULLY;
+import static com.irlab.view.common.Constants.RESET_BOARD_ORDER;
+import static com.irlab.view.common.Constants.TURN_OFF_LIGHT_ORDER;
+import static com.irlab.view.common.Constants.WHITE;
+import static com.irlab.view.common.Constants.WIDTH;
+import static com.irlab.view.common.Constants.WRONG_SIDE;
+import static com.irlab.view.common.MessageType.*;
+import static com.irlab.view.utils.DialogUtil.*;
+import static com.irlab.view.utils.SerialUtil.ByteArrToHexList;
 
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,27 +38,41 @@ import com.irlab.view.fragment.FriendPlayFragment;
 import com.irlab.view.listener.FragmentEventListener;
 import com.irlab.view.listener.FragmentReceiveListener;
 import com.irlab.view.listener.WebSocketCallbackListener;
+import com.irlab.view.serial.Serial;
+import com.irlab.view.serial.SerialInter;
+import com.irlab.view.serial.SerialManager;
 import com.irlab.view.service.WebSocketService;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.rosefinches.smiledialog.SmileDialog;
-import com.rosefinches.smiledialog.SmileDialogBuilder;
-import com.rosefinches.smiledialog.enums.SmileDialogType;
+import com.rosefinches.smiledialog.interfac.OnCancelClickListener;
+import com.rosefinches.smiledialog.interfac.OnConformClickListener;
 
-public class FriendsPlayActivity extends BaseActivity implements View.OnClickListener, FragmentEventListener {
+import java.util.List;
+
+public class FriendsPlayActivity extends BaseActivity implements View.OnClickListener, FragmentEventListener, SerialInter {
 
     private static final String Logger = FriendsPlayActivity.class.getName();
 
+    // View Components
     private ImageView headerBack, blackAvatar, whiteAvatar;
     private TextView blackInfo, whiteInfo;
-    private String userid;
+    private SmileDialog smileDialog = null;
 
+    // Service Manager Listener components
     public WebSocketService webSocketService;
     private FriendListFragment friendListFragment = null;
     private FriendPlayFragment friendPlayFragment = null;
     public FragmentManager fragmentManager = null;
     private FragmentReceiveListener mListener;
-    private SmileDialog smileDialog = null;
+
+    // normal variables
     private int[][] receivedBoardState;
+    private String userid;
+    private boolean initSerial;
+    private Integer side;
+
+    // temp
+    private EditText input;
 
     /**
      * 当服务绑定时，绑定是异步的．bindService()会立即返回，它不会返回IBinder给客户端．要接收IBinder，
@@ -77,10 +96,10 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends_play);
-        bindService(new Intent(this, WebSocketService.class), serviceConnection, BIND_AUTO_CREATE);
+        bindService(new Intent(this, WebSocketService.class), serviceConnection, BIND_AUTO_CREATE);  // 绑定Websocket服务
         initComponents();
+        initArgs();
         initFragments();
-        setTabSelection(1);
     }
 
     @Override
@@ -96,18 +115,26 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     }
 
     public void initComponents() {
-        userid = SPUtils.getString("user_id");
         headerBack = findViewById(R.id.header_back);
         headerBack.setOnClickListener(this);
         fragmentManager = getSupportFragmentManager();
     }
 
+    private void initArgs() {
+        userid = SPUtils.getString("user_id");
+        receivedBoardState = new int[WIDTH + 1][WIDTH + 1];
+        initSerial = false;
+    }
+
     public void initFragmentComponents() {
         findViewById(R.id.btn_resign).setOnClickListener(this);
+        findViewById(R.id.btn_regret).setOnClickListener(this);
         blackAvatar = findViewById(R.id.black_avatar);
         blackInfo = findViewById(R.id.black_info);
         whiteAvatar = findViewById(R.id.white_avatar);
         whiteInfo = findViewById(R.id.white_info);
+
+        input = findViewById(R.id.et_input);
     }
 
     // 将两个Fragment绑定到主Activity上
@@ -160,25 +187,21 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         } else if (vid == R.id.btn_resign) {    // 用户主动认输
-            smileDialog = new SmileDialogBuilder(this, SmileDialogType.ERROR)
-                    .hideTitle(true)
-                    .setContentText(R.string.confirm_resign)
-                    .setCanceledOnTouchOutside(false)
-                    .setConformBgResColor(R.color.delete)
-                    .setConformTextColor(Color.WHITE)
-                    .setCancelTextColor(Color.BLACK)
-                    .setCancelButton(R.string.cancel)
-                    .setCancelBgResColor(R.color.whiteSmoke)
-                    .setWindowAnimations(R.style.dialog_style)
-                    .setConformButton(R.string.confirm, () -> {
-                        JSONObject req = new JSONObject();
-                        req.put("event", PLAY);
-                        req.put("x", -1);
-                        req.put("y", -1);
-                        webSocketService.send(req.toJSONString());
-                        setTabSelection(1);
-                    }).build();
+            OnConformClickListener listener = () -> {
+                JSONObject req = new JSONObject();
+                req.put("event", PLAY);
+                req.put("x", -1);
+                req.put("y", -1);
+                webSocketService.send(req.toJSONString());
+                setTabSelection(1);
+            };
+            smileDialog = buildErrorDialogWithConfirmAndCancel(FriendsPlayActivity.this, "你确定认输吗", listener);
             smileDialog.show();
+        } else if (vid == R.id.btn_regret) {
+            String[] indexes = input.getText().toString().split(" ");
+            int x = Integer.parseInt(indexes[0]);
+            int y = Integer.parseInt(indexes[1]);
+            mListener.communication(x, y, true);
         }
     }
 
@@ -195,29 +218,28 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             if (type.equals(REQUEST_PLAY)) {
                 Long friendId = resp.getLong("id");
                 runOnUiThread(() -> {
-                    smileDialog = new SmileDialogBuilder(FriendsPlayActivity.this, SmileDialogType.WARNING)
-                            .hideTitle(true)
-                            .setContentText("有人向您提出对局申请")
-                            .setCanceledOnTouchOutside(false)
-                            .setWindowAnimations(R.style.dialog_style)
-                            .setConformBgResColor(R.color.color_green_sea)
-                            .setConformTextColor(Color.WHITE)
-                            .setConformButton("同意", () -> {
-                                JSONObject sendReq = new JSONObject();
-                                sendReq.put("event", ACCEPT_INVITATION);
-                                sendReq.put("user_id", userid);
-                                sendReq.put("friend_id", friendId);
-                                webSocketService.send(sendReq.toJSONString());
-                            })
-                            .setCancelBgResColor(R.color.delete)
-                            .setCancelTextColor(Color.WHITE)
-                            .setCancelButton("拒绝", () -> {
-                                JSONObject sendReq = new JSONObject();
-                                sendReq.put("event", REFUSE_INVITATION);
-                                sendReq.put("friend_id", friendId);
-                                webSocketService.send(sendReq.toJSONString());
-                            })
-                            .build();
+                    OnConformClickListener confirmListener = () -> {
+                        JSONObject sendReq = new JSONObject();
+                        sendReq.put("event", ACCEPT_INVITATION);
+                        sendReq.put("user_id", userid);
+                        sendReq.put("friend_id", friendId);
+                        webSocketService.send(sendReq.toJSONString());
+                    };
+                    OnCancelClickListener cancelListener = () -> {
+                        JSONObject sendReq = new JSONObject();
+                        sendReq.put("event", REFUSE_INVITATION);
+                        sendReq.put("friend_id", friendId);
+                        webSocketService.send(sendReq.toJSONString());
+                    };
+                    smileDialog = buildSuccessDialogWithConfirmAndCancel(FriendsPlayActivity.this, "有人向您提出对局申请", confirmListener, cancelListener);
+                    smileDialog.show();
+                });
+            }
+            // 好友不在线
+            else if (type.equals(FRIEND_NOT_ONLINE)) {
+                runOnUiThread(() -> {
+                    smileDialog.dismiss();
+                    smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "对方不在线", null);
                     smileDialog.show();
                 });
             }
@@ -225,15 +247,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             else if (type.equals(FRIEND_REFUSE)) {
                 runOnUiThread(() -> {
                     smileDialog.dismiss();
-                    smileDialog = new SmileDialogBuilder(FriendsPlayActivity.this, SmileDialogType.WARNING)
-                            .hideTitle(true)
-                            .setContentText("对方拒绝了您的请求")
-                            .setConformBgResColor(R.color.gray_text_light)
-                            .setCanceledOnTouchOutside(false)
-                            .setConformTextColor(Color.WHITE)
-                            .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton(R.string.confirm)
-                            .build();
+                    smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "对方拒绝了您的请求", null);
                     smileDialog.show();
                 });
             }
@@ -261,34 +275,41 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                         ImageLoader.getInstance().displayImage(opponentAvatar, whiteAvatar);
                         blackInfo.append(SPUtils.getString("username"));
                         whiteInfo.append(opponentUsername);
+                        side = BLACK;
                     });
-                } else {
+                }
+                // 本方执白
+                else {
                     runOnUiThread(() -> {
                         ImageLoader.getInstance().displayImage(opponentAvatar, blackAvatar);
                         ImageLoader.getInstance().displayImage(SPUtils.getString("user_avatar"), whiteAvatar);
                         blackInfo.append(opponentUsername);
                         whiteInfo.append(SPUtils.getString("username"));
+                        side = WHITE;
                     });
                 }
-                // TODO: 1.打开串口
-                //  2. 轮到本方落子时，将棋盘状态通过串口发送到Activity，
-                //  3. 通过对比算法计算用户上一步的落子，如果不合法，则不发送到服务器
-                //  4. 如果合法，Activity通过Websocket发送到服务器，服务器将局面发送给另一方
-                //  5. 另一方通过Websocket拿到局面后，通过communication接口发送到子Fragment:mListener.communication(state)
-                //  6. 子Fragment通过drawBoard更新UI
+                // TODO:打开串口
+                // initSerial();
+                // Serial serial = new Serial();
+                // serial.start();
+            }
+            // 接受到另一端的落子
+            else if (type.equals(PLAY)) {
+                int current = resp.getInteger("current");
+                // 判断接受到的是本方发送过去的落子还是对方发来的合法落子
+                if (current == side) {
+                    // 接受到对方发来的落子
+                    int opponentPlayX = resp.getInteger("last_x");
+                    int opponentPlayY = resp.getInteger("last_y");
+                    // 另一方通过Websocket拿到局面后，通过communication接口发送到子Fragment:mListener.communication(state)
+                    mListener.communication(opponentPlayX, opponentPlayY, false);
+                }
             }
             // 对局结束，返回好友界面
             else if (type.equals("result")) {
                 FriendsPlayActivity.this.runOnUiThread(() -> {
-                    smileDialog = new SmileDialogBuilder(FriendsPlayActivity.this, SmileDialogType.SUCCESS)
-                            .hideTitle(true)
-                            .setContentText("对局结束" + resp.getString("loser"))
-                            .setConformBgResColor(R.color.color_green_sea)
-                            .setCanceledOnTouchOutside(false)
-                            .setConformTextColor(Color.WHITE)
-                            .setWindowAnimations(R.style.dialog_style)
-                            .setConformButton(R.string.confirm, () -> setTabSelection(1))
-                            .build();
+                    OnConformClickListener listener = () -> setTabSelection(1);
+                    smileDialog = buildSuccessDialogWithConfirm(FriendsPlayActivity.this, "对局结束" + resp.getString("loser"), listener);
                     smileDialog.show();
                 });
             }
@@ -296,12 +317,12 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
 
         @Override
         public void onOpen() {
-            Log.d(Logger, "opOpen");
+            Log.d(Logger, "onOpen");
         }
 
         @Override
         public void onClosed() {
-            Log.d(Logger, "opClosed");
+            Log.d(Logger, "onClosed");
         }
     };
 
@@ -314,20 +335,88 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     public void process(String str, Long requestId) {
         webSocketService.send(str);
         runOnUiThread(() -> {
-            smileDialog = new SmileDialogBuilder(this, SmileDialogType.WARNING)
-                    .hideTitle(true)
-                    .setContentText("请等待对方响应...")
-                    .setConformBgResColor(R.color.gray_text_light)
-                    .setCanceledOnTouchOutside(false)
-                    .setConformTextColor(Color.WHITE)
-                    .setWindowAnimations(R.style.dialog_style)
-                    .setConformButton(R.string.cancel, () -> {
-                        JSONObject sendReq = new JSONObject();
-                        sendReq.put("event", CANCEL_REQUEST);
-                        sendReq.put("friend_id", requestId);
-                        webSocketService.send(sendReq.toJSONString());
-                    }).build();
+            OnConformClickListener listener = () -> {
+                JSONObject sendReq = new JSONObject();
+                sendReq.put("event", CANCEL_REQUEST);
+                sendReq.put("friend_id", requestId);
+                webSocketService.send(sendReq.toJSONString());
+            };
+            smileDialog = buildWarningDialogWithCancel(this, "请等待对方响应...", listener);
             smileDialog.show();
         });
+    }
+
+    @Override
+    public void event(int eventCode, int x, int y, String msg) {
+        // 无法落子回调
+        if (eventCode == INVALID_PLAY) {
+            Log.e(Logger, "无法落子");
+        } else if (eventCode == PLAY_SUCCESSFULLY) {
+            // 落子合法，将该位置通过Websocket发送给另一端
+            JSONObject req = new JSONObject();
+            req.put("event", PLAY);
+            req.put("x", x);
+            req.put("y", y);
+            webSocketService.send(req.toJSONString());
+        } else if (eventCode == WRONG_SIDE) {
+            smileDialog.dismiss();
+            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "错误的落子方 " + msg, null);
+            smileDialog.show();
+        } else if (eventCode == DETECTION_LACK_STONE) {
+            smileDialog.dismiss();
+            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "缺少棋子 " + msg, null);
+            smileDialog.show();
+        } else if (eventCode == DETECTION_UNNECESSARY_STONE) {
+            smileDialog.dismiss();
+            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "多余棋子", null);
+            smileDialog.show();
+        }
+    }
+
+    /**
+     * 初始化串口并打开
+     */
+    private void initSerial() {
+        SerialManager.getInstance().init(this);
+        initSerial = SerialManager.getInstance().open();
+        if (initSerial) {
+            Log.d(Logger, "串口已开启");
+            resetUnderMachine();
+        }
+    }
+
+    private void resetUnderMachine() {
+        SerialManager.getInstance().send(TURN_OFF_LIGHT_ORDER);
+        SerialManager.getInstance().send(TURN_OFF_LIGHT_ORDER);
+        SerialManager.getInstance().send(RESET_BOARD_ORDER);
+        SerialManager.getInstance().send(RESET_BOARD_ORDER);
+    }
+
+    /**
+     * 串口连接成功回调函数
+     *
+     * @param path    串口地址(当有多个串口需要统一处理时，可以用地址来区分)
+     * @param success 连接是否成功
+     */
+    @Override
+    public void connectMsg(String path, boolean success) {
+    }
+
+    /***
+     * 串口读取数据回调函数，轮到本方落子时，将棋盘状态通过串口发送到Activity，
+     * @param path 串口地址(当有多个串口需要统一处理时，可以用地址来区分)
+     * @param bytes 读取到的数据
+     * @param size 数据长度
+     */
+    @Override
+    public void readData(String path, byte[] bytes, int size) {
+        // 1.接收到的字节数组转化为16进制字符串列表
+        List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
+        // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState
+        int cnt, k;
+        for (cnt = 0, k = 0; k < receivedHexString.size(); k++, cnt++) {
+            receivedBoardState[cnt / 19 + 1][(cnt % 19) + 1] = Integer.parseInt(receivedHexString.get(k), 16);
+        }
+        mListener.transferBoardState(receivedBoardState);
     }
 }

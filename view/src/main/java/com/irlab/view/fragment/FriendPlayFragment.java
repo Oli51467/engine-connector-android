@@ -85,7 +85,7 @@ public class FriendPlayFragment extends Fragment implements FragmentReceiveListe
 
     @Override
     public void communication(int x, int y, boolean me) {
-        // 接收到Activity回调来的落子位置，检查落子是否合法 要改！！！！
+        // 接收到Activity回调来的落子位置，检查落子是否合法
         if (board.play(x, y)) {
             // 合法 画到棋盘上前端展示
             lastX = x;

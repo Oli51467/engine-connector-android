@@ -53,6 +53,8 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
 
     private static final String Logger = FriendsPlayActivity.class.getName();
 
+    private final OnConformClickListener onConformClickListener = () -> showDialog = true;
+
     // View Components
     private ImageView headerBack, blackAvatar, whiteAvatar;
     private TextView blackInfo, whiteInfo;
@@ -68,7 +70,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     // normal variables
     private int[][] receivedBoardState;
     private String userid;
-    private boolean initSerial;
+    private boolean initSerial, showDialog;
     private Integer side;
 
     // temp
@@ -124,6 +126,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         userid = SPUtils.getString("user_id");
         receivedBoardState = new int[WIDTH + 1][WIDTH + 1];
         initSerial = false;
+        showDialog = true;
     }
 
     public void initFragmentComponents() {
@@ -143,8 +146,8 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         friendListFragment = new FriendListFragment();
         friendPlayFragment = new FriendPlayFragment();
         mListener = friendPlayFragment;
-        transaction.add(R.id.fragment, friendListFragment, "friend_list");
-        transaction.add(R.id.fragment, friendPlayFragment, "friend_play");
+        transaction.add(R.id.fragment, friendListFragment);
+        transaction.add(R.id.fragment, friendPlayFragment);
         transaction.commit();
         setTabSelection(1);
     }
@@ -196,7 +199,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                 setTabSelection(1);
             };
             smileDialog = buildErrorDialogWithConfirmAndCancel(FriendsPlayActivity.this, "你确定认输吗", listener);
-            smileDialog.show();
+            runOnUiThread(() -> smileDialog.show());
         } else if (vid == R.id.btn_regret) {
             String[] indexes = input.getText().toString().split(" ");
             int x = Integer.parseInt(indexes[0]);
@@ -217,23 +220,21 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             // 收到某个好友的对局邀请
             if (type.equals(REQUEST_PLAY)) {
                 Long friendId = resp.getLong("id");
-                runOnUiThread(() -> {
-                    OnConformClickListener confirmListener = () -> {
-                        JSONObject sendReq = new JSONObject();
-                        sendReq.put("event", ACCEPT_INVITATION);
-                        sendReq.put("user_id", userid);
-                        sendReq.put("friend_id", friendId);
-                        webSocketService.send(sendReq.toJSONString());
-                    };
-                    OnCancelClickListener cancelListener = () -> {
-                        JSONObject sendReq = new JSONObject();
-                        sendReq.put("event", REFUSE_INVITATION);
-                        sendReq.put("friend_id", friendId);
-                        webSocketService.send(sendReq.toJSONString());
-                    };
-                    smileDialog = buildSuccessDialogWithConfirmAndCancel(FriendsPlayActivity.this, "有人向您提出对局申请", confirmListener, cancelListener);
-                    smileDialog.show();
-                });
+                OnConformClickListener confirmListener = () -> {
+                    JSONObject sendReq = new JSONObject();
+                    sendReq.put("event", ACCEPT_INVITATION);
+                    sendReq.put("user_id", userid);
+                    sendReq.put("friend_id", friendId);
+                    webSocketService.send(sendReq.toJSONString());
+                };
+                OnCancelClickListener cancelListener = () -> {
+                    JSONObject sendReq = new JSONObject();
+                    sendReq.put("event", REFUSE_INVITATION);
+                    sendReq.put("friend_id", friendId);
+                    webSocketService.send(sendReq.toJSONString());
+                };
+                smileDialog = buildSuccessDialogWithConfirmAndCancel(FriendsPlayActivity.this, "有人向您提出对局申请", confirmListener, cancelListener);
+                runOnUiThread(() -> smileDialog.show());
             }
             // 好友不在线
             else if (type.equals(FRIEND_NOT_ONLINE)) {
@@ -258,8 +259,8 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             // 双方准备好，进入对局界面
             else if (type.equals(READY_STATUS)) {
                 FriendsPlayActivity.this.runOnUiThread(() -> {
-                    setTabSelection(2);
                     smileDialog.dismiss();
+                    setTabSelection(2);
                 });
             }
             // 对局开始
@@ -288,10 +289,10 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                         side = WHITE;
                     });
                 }
-                // TODO:打开串口
-                // initSerial();
-                // Serial serial = new Serial();
-                // serial.start();
+                // TODO: 打开串口
+                /* initSerial();
+                 Serial serial = new Serial();
+                 serial.start();*/
             }
             // 接受到另一端的落子
             else if (type.equals(PLAY)) {
@@ -334,23 +335,24 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void process(String str, Long requestId) {
         webSocketService.send(str);
-        runOnUiThread(() -> {
-            OnConformClickListener listener = () -> {
-                JSONObject sendReq = new JSONObject();
-                sendReq.put("event", CANCEL_REQUEST);
-                sendReq.put("friend_id", requestId);
-                webSocketService.send(sendReq.toJSONString());
-            };
-            smileDialog = buildWarningDialogWithCancel(this, "请等待对方响应...", listener);
-            smileDialog.show();
-        });
+        OnConformClickListener listener = () -> {
+            JSONObject sendReq = new JSONObject();
+            sendReq.put("event", CANCEL_REQUEST);
+            sendReq.put("friend_id", requestId);
+            webSocketService.send(sendReq.toJSONString());
+        };
+        smileDialog = buildWarningDialogWithCancel(this, "请等待对方响应...", listener);
+        runOnUiThread(() -> smileDialog.show());
     }
 
     @Override
     public void event(int eventCode, int x, int y, String msg) {
         // 无法落子回调
-        if (eventCode == INVALID_PLAY) {
+        if (eventCode == INVALID_PLAY && showDialog) {
             Log.e(Logger, "无法落子");
+            showDialog = false;
+            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "无法落子", onConformClickListener);
+            runOnUiThread(() -> smileDialog.show());
         } else if (eventCode == PLAY_SUCCESSFULLY) {
             // 落子合法，将该位置通过Websocket发送给另一端
             JSONObject req = new JSONObject();
@@ -358,18 +360,18 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             req.put("x", x);
             req.put("y", y);
             webSocketService.send(req.toJSONString());
-        } else if (eventCode == WRONG_SIDE) {
-            smileDialog.dismiss();
-            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "错误的落子方 " + msg, null);
-            smileDialog.show();
-        } else if (eventCode == DETECTION_LACK_STONE) {
-            smileDialog.dismiss();
-            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "缺少棋子 " + msg, null);
-            smileDialog.show();
-        } else if (eventCode == DETECTION_UNNECESSARY_STONE) {
-            smileDialog.dismiss();
-            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "多余棋子", null);
-            smileDialog.show();
+        } else if (eventCode == WRONG_SIDE && showDialog) {
+            showDialog = false;
+            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "错误的落子方 " + msg, onConformClickListener);
+            runOnUiThread(() -> smileDialog.show());
+        } else if (eventCode == DETECTION_LACK_STONE && showDialog) {
+            showDialog = false;
+            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "缺少棋子 " + msg, onConformClickListener);
+            runOnUiThread(() -> smileDialog.show());
+        } else if (eventCode == DETECTION_UNNECESSARY_STONE && showDialog) {
+            showDialog = false;
+            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "多余棋子", onConformClickListener);
+            runOnUiThread(() -> smileDialog.show());
         }
     }
 

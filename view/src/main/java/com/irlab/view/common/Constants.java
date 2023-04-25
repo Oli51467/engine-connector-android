@@ -19,6 +19,7 @@ public class Constants {
     public static final String DEFAULT_LEVEL = "选择难度";
 
     public static final String[] LEVELS = {"1段", "2段", "3段", "4段", "5段", "6段", "7段", "8段", "9段", "10段"};
+    public static final String FAILED_STATUS = "failed";
     public static final String[] ENGINE_LEVEL = {"b", "d", "f", "h", "j", "l", "m", "n", "o", "p"};
 
     public static final int RECONNECT_TIMEOUT = 5000;

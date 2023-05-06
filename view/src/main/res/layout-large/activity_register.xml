@@ -47,6 +47,36 @@
             android:textSize="36sp"
             android:theme="@style/MyEditText" />
         <!--输入框-->
+        <LinearLayout
+            android:layout_width="400dp"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/et_verification_code"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:hint="验证码"
+                android:inputType="phone"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:maxLines="1"
+                android:maxLength="6"
+                android:textColor="@color/black"
+                android:textColorHint="@color/hint_text_color"
+                android:textSize="36sp"
+                android:theme="@style/MyEditText">
+            </EditText>
+
+            <Button
+                android:id="@+id/send_ver_code"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="发送"
+                android:textSize="24sp"/>
+        </LinearLayout>
+        <!--输入框-->
         <EditText
             android:id="@+id/et_psw"
             android:layout_width="400dp"
@@ -82,25 +112,25 @@
         <!--按钮-->
         <Button
             android:id="@+id/btn_register"
-            android:layout_width="320dp"
+            android:layout_width="400dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
             android:background="@drawable/btn_not_focus"
             android:text="注册"
             android:textColor="@color/white"
-            android:textSize="36sp" />
+            android:textSize="32sp" />
 
         <Button
             android:id="@+id/btn_return"
-            android:layout_width="320dp"
+            android:layout_width="400dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
             android:background="@drawable/btn_update"
             android:text="已有账号 去登陆"
             android:textColor="@color/white"
-            android:textSize="36sp" />
+            android:textSize="32sp" />
     </LinearLayout>
 
 

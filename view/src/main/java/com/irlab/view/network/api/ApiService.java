@@ -15,16 +15,34 @@ import retrofit2.http.Query;
 public interface ApiService {
 
     /**
-     * 检查用户名是否被注册
+     * 用户通过账户密码登陆
      */
     @POST("/api/account/token/")
-    Observable<Response> login(@Query("username") String username, @Query("password") String password);
+    Observable<Response> loginViaPassword(@Query("username") String username,
+                                          @Query("password") String password);
+
+    /**
+     * 用户通过手机验证码登陆
+     */
+    @POST("/api/login/code/")
+    Observable<Response> loginViaVerificationCode(@Query("phone_number") String phoneNumber,
+                                                  @Query("verification_code") String verificationCode);
 
     /**
      * 添加一个用户
      */
     @POST("/api/account/register/")
-    Observable<Response> register(@Query("username") String username, @Query("password") String password);
+    Observable<Response> register(@Query("username") String username,
+                                  @Query("password") String password,
+                                  @Query("phone_number") String phoneNumber,
+                                  @Query("verification_code") String verificationCode);
+
+    /**
+     * 给指定手机发送验证码
+     * @param phoneNumber 手机号
+     */
+    @POST("/api/account/verification/")
+    Observable<Response> sendVerificationCode(@Query("phone_number") String phoneNumber);
 
     /**
      * 获取用户信息
@@ -40,7 +58,9 @@ public interface ApiService {
      * @return 棋谱信息Json
      */
     @GET("/api/record/getMy/")
-    Observable<JSONObject> getMyRecords(@Header("Authorization") String token, @Query("user_id") Long userid, @Query("page") Integer page);
+    Observable<JSONObject> getMyRecords(@Header("Authorization") String token,
+                                        @Query("user_id") Long userid,
+                                        @Query("page") Integer page);
 
     /**
      * 获取其他人棋谱信息
@@ -50,7 +70,9 @@ public interface ApiService {
      * @return 棋谱信息Json
      */
     @GET("/api/record/getAll/")
-    Observable<JSONObject> getAllRecords(@Header("Authorization") String token, @Query("user_id") Long userid, @Query("page") Integer page);
+    Observable<JSONObject> getAllRecords(@Header("Authorization") String token,
+                                         @Query("user_id") Long userid,
+                                         @Query("page") Integer page);
 
     /**
      * 获取棋谱的详细信息
@@ -59,16 +81,21 @@ public interface ApiService {
      * @return 棋谱详细信息 主要是steps
      */
     @GET("/api/record/detail/")
-    Observable<JSONObject> getRecordDetail(@Header("Authorization") String token, @Query("record_id") Long recordId);
+    Observable<JSONObject> getRecordDetail(@Header("Authorization") String token,
+                                           @Query("record_id") Long recordId);
 
     @GET("/api/friend/get/")
-    Observable<JSONObject> getFriends(@Header("Authorization") String token, @Query("user_id") Long userid);
+    Observable<JSONObject> getFriends(@Header("Authorization") String token,
+                                      @Query("user_id") Long userid);
 
     /**
      * 更新用户信息
      */
     @POST("/api/user/updateInfo/")
-    Observable<Response> updateUser(@Header("Authorization") String token, @Query("username") String username, @Query("profile") String profile, @Query("phone") String phone);
+    Observable<Response> updateUser(@Header("Authorization") String token,
+                                    @Query("username") String username,
+                                    @Query("profile") String profile,
+                                    @Query("phone") String phone);
 
     /**
      * 更新用户信息

@@ -2,13 +2,10 @@ package com.irlab.view.fragment;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +17,6 @@ import com.irlab.view.entity.MyFunction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 
 public class PlayFragment extends Fragment {
 
@@ -34,45 +30,29 @@ public class PlayFragment extends Fragment {
     };
     private final List<MyFunction> funcList = new ArrayList<>();
 
-    // 控件
     private View view;
+    private RecyclerView mRecyclerView = null;
+    private FunctionAdapter functionAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // 控件
         view = inflater.inflate(R.layout.fragment_play, container, false);
-        setView(view);
-        Message msg = new Message();
-        msg.obj = this.getActivity();
+        initFunction();
+        mRecyclerView = view.findViewById(R.id.recycler_view);
+        initComponents();
         return view;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initFunction();
-        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+    private void initComponents() {
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
-        recyclerView.setLayoutManager(gridLayoutManager);
-        FunctionAdapter functionAdapter = new FunctionAdapter(funcList);
-        recyclerView.setAdapter(functionAdapter);
+        mRecyclerView.setLayoutManager(gridLayoutManager);
+        functionAdapter = new FunctionAdapter(funcList);
+        mRecyclerView.setAdapter(functionAdapter);
     }
 
     // 初始化卡片中的功能模块
     public void initFunction() {
         Collections.addAll(funcList, functions);
-    }
-
-    private void setView(View view) {
-        this.view = view;
     }
 }

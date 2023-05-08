@@ -38,7 +38,7 @@ import com.irlab.view.fragment.FriendPlayFragment;
 import com.irlab.view.listener.FragmentEventListener;
 import com.irlab.view.listener.FragmentReceiveListener;
 import com.irlab.view.listener.WebSocketCallbackListener;
-import com.irlab.view.serial.Serial;
+import com.irlab.view.serial.FriendPlaySerial;
 import com.irlab.view.serial.SerialInter;
 import com.irlab.view.serial.SerialManager;
 import com.irlab.view.service.WebSocketService;
@@ -52,6 +52,7 @@ import java.util.List;
 public class FriendsPlayActivity extends BaseActivity implements View.OnClickListener, FragmentEventListener, SerialInter {
 
     private static final String Logger = FriendsPlayActivity.class.getName();
+    public static boolean playing = false;
 
     private final OnConformClickListener onConformClickListener = () -> showDialog = true;
 
@@ -191,6 +192,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             startActivity(intent);
         } else if (vid == R.id.btn_resign) {    // 用户主动认输
             OnConformClickListener listener = () -> {
+                playing = false;
                 JSONObject req = new JSONObject();
                 req.put("event", PLAY);
                 req.put("x", -1);
@@ -198,8 +200,8 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                 webSocketService.send(req.toJSONString());
                 setTabSelection(1);
             };
-            smileDialog = buildErrorDialogWithConfirmAndCancel(FriendsPlayActivity.this, "你确定认输吗", listener);
-            runOnUiThread(() -> smileDialog.show());
+            SmileDialog smileDialog = buildErrorDialogWithConfirmAndCancel(FriendsPlayActivity.this, "你确定认输吗", listener);
+            runOnUiThread(smileDialog::show);
         } else if (vid == R.id.btn_regret) {
             String[] indexes = input.getText().toString().split(" ");
             int x = Integer.parseInt(indexes[0]);
@@ -241,7 +243,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                 runOnUiThread(() -> {
                     smileDialog.dismiss();
                     smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "对方不在线", null);
-                    smileDialog.show();
+                    runOnUiThread(() -> smileDialog.show());
                 });
             }
             // 好友拒绝了您的邀请
@@ -249,7 +251,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                 runOnUiThread(() -> {
                     smileDialog.dismiss();
                     smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "对方拒绝了您的请求", null);
-                    smileDialog.show();
+                    runOnUiThread(() -> smileDialog.show());
                 });
             }
             // 好友取消了邀请
@@ -289,10 +291,11 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                         side = WHITE;
                     });
                 }
-                // TODO: 打开串口
-                /* initSerial();
-                 Serial serial = new Serial();
-                 serial.start();*/
+                // 打开串口
+                playing = true;
+                initSerial();
+                FriendPlaySerial serial = new FriendPlaySerial();
+                serial.start();
             }
             // 接受到另一端的落子
             else if (type.equals(PLAY)) {
@@ -302,16 +305,18 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                     // 接受到对方发来的落子
                     int opponentPlayX = resp.getInteger("last_x");
                     int opponentPlayY = resp.getInteger("last_y");
+                    sendMoves2LowerComputer(opponentPlayX, opponentPlayY);
                     // 另一方通过Websocket拿到局面后，通过communication接口发送到子Fragment:mListener.communication(state)
                     mListener.communication(opponentPlayX, opponentPlayY, false);
                 }
             }
             // 对局结束，返回好友界面
             else if (type.equals("result")) {
+                playing = false;
                 FriendsPlayActivity.this.runOnUiThread(() -> {
                     OnConformClickListener listener = () -> setTabSelection(1);
-                    smileDialog = buildSuccessDialogWithConfirm(FriendsPlayActivity.this, "对局结束" + resp.getString("loser"), listener);
-                    smileDialog.show();
+                    SmileDialog smileDialog = buildSuccessDialogWithConfirm(FriendsPlayActivity.this, "对局结束" + resp.getString("loser"), listener);
+                    runOnUiThread(smileDialog::show);
                 });
             }
         }
@@ -324,6 +329,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         @Override
         public void onClosed() {
             Log.d(Logger, "onClosed");
+            playing = false;
         }
     };
 
@@ -349,10 +355,9 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     public void event(int eventCode, int x, int y, String msg) {
         // 无法落子回调
         if (eventCode == INVALID_PLAY && showDialog) {
-            Log.e(Logger, "无法落子");
             showDialog = false;
-            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "无法落子", onConformClickListener);
-            runOnUiThread(() -> smileDialog.show());
+            SmileDialog smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "无法落子", onConformClickListener);
+            runOnUiThread(smileDialog::show);
         } else if (eventCode == PLAY_SUCCESSFULLY) {
             // 落子合法，将该位置通过Websocket发送给另一端
             JSONObject req = new JSONObject();
@@ -362,16 +367,16 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             webSocketService.send(req.toJSONString());
         } else if (eventCode == WRONG_SIDE && showDialog) {
             showDialog = false;
-            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "错误的落子方 " + msg, onConformClickListener);
-            runOnUiThread(() -> smileDialog.show());
+            SmileDialog smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "错误的落子方 " + msg, onConformClickListener);
+            runOnUiThread(smileDialog::show);
         } else if (eventCode == DETECTION_LACK_STONE && showDialog) {
             showDialog = false;
-            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "缺少棋子 " + msg, onConformClickListener);
-            runOnUiThread(() -> smileDialog.show());
+            SmileDialog smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "缺少棋子 " + msg, onConformClickListener);
+            runOnUiThread(smileDialog::show);
         } else if (eventCode == DETECTION_UNNECESSARY_STONE && showDialog) {
             showDialog = false;
-            smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "多余棋子", onConformClickListener);
-            runOnUiThread(() -> smileDialog.show());
+            SmileDialog smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "多余棋子", onConformClickListener);
+            runOnUiThread(smileDialog::show);
         }
     }
 
@@ -395,6 +400,30 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     }
 
     /**
+     * 将落子位置发送给下位机
+     * @param moveX 落子位置的十进制横坐标
+     * @param moveY 落子位置的十进制纵坐标
+     */
+    private void sendMoves2LowerComputer(Integer moveX, Integer moveY) {
+        // 1.将引擎的落子位置转化成16进制
+        String hexX = Integer.toHexString(moveX);
+        String hexY = Integer.toHexString(moveY);
+        // 2.如果小于15 要补0
+        if (moveX <= 15) hexX = "0" + hexX;
+        if (moveY <= 15) hexY = "0" + hexY;
+        // 3.根据通信协议构建指令
+        StringBuilder order = new StringBuilder();
+        order.append("EE");
+        if (side == BLACK) order.append("32");
+        else order.append("31");
+        order.append(hexX).append(hexY).append("FC").append("FF");
+        // 4.通过串口类发送数据
+        SerialManager.getInstance().send(order.toString());
+        SerialManager.getInstance().send(order.toString());
+        SerialManager.getInstance().send(order.toString());
+    }
+
+    /**
      * 串口连接成功回调函数
      *
      * @param path    串口地址(当有多个串口需要统一处理时，可以用地址来区分)
@@ -414,6 +443,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     public void readData(String path, byte[] bytes, int size) {
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
+        Log.d("serialLogger", "接收: " + size + "字节");
         // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState
         int cnt, k;
         for (cnt = 0, k = 0; k < receivedHexString.size(); k++, cnt++) {

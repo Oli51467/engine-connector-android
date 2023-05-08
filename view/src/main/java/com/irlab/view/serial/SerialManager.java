@@ -36,7 +36,7 @@ public class SerialManager {
         return instance;
     }
 
-    public static void setInstance() {
+    public static void destroyInstance() {
         if (null != instance) {
             synchronized (SerialManager.class) {
                 if (null != instance) {

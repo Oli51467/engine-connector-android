@@ -23,6 +23,7 @@ import com.irlab.view.activity.FriendsPlayActivity;
 import com.irlab.view.activity.PlayActivity;
 import com.irlab.view.activity.SelectConfigActivity;
 import com.irlab.view.activity.ConnectWifiActivity;
+import com.irlab.view.activity.SpeechActivity;
 import com.irlab.view.entity.MyFunction;
 
 import java.util.List;
@@ -102,6 +103,10 @@ public class FunctionAdapter extends RecyclerView.Adapter<FunctionAdapter.ViewHo
             } else if (function.getName().equals("语音对话")) {
                 if (!checkLogin()) {
                     Intent intent = new Intent(context, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(intent);
+                } else {
+                    Intent intent = new Intent(context, SpeechActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(intent);
                 }

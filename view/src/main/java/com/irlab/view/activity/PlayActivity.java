@@ -66,22 +66,19 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     public static final String serialLogger = "serial-Logger";
     public static boolean playing = false;
 
-    public boolean showDialog;
-
     private final Drawer drawer = new Drawer();
     private final OnConformClickListener onConformClickListener = () -> showDialog = true;
 
     private Board board;
     private ImageView boardImageView;
     private Bitmap boardBitmap;
-    private SmileDialog dialog;
     private Button chooseSide, chooseLevel;
     private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
 
     private Integer side, level, engineLastX, engineLastY;
     private String userid;
     private int[][] receivedBoardState;
-    private boolean initSerial;
+    private boolean initSerial, showDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -142,13 +139,13 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             // 点击返回时，如果玩家在对局中，提示玩家先结束对局
             if (playing) {
                 if (showDialog) {
-                    dialog = buildErrorDialogWithConfirm(PlayActivity.this, "请先结束对局", onConformClickListener);
-                    runOnUiThread(() -> dialog.show());
+                    SmileDialog dialog = buildErrorDialogWithConfirm(PlayActivity.this, "请先结束对局", onConformClickListener);
+                    runOnUiThread(dialog::show);
                 }
             } else {
                 // 否则关闭串口流，然后跳转
                 SerialManager.getInstance().close();
-                SerialManager.setInstance();
+                SerialManager.destroyInstance();
                 Intent intent = new Intent(this, MainView.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -157,7 +154,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             // 必须选择难度和黑白方后才能开始下棋
             if (chooseSide.getText().equals(DEFAULT_SIDE) || chooseLevel.getText().equals(DEFAULT_LEVEL)) {
                 SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "请选择黑白及段位", null);
-                dialog.show();
+                runOnUiThread(dialog::show);
                 return;
             } else if (chooseSide.getText().equals(BLACK_SIDE)) {
                 side = BLACK;
@@ -190,8 +187,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                     saveRecord();
                     resign();
                 };
-                dialog = buildErrorDialogWithConfirmAndCancel(this, "您确定认输吗", listener);
-                runOnUiThread(() -> dialog.show());
+                SmileDialog dialog = buildErrorDialogWithConfirmAndCancel(this, "您确定认输吗", listener);
+                runOnUiThread(dialog::show);
             }
         } else if (vid == R.id.btn_choose_side) {
             if (chooseSide.getText().equals(DEFAULT_SIDE)) chooseSide.setText(BLACK_SIDE);
@@ -205,6 +202,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     @Override
     public void connectMsg(String path, boolean success) {
+        Log.d(serialLogger, "Connect status " + success + " Path is: " + path);
     }
 
     /**
@@ -241,23 +239,23 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             String wrongPosition = getPositionByIndex(checkResp.get(1), checkResp.get(2));
             if (showDialog) {
                 showDialog = false;
-                dialog = buildWarningDialogWithConfirm(PlayActivity.this, "错误的落子方 " + wrongPosition, onConformClickListener);
-                runOnUiThread(() -> dialog.show());
+                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "错误的落子方 " + wrongPosition, onConformClickListener);
+                runOnUiThread(dialog::show);
             }
         } else if (res == DETECTION_LACK_STONE) {
             // 缺少棋子提示
             String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
             if (showDialog) {
                 showDialog = false;
-                dialog = buildWarningDialogWithConfirm(PlayActivity.this, "缺少棋子 " + lackStonePosition, onConformClickListener);
-                runOnUiThread(() -> dialog.show());
+                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "缺少棋子 " + lackStonePosition, onConformClickListener);
+                runOnUiThread(dialog::show);
             }
         } else if (res == DETECTION_UNNECESSARY_STONE) {
             // 多余棋子提示
             if (showDialog) {
                 showDialog = false;
-                dialog = buildWarningDialogWithConfirm(PlayActivity.this, "多余棋子", onConformClickListener);
-                runOnUiThread(() -> dialog.show());
+                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "多余棋子", onConformClickListener);
+                runOnUiThread(dialog::show);
             }
         } else if (res == NORMAL_PLAY) {
             Integer playX = checkResp.get(1);
@@ -266,8 +264,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 // 无法落子提示
                 if (showDialog) {
                     showDialog = false;
-                    dialog = buildWarningDialogWithConfirm(PlayActivity.this, "不允许落子，请及时取走", onConformClickListener);
-                    runOnUiThread(() -> dialog.show());
+                    SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "不允许落子，请及时取走", onConformClickListener);
+                    runOnUiThread(dialog::show);
                 }
             }
         }
@@ -279,7 +277,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         boolean ok = board.play(x, y);
         if (!ok) return false;  // 不能落子 直接返回 给出错误提示
         else {
-            Log.d(serialLogger, "比较落子位置: " + x + " " + y);
+            //Log.d(serialLogger, "比较落子位置: " + x + " " + y);
             // 1.将可以落下的棋子标记在棋盘上并刷新棋盘
             drawBoard();
             // 2.将落子的轴坐标转化为引擎可接受的棋盘坐标
@@ -313,8 +311,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         // 2.如果小于15 要补0
         if (moveX <= 15) hexX = "0" + hexX;
         if (moveY <= 15) hexY = "0" + hexY;
-        Log.d(serialLogger, "引擎落子：" + engineLastX + " " + engineLastY);
-        Log.d(serialLogger, "发下位机：" + hexX + " " + hexY);
+//        Log.d(serialLogger, "引擎落子：" + engineLastX + " " + engineLastY);
+//        Log.d(serialLogger, "发下位机：" + hexX + " " + hexY);
         // 3.根据通信协议构建指令
         StringBuilder order = new StringBuilder();
         order.append("EE");

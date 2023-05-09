@@ -110,11 +110,13 @@ public class FriendPlayFragment extends Fragment implements FragmentReceiveListe
         if (res.equals(WRONG_SIDE)) {
             String wrongPosition = getPositionByIndex(checkResp.get(1), checkResp.get(2));
             fragmentEventListener.event(WRONG_SIDE, -1, -1, wrongPosition);
-        } else if (res.equals(DETECTION_LACK_STONE)) {
-            // 缺少棋子提示
-            String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
-            fragmentEventListener.event(DETECTION_LACK_STONE, -1, -1, lackStonePosition);
-        } else if (res.equals(DETECTION_UNNECESSARY_STONE)) {
+        }
+//        else if (res.equals(DETECTION_LACK_STONE)) {
+//            // 缺少棋子提示
+//            String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
+//            fragmentEventListener.event(DETECTION_LACK_STONE, -1, -1, lackStonePosition);
+//        }
+        else if (res.equals(DETECTION_UNNECESSARY_STONE)) {
             // 多余棋子提示
             fragmentEventListener.event(DETECTION_UNNECESSARY_STONE, -1, -1, "多余棋子");
         } else if (res.equals(NORMAL_PLAY)) {

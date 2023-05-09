@@ -29,6 +29,16 @@ public interface ApiService {
                                                   @Query("verification_code") String verificationCode);
 
     /**
+     * 添加一个陪伴版设备
+     * @param token json web token
+     * @param companyId 设备id
+     * @return 若设备添加成功，返回{"code": 200, "msg": "success", "data": null}
+     *        设备已被其它用户添加过 返回{"code": 10100, "msg": "设备已被其它用户注册", "data": null}
+     */
+    @POST("/api/device/company/add/")
+    Observable<Response> addCompanyDevice(@Header("Authorization") String token, @Query("company_id") String companyId);
+
+    /**
      * 添加一个用户
      */
     @POST("/api/account/register/")

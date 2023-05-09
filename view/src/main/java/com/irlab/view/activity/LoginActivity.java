@@ -1,5 +1,6 @@
 package com.irlab.view.activity;
 
+import static com.irlab.base.utils.SPUtils.getHeaders;
 import static com.irlab.base.utils.SPUtils.saveString;
 
 import android.annotation.SuppressLint;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,6 +38,8 @@ import java.util.Map;
 @SuppressLint("CheckResult")
 @Route(path = "/auth/login")
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
+
+    private final String Logger = LoginActivity.class.getName();
 
     private EditText etUsername, etPassword, etPhoneNumber, etVerCode;
     private TextView tvVerCodeLogin, tvPasswordLogin;
@@ -195,8 +199,23 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     private void getUserInfoViaJsonWebToken(String jwt, Message msg) {
         saveString("jwt", jwt);
+        String header = getHeaders();
+        String deviceId = Settings.System.getString(getContentResolver(), Settings.System.ANDROID_ID);
         NetworkApi.createService(ApiService.class)
-                .getInfo("Bearer " + jwt).compose(NetworkApi.applySchedulers(new BaseObserver<>() {
+                .addCompanyDevice(header, deviceId)
+                .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
+                    @Override
+                    public void onSuccess(Response response) {
+                        // TODO:需要添加替换策略
+                    }
+
+                    @Override
+                    public void onFailure(Throwable e) {
+
+                    }
+                }));
+        NetworkApi.createService(ApiService.class)
+                .getInfo(header).compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(Response response) {
                         if (response.getCode() == ResponseCode.SUCCESS.getCode()) {

@@ -187,11 +187,15 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     public void onClick(View v) {
         int vid = v.getId();
         if (vid == R.id.header_back) {
+            // 否则关闭串口流，然后跳转
+            SerialManager.getInstance().close();
+            SerialManager.destroyInstance();
             Intent intent = new Intent(this, MainView.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         } else if (vid == R.id.btn_resign) {    // 用户主动认输
             OnConformClickListener listener = () -> {
+                resetUnderMachine();
                 playing = false;
                 JSONObject req = new JSONObject();
                 req.put("event", PLAY);
@@ -314,7 +318,10 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             else if (type.equals("result")) {
                 playing = false;
                 FriendsPlayActivity.this.runOnUiThread(() -> {
-                    OnConformClickListener listener = () -> setTabSelection(1);
+                    OnConformClickListener listener = () -> {
+                        setTabSelection(1);
+                        resetUnderMachine();
+                    };
                     SmileDialog smileDialog = buildSuccessDialogWithConfirm(FriendsPlayActivity.this, "对局结束" + resp.getString("loser"), listener);
                     runOnUiThread(smileDialog::show);
                 });

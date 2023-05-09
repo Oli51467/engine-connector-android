@@ -33,6 +33,7 @@
                 android:layout_height="90dp"
                 android:layout_gravity="center_vertical"
                 android:scaleType="fitXY"
+                app:strokeColor="@null"
                 app:shapeAppearanceOverlay="@style/circleImageStyle"
                 android:src="@mipmap/default_profile" />
             <LinearLayout

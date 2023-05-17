@@ -2,7 +2,6 @@ package com.irlab.view.fragment;
 
 import static com.irlab.view.common.Constants.BOARD_HEIGHT;
 import static com.irlab.view.common.Constants.BOARD_WIDTH;
-import static com.irlab.view.common.Constants.DETECTION_LACK_STONE;
 import static com.irlab.view.common.Constants.DETECTION_UNNECESSARY_STONE;
 import static com.irlab.view.common.Constants.INVALID_PLAY;
 import static com.irlab.view.common.Constants.NORMAL_PLAY;
@@ -28,7 +27,6 @@ import com.irlab.view.listener.FragmentEventListener;
 import com.irlab.view.listener.FragmentReceiveListener;
 import com.irlab.view.models.Board;
 import com.irlab.view.models.Point;
-import com.irlab.view.utils.BoardUtil;
 import com.irlab.view.utils.Drawer;
 
 import java.util.List;

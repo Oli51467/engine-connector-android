@@ -109,7 +109,7 @@ public class TtsService {
         // 设置合成音调
         mTts.setParameter(SpeechConstant.PITCH, "50");
         // 设置合成音量
-        mTts.setParameter(SpeechConstant.VOLUME, "50");
+        mTts.setParameter(SpeechConstant.VOLUME, "60");
 
         // 设置播放器音频流类型
         mTts.setParameter(SpeechConstant.STREAM_TYPE, "3");

@@ -64,7 +64,7 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordAdapter.RecordView
         // 双方信息
         holder.playerInfo.setText(list.get(position).getRecordDetail());
         // 日期
-        holder.date.append(list.get(position).getCreateTime());
+        holder.date.setText(list.get(position).getCreateTime());
         // 对局结果
         holder.result.setText(list.get(position).getResult());
         // 设置tag

@@ -82,7 +82,7 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
     private void loadRecords(JSONObject resp, Context context) {
         list.clear();
         JSONArray jsonArray = resp.getJSONObject("data").getJSONArray("records");
-        for (int i = jsonArray.size() - 1; i >= 0; i -- ) {
+        for (int i = 0; i < jsonArray.size(); i ++ ) {
             JSONObject record = jsonArray.getJSONObject(i);
             Long recordId = record.getLong("id");
             long blackId = record.getLong("black_userid");

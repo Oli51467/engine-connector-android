@@ -185,7 +185,7 @@ public class SpeechService {
         //此处用于设置dialog中不显示错误码信息
         //mIat.setParameter("view_tips_plain","false");
 
-        // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理 3000
+        // 设置语音前端点:静音超时时间，即用户多长时间不说话则当做超时处理
         mIat.setParameter(SpeechConstant.VAD_BOS, SILENCE_TIMEOUT);
 
         // 设置语音后端点:后端点静音检测时间，即用户停止说话多长时间内即认为不再输入, 自动停止录音 2000

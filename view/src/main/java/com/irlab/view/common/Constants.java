@@ -1,7 +1,7 @@
 package com.irlab.view.common;
 
 public class Constants {
-    public static final String WEBSOCKET_SERVER = "wss://web.fcjznkj.com/go/websocket/";
+    public static final String WEBSOCKET_SERVER = "ws://39.98.80.11:3000/go/websocket/";
     public final static int[] dx = {-1, 0, 1, 0};
     public final static int[] dy = {0, 1, 0, -1};
     public static final int WIDTH = 19;
@@ -29,6 +29,7 @@ public class Constants {
     public static final int DETECTION_NO_STONE = 10003;
     public static final int WRONG_SIDE = 10004;
     public static final int INVALID_PLAY = 10005;
+    public static final int PLAY_IN_ORDER_POSITION = 10006;
     public static final int NORMAL_PLAY = 20001;
     public static final int PLAY_SUCCESSFULLY = 20002;
     public static final int LOAD_FRIENDS_SUCCESSFULLY = 0x03;

@@ -8,7 +8,7 @@ public class Serial extends Thread {
     public void run() {
         while (playing) {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(800);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {

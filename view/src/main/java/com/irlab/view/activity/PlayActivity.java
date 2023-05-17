@@ -223,18 +223,19 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
      */
     @Override
     public void readData(String path, byte[] bytes, int size) {
+        if (size != 365) return;
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
-        Log.d(serialLogger, "接收: " + size + "字节");
         // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState
         int cnt, k;
         for (cnt = 0, k = 0; k < receivedHexString.size(); k++, cnt++) {
             receivedBoardState[cnt / 19 + 1][(cnt % 19) + 1] = Integer.parseInt(receivedHexString.get(k), 16);
         }
-        Log.d(serialLogger, "上一步: " + engineLastX + " " + engineLastY);
+        //Log.d(serialLogger, Arrays.deepToString(receivedBoardState));
         // 3.对比接收到的棋盘数据与维护的棋盘数据的差别
         List<Integer> checkResp = checkState(receivedBoardState, board.getBoard(), engineLastX, engineLastY, board.getPlayer(), board.getCapturedStones());
         int res = checkResp.get(0);
+        // 3.1 轮到黑棋落子 却在棋盘上放白棋 或反之
         if (res == WRONG_SIDE) {
             String wrongPosition = getPositionByIndex(checkResp.get(1), checkResp.get(2));
             if (showDialog) {
@@ -242,24 +243,30 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "错误的落子方 " + wrongPosition, onConformClickListener);
                 runOnUiThread(dialog::show);
             }
-        } else if (res == DETECTION_LACK_STONE) {
-            // 缺少棋子提示
+        }
+        // 3.2 缺少棋子提示
+        else if (res == DETECTION_LACK_STONE) {
             String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
             if (showDialog) {
                 showDialog = false;
                 SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "缺少棋子 " + lackStonePosition, onConformClickListener);
                 runOnUiThread(dialog::show);
             }
-        } else if (res == DETECTION_UNNECESSARY_STONE) {
-            // 多余棋子提示
+        }
+        // 3.3 多余棋子提示
+        else if (res == DETECTION_UNNECESSARY_STONE) {
             if (showDialog) {
                 showDialog = false;
                 SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "多余棋子", onConformClickListener);
                 runOnUiThread(dialog::show);
             }
-        } else if (res == NORMAL_PLAY) {
+        }
+        // 3.4 正常落子 但还未判断是否合法
+        else if (res == NORMAL_PLAY) {
+            // 4. 获得落子位置
             Integer playX = checkResp.get(1);
             Integer playY = checkResp.get(2);
+            // 5. 判断是否落子位置是否合法
             if (!playOnBoardAndRequestEngine(playX, playY)) {
                 // 无法落子提示
                 if (showDialog) {
@@ -273,11 +280,15 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     @SuppressLint("SetTextI18n")
     private boolean playOnBoardAndRequestEngine(int x, int y) {
-        // 0.判断该位置是否可以落子
+        // 0. 判断该位置是否可以落子
         boolean ok = board.play(x, y);
-        if (!ok) return false;  // 不能落子 直接返回 给出错误提示
+        if (!ok) {
+            Log.d(serialLogger, "invalid");
+            return false;  // 不能落子 直接返回 给出错误提示
+        }
+        // 可以落子
         else {
-            //Log.d(serialLogger, "比较落子位置: " + x + " " + y);
+            Log.d(serialLogger, "比较落子位置: " + x + " " + y);
             // 1.将可以落下的棋子标记在棋盘上并刷新棋盘
             drawBoard();
             // 2.将落子的轴坐标转化为引擎可接受的棋盘坐标

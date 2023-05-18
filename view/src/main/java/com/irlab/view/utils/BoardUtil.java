@@ -5,6 +5,7 @@ import static com.irlab.view.common.Constants.DETECTION_NO_STONE;
 import static com.irlab.view.common.Constants.DETECTION_UNNECESSARY_STONE;
 import static com.irlab.view.common.Constants.EMPTY;
 import static com.irlab.view.common.Constants.NORMAL_PLAY;
+import static com.irlab.view.common.Constants.PLAY_IN_ORDER_POSITION;
 import static com.irlab.view.common.Constants.WIDTH;
 import static com.irlab.view.common.Constants.WRONG_SIDE;
 
@@ -13,12 +14,14 @@ import android.util.Pair;
 import com.irlab.view.models.Point;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 public class BoardUtil {
 
-    private static final List<Integer> res = new ArrayList<>();
+    private static final List<Integer> res = new LinkedList<>();
 
     private static final Point point = new Point();
 

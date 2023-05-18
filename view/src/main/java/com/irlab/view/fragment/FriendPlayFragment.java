@@ -76,7 +76,7 @@ public class FriendPlayFragment extends Fragment implements FragmentReceiveListe
 
     private void drawBoard() {
         requireActivity().runOnUiThread(() -> {
-            Bitmap board = drawer.drawBoard(boardBitmap, this.board.getBoard(), new Point(lastX, lastY), 0, 0);
+            Bitmap board = drawer.drawBoard(boardBitmap, this.board.getBoard(), new Point(lastX, lastY), 0, 0, false);
             boardImageView.setImageBitmap(board);
         });
     }

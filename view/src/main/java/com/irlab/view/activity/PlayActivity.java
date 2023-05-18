@@ -161,17 +161,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             } else if (chooseSide.getText().equals(WHITE_SIDE)) {
                 side = WHITE;
             }
-            // 如果没有初始化串口，则初始化
-            if (!initSerial) {
-                initSerial();
-            }
-            playing = true;
-            layoutBeforePlay.setVisibility(View.GONE);
-            layoutAfterPlay.setVisibility(View.VISIBLE);
-            initBoard();
-            // 开启串口轮训发送指令线程
-            Serial serial = new Serial();
-            serial.start();
             initEngine();
         } else if (vid == R.id.btn_resign) {
             if (showDialog) {
@@ -238,7 +227,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         // 3.1 轮到黑棋落子 却在棋盘上放白棋 或反之
         if (res == WRONG_SIDE) {
             String wrongPosition = getPositionByIndex(checkResp.get(1), checkResp.get(2));
-            if (showDialog) {
+            if (showDialog && playing) {
                 showDialog = false;
                 SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "错误的落子方 " + wrongPosition, onConformClickListener);
                 runOnUiThread(dialog::show);
@@ -247,7 +236,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         // 3.2 缺少棋子提示
         else if (res == DETECTION_LACK_STONE) {
             String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
-            if (showDialog) {
+            if (showDialog && playing) {
                 showDialog = false;
                 SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "缺少棋子 " + lackStonePosition, onConformClickListener);
                 runOnUiThread(dialog::show);
@@ -255,7 +244,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         }
         // 3.3 多余棋子提示
         else if (res == DETECTION_UNNECESSARY_STONE) {
-            if (showDialog) {
+            if (showDialog && playing) {
                 showDialog = false;
                 SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "多余棋子", onConformClickListener);
                 runOnUiThread(dialog::show);
@@ -269,7 +258,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             // 5. 判断是否落子位置是否合法
             if (!playOnBoardAndRequestEngine(playX, playY)) {
                 // 无法落子提示
-                if (showDialog) {
+                if (showDialog && playing) {
                     showDialog = false;
                     SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "不允许落子，请及时取走", onConformClickListener);
                     runOnUiThread(dialog::show);
@@ -283,14 +272,18 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         // 0. 判断该位置是否可以落子
         boolean ok = board.play(x, y);
         if (!ok) {
-            Log.d(serialLogger, "invalid");
             return false;  // 不能落子 直接返回 给出错误提示
         }
         // 可以落子
         else {
             Log.d(serialLogger, "比较落子位置: " + x + " " + y);
             // 1.将可以落下的棋子标记在棋盘上并刷新棋盘
-            drawBoard();
+            engineLastX = x;
+            engineLastY = y;
+            runOnUiThread(() -> {
+                Bitmap board = drawer.drawBoard(boardBitmap, this.board.getBoard(), new Point(engineLastX, engineLastY), 0, 0, true);
+                boardImageView.setImageBitmap(board);
+            });
             // 2.将落子的轴坐标转化为引擎可接受的棋盘坐标
             String playPosition = getPositionByIndex(x, y);
             // 3.请求引擎下一步的位置，并返回引擎的落子位置的棋盘坐标
@@ -358,15 +351,38 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                     int code = jsonObject.getInt("code");
                     if (code == 1000) {
                         Log.d(Logger, "初始化成功");
+                        runOnUiThread(() -> {
+                            layoutBeforePlay.setVisibility(View.GONE);
+                            layoutAfterPlay.setVisibility(View.VISIBLE);
+                        });
                         // 如果用户选择白棋，引擎会先走一步黑棋，将黑棋落子落上
                         if (side == WHITE) {
                             String indexes = jsonObject.getJSONObject("data").getString("move");
                             Pair<Integer, Integer> firstIndexes = transformIndex(indexes);
+                            // 如果没有初始化串口，则初始化
+                            if (!initSerial) {
+                                initSerial();
+                            }
+                            playing = true;
+                            // 开启串口轮训发送指令线程
+                            Serial serial = new Serial();
+                            serial.start();
                             engineLastX = firstIndexes.first;
                             engineLastY = firstIndexes.second;
+                            initBoard();
                             board.play(engineLastX, engineLastY);
                             sendMoves2LowerComputer(engineLastX, engineLastY);
                             runOnUiThread(() -> drawBoard());
+                        } else {
+                            initBoard();
+                            // 如果没有初始化串口，则初始化
+                            if (!initSerial) {
+                                initSerial();
+                            }
+                            playing = true;
+                            // 开启串口轮训发送指令线程
+                            Serial serial = new Serial();
+                            serial.start();
                         }
                     } else {
                         Log.e(Logger, ResponseCode.ENGINE_CONNECT_FAILED.getMsg());
@@ -480,7 +496,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     private void drawBoard() {
         runOnUiThread(() -> {
-            Bitmap board = drawer.drawBoard(boardBitmap, this.board.getBoard(), new Point(engineLastX, engineLastY), 0, 0);
+            Bitmap board = drawer.drawBoard(boardBitmap, this.board.getBoard(), new Point(engineLastX, engineLastY), 0, 0, false);
             boardImageView.setImageBitmap(board);
         });
     }

@@ -148,7 +148,7 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
 
     private void drawBoard() {
         runOnUiThread(() -> {
-            Bitmap board = drawer.drawBoard(boardBitmap, movesState[pointer], this.board.steps.get(pointer), 0, 0);
+            Bitmap board = drawer.drawBoard(boardBitmap, movesState[pointer], this.board.steps.get(pointer), 0, 0, false);
             boardImageView.setImageBitmap(board);
         });
     }

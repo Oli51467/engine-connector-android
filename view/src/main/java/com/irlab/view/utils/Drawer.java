@@ -54,7 +54,7 @@ public class Drawer {
      * @param y 画布的初始位置y
      * @return 返回画好的bitmap
      */
-    public Bitmap drawBoard(Bitmap bitmap, int[][] board, Point lastMove, int x, int y) {
+    public Bitmap drawBoard(Bitmap bitmap, int[][] board, Point lastMove, int x, int y, boolean o) {
         bitmap.eraseColor(Color.parseColor("#dbb069"));
         // 创建画布
         Canvas canvas = new Canvas(bitmap);
@@ -95,7 +95,11 @@ public class Drawer {
                     }
                     if (lastMove != null) {
                         if (i == lastMove.getX() && j == lastMove.getY()) {
-                            canvas.drawCircle(centerX, centerY, LAST_MOVE_RADIUS, redPaint);
+                            if (o) {
+                                canvas.drawCircle(centerX, centerY, LAST_MOVE_RADIUS, greenPaint);
+                            } else {
+                                canvas.drawCircle(centerX, centerY, LAST_MOVE_RADIUS, redPaint);
+                            }
                         }
                     }
                 }

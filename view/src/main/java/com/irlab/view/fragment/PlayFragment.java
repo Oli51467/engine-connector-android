@@ -22,7 +22,6 @@ public class PlayFragment extends Fragment {
 
     private final MyFunction[] functions = {
             new MyFunction("开始对弈", R.drawable.play),
-            new MyFunction("系统设置", R.drawable.icon_set_level),
             new MyFunction("我的对局", R.drawable.icon_mygame),
             new MyFunction("联机对弈", R.drawable.icon_friends_play),
             new MyFunction("连接WiFi", R.drawable.icon_wifi),

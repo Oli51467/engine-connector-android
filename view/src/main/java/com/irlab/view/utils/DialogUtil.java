@@ -5,11 +5,11 @@ import android.graphics.Color;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.irlab.view.R;
-import com.rosefinches.smiledialog.SmileDialog;
-import com.rosefinches.smiledialog.SmileDialogBuilder;
-import com.rosefinches.smiledialog.enums.SmileDialogType;
-import com.rosefinches.smiledialog.interfac.OnCancelClickListener;
-import com.rosefinches.smiledialog.interfac.OnConformClickListener;
+import com.rosefinches.dialog.SmileDialog;
+import com.rosefinches.dialog.SmileDialogBuilder;
+import com.rosefinches.dialog.enums.SmileDialogType;
+import com.rosefinches.dialog.interfac.OnCancelClickListener;
+import com.rosefinches.dialog.interfac.OnConformClickListener;
 
 public class DialogUtil {
 
@@ -17,6 +17,7 @@ public class DialogUtil {
         return new SmileDialogBuilder(activity, SmileDialogType.WARNING)
                 .hideTitle(true)
                 .setContentText(text)
+                .setTextSize(28f)
                 .setConformBgResColor(R.color.warning)
                 .setCanceledOnTouchOutside(false)
                 .setConformTextColor(Color.WHITE)
@@ -28,6 +29,7 @@ public class DialogUtil {
     public static SmileDialog buildErrorDialogWithConfirm(AppCompatActivity activity, String text, OnConformClickListener listener) {
         return new SmileDialogBuilder(activity, SmileDialogType.ERROR)
                 .hideTitle(true)
+                .setTextSize(28f)
                 .setContentText(text)
                 .setConformBgResColor(R.color.delete)
                 .setCanceledOnTouchOutside(false)
@@ -41,6 +43,7 @@ public class DialogUtil {
         return new SmileDialogBuilder(activity, SmileDialogType.ERROR)
                 .hideTitle(true)
                 .setContentText(text)
+                .setTextSize(28f)
                 .setCanceledOnTouchOutside(false)
                 .setConformBgResColor(R.color.delete)
                 .setConformTextColor(Color.WHITE)
@@ -55,6 +58,7 @@ public class DialogUtil {
     public static SmileDialog buildSuccessDialogWithConfirm(AppCompatActivity activity, String text, OnConformClickListener listener) {
         return new SmileDialogBuilder(activity, SmileDialogType.SUCCESS)
                 .hideTitle(true)
+                .setTextSize(28f)
                 .setContentText(text)
                 .setConformBgResColor(R.color.color_green_sea)
                 .setCanceledOnTouchOutside(false)
@@ -68,6 +72,7 @@ public class DialogUtil {
         return new SmileDialogBuilder(activity, SmileDialogType.WARNING)
                 .hideTitle(true)
                 .setContentText(text)
+                .setTextSize(28f)
                 .setConformBgResColor(R.color.gray_text_light)
                 .setCanceledOnTouchOutside(false)
                 .setConformTextColor(Color.WHITE)
@@ -80,6 +85,7 @@ public class DialogUtil {
         return new SmileDialogBuilder(activity, SmileDialogType.SUCCESS)
                 .hideTitle(true)
                 .setContentText(text)
+                .setTextSize(28f)
                 .setCanceledOnTouchOutside(false)
                 .setWindowAnimations(R.style.dialog_style)
                 .setConformBgResColor(R.color.color_green_sea)

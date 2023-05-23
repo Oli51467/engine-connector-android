@@ -104,8 +104,7 @@ public interface ApiService {
     @POST("/api/user/updateInfo/")
     Observable<Response> updateUser(@Header("Authorization") String token,
                                     @Query("username") String username,
-                                    @Query("profile") String profile,
-                                    @Query("phone") String phone);
+                                    @Query("profile") String profile);
 
     /**
      * 更新用户信息

@@ -86,7 +86,7 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
                 String newPhone = et_phone.getText().toString();
                 Message msg = new Message();
                 NetworkApi.createService(ApiService.class)
-                        .updateUser(getHeaders(), newName, SPUtils.getString("profile"), newPhone)
+                        .updateUser(getHeaders(), newName, SPUtils.getString("profile"))
                         .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                             @Override
                             public void onSuccess(Response response) {

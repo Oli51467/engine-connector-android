@@ -43,9 +43,9 @@ import com.irlab.view.serial.SerialInter;
 import com.irlab.view.serial.SerialManager;
 import com.irlab.view.service.WebSocketService;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.rosefinches.smiledialog.SmileDialog;
-import com.rosefinches.smiledialog.interfac.OnCancelClickListener;
-import com.rosefinches.smiledialog.interfac.OnConformClickListener;
+import com.rosefinches.dialog.SmileDialog;
+import com.rosefinches.dialog.interfac.OnCancelClickListener;
+import com.rosefinches.dialog.interfac.OnConformClickListener;
 
 import java.util.List;
 

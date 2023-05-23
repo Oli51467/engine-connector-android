@@ -42,7 +42,7 @@
     <LinearLayout
         android:id="@+id/layout_before_play"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="300dp"
         android:orientation="vertical"
         android:visibility="visible"
         android:layout_marginTop="-100px">
@@ -140,7 +140,7 @@
             livebutton:corners="12dp"
             livebutton:normalHeight="4dp"
             livebutton:pressedHeight="2dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="40dp"
             livebutton:backgroundColor="@color/color_emerald"
             livebutton:shadowColor="@color/color_green_sea"/>
 

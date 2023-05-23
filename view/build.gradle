@@ -62,7 +62,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'com.github.rosefinches:smile-dialog:1.0.1'
+//    implementation 'com.github.rosefinches:smile-dialog:1.0.1'
     implementation 'com.alibaba:arouter-api:1.5.2'
     // cardView and RecycleView
     implementation 'androidx.cardview:cardview:1.0.0'
@@ -111,5 +111,6 @@ dependencies {
     implementation project(':opencv')
     implementation project(':iFLYTEK')
     implementation project(':network')
+    implementation project(':components')
     implementation files('../iFLYTEK/libs/Msc.jar')
 }

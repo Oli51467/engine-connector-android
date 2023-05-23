@@ -28,12 +28,14 @@ import com.irlab.view.activity.UserInfoActivity;
 import com.irlab.view.fragment.PlayFragment;
 import com.irlab.view.fragment.RecordFragment;
 import com.irlab.view.network.NetworkRequiredInfo;
+import com.irlab.view.utils.GpioUtil;
 import com.irlab.view.wakeup.BaiduWakeup;
 import com.irlab.view.service.SpeechService;
 import com.irlab.view.service.TtsService;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sdu.network.NetworkApi;
 
+import java.io.File;
 import java.util.Random;
 
 @Route(path = "/view/main")
@@ -61,7 +63,7 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == WAKEUP_STATE) {
-                String[] ans = new String[]{"怎么了", "你好，有什么可以帮您", "我在"};
+                String[] ans = new String[]{"怎么辣", "你好，有什么可以帮您", "我在"};
                 Random random = new Random();
                 MainView.ttsService.tts(ans[random.nextInt(3)]);
                 MainView.baiduWakeup.stop();
@@ -167,7 +169,9 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         speechService.init(this);
         // 初始化语音合成
         ttsService = new TtsService(this);
+        GpioUtil.enableSpeaker(getFileName());
         MainView.ttsService.tts("你好");
+        GpioUtil.disableSpeaker(getFileName());
     }
 
     public void initFragment() {
@@ -285,5 +289,14 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         if (recordFragment != null) {
             transaction.hide(recordFragment);
         }
+    }
+
+    private String getFileName() {
+        File targetFile = new File("/proc/rp_gpio/");
+        File[] fileArray = targetFile.listFiles();
+        if (null != fileArray) {
+            return fileArray[0].getPath();
+        }
+        return "";
     }
 }

@@ -133,7 +133,7 @@ public class NetworkApi {
      */
     public static void init(INetworkRequiredInfo networkRequiredInfo) {
         iNetworkRequiredInfo = networkRequiredInfo;
-        mBaseUrl = "http://39.98.80.11:3000";
+        mBaseUrl = "https://web.fcjznkj.com";
     }
 
     /**

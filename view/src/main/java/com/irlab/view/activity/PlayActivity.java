@@ -28,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.irlab.base.BaseActivity;
-import com.irlab.base.response.ResponseCode;
 import com.irlab.base.utils.HttpUtil;
 import com.irlab.base.utils.SPUtils;
 import com.irlab.view.MainView;
@@ -43,8 +42,8 @@ import com.irlab.view.serial.SerialManager;
 import com.irlab.view.utils.BoardUtil;
 import com.irlab.view.utils.Drawer;
 import com.irlab.view.utils.RequestUtil;
-import com.rosefinches.smiledialog.SmileDialog;
-import com.rosefinches.smiledialog.interfac.OnConformClickListener;
+import com.rosefinches.dialog.SmileDialog;
+import com.rosefinches.dialog.interfac.OnConformClickListener;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
 
@@ -93,7 +92,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private void initArgs() {
         playing = false;    // 是否在对局的状态标识
         side = BLACK;           // 标识玩家是黑方还是白方
-        level = 5;              // 标识初始难度
+        level = 3;              // 标识初始难度
         engineLastX = -1;
         engineLastY = -1;
         initSerial = false;
@@ -341,6 +340,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.e(Logger, "初始化引擎出错:" + e.getMessage());
+                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "引擎未开启，请重新选择", null);
+                runOnUiThread(dialog::show);
             }
 
             @Override
@@ -385,10 +386,13 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                             serial.start();
                         }
                     } else {
-                        Log.e(Logger, ResponseCode.ENGINE_CONNECT_FAILED.getMsg());
+                        SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "引擎未开启，请重新选择", null);
+                        runOnUiThread(dialog::show);
                     }
                 } catch (JSONException e) {
                     Log.d(Logger, "初始化引擎JsonException:" + e.getMessage());
+                    SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "引擎未开启，请重新选择", null);
+                    runOnUiThread(dialog::show);
                 }
             }
         });

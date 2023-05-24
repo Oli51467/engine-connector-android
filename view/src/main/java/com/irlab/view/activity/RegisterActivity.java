@@ -130,7 +130,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                 Message msg = new Message();
                 msg.obj = this;
                 NetworkApi.createService(ApiService.class)
-                        .sendVerificationCode(phoneNumber.getText().toString())
+                        .sendRegisterVerificationCode(phoneNumber.getText().toString())
                         .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                             @Override
                             public void onSuccess(Response response) {

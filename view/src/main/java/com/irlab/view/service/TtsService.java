@@ -13,6 +13,9 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechEvent;
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.iflytek.cloud.SynthesizerListener;
+import com.irlab.view.utils.GpioUtil;
+
+import java.io.File;
 
 public class TtsService {
 
@@ -25,12 +28,23 @@ public class TtsService {
 
     // 语音合成的方法
     public void tts(String texts) {
+        // 喇叭使能
+        GpioUtil.enableSpeaker(getFileName());
         setParam();
         // 合成并播放
         int code = mTts.startSpeaking(texts, mTtsListener);
         if (code != ErrorCode.SUCCESS) {
             Log.e(TAG, "语音合成失败,错误码: " + code);
         }
+    }
+
+    private String getFileName() {
+        File targetFile = new File("/proc/rp_gpio/");
+        File[] fileArray = targetFile.listFiles();
+        if (null != fileArray) {
+            return fileArray[0].getPath();
+        }
+        return "";
     }
 
     /**
@@ -67,6 +81,8 @@ public class TtsService {
             if (error != null) {
                 Log.e(TAG, error.getPlainDescription(true));
             }
+            // 喇叭关闭
+            GpioUtil.disableSpeaker(getFileName());
         }
 
         @Override

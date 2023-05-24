@@ -48,11 +48,18 @@ public interface ApiService {
                                   @Query("verification_code") String verificationCode);
 
     /**
-     * 给指定手机发送验证码
+     * 给指定手机发送验证码登陆
+     * @param phoneNumber 手机号
+     */
+    @POST("/api/login/verification/")
+    Observable<Response> sendLoginVerificationCode(@Query("phone_number") String phoneNumber);
+
+    /**
+     * 给指定手机发送验证码注册
      * @param phoneNumber 手机号
      */
     @POST("/api/account/verification/")
-    Observable<Response> sendVerificationCode(@Query("phone_number") String phoneNumber);
+    Observable<Response> sendRegisterVerificationCode(@Query("phone_number") String phoneNumber);
 
     /**
      * 获取用户信息
@@ -64,25 +71,25 @@ public interface ApiService {
      * 获取自己的棋谱信息
      * @param token jwt-token
      * @param userid 用户id
-     * @param page 分页 移动端为-1
+     * @param pageNum 分页 移动端为-1
      * @return 棋谱信息Json
      */
     @GET("/api/record/getMy/")
     Observable<JSONObject> getMyRecords(@Header("Authorization") String token,
                                         @Query("user_id") Long userid,
-                                        @Query("page") Integer page);
+                                        @Query("pageNum") Integer pageNum);
 
     /**
      * 获取其他人棋谱信息
      * @param token jwt-token
      * @param userid 用户id
-     * @param page 分页 移动端为-1
+     * @param pageNum 分页 移动端为-1
      * @return 棋谱信息Json
      */
     @GET("/api/record/getAll/")
     Observable<JSONObject> getAllRecords(@Header("Authorization") String token,
                                          @Query("user_id") Long userid,
-                                         @Query("page") Integer page);
+                                         @Query("pageNum") Integer pageNum);
 
     /**
      * 获取棋谱的详细信息

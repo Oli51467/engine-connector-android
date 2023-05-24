@@ -122,7 +122,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 Message msg = new Message();
                 msg.obj = this;
                 NetworkApi.createService(ApiService.class)
-                        .sendVerificationCode(etPhoneNumber.getText().toString())
+                        .sendLoginVerificationCode(etPhoneNumber.getText().toString())
                         .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                             @Override
                             public void onSuccess(Response response) {

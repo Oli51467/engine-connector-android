@@ -62,7 +62,7 @@ public class GameRecordActivity extends BaseActivity implements RecordAdapter.se
     private void loadRecords(Context context) {
         Message msg = new Message();
         NetworkApi.createService(ApiService.class)
-                .getMyRecords(getHeaders(), Long.parseLong(SPUtils.getString("user_id")), -1)
+                .getMyRecords(getHeaders(), Long.parseLong(SPUtils.getString("user_id")), -1, 10)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(JSONObject resp) {

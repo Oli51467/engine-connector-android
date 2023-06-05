@@ -42,6 +42,7 @@ public class RequestUtil {
     public static RequestBody getResignRequestBody(String userid) {
         JSONObject data = new JSONObject();
         data.put("user_id", userid);
+        data.put("regret_steps", "1");
         return RequestBody.create(JSON, data.toString());
     }
 

@@ -168,7 +168,7 @@ public class MainView extends BaseActivity implements View.OnClickListener {
         // 初始化语音合成
         ttsService = new TtsService(this);
         // 语音合成
-        MainView.ttsService.tts("你好你好你好你好你好你好你好");
+        MainView.ttsService.tts("你好你好");
     }
 
     public void initFragment() {

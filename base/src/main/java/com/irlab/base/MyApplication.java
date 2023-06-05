@@ -18,10 +18,11 @@ import okhttp3.MediaType;
 
 public class MyApplication extends Application {
 
-    private static final String ENGINE_SERVER = "http://47.92.236.9:5001/"; // 阿里云服务器
+    private static final String ENGINE_SERVER = "https://carry.fcjznkj.com/"; // 阿里云服务器
     public static final String ENGINE_PLAY_URL = ENGINE_SERVER + "go/";
     public static final String ENGINE_INIT_URL = ENGINE_SERVER + "set/";
     public static final String ENGINE_RESIGN_URL = ENGINE_SERVER + "finish/";
+    public static final String ENGINE_REGRET_URL = ENGINE_SERVER + "regret";
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public static final int THREAD_NUM = 19;
     public static ThreadPoolExecutor threadPool;

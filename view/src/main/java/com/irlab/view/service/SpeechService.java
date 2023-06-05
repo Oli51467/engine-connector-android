@@ -83,28 +83,30 @@ public class SpeechService {
             Log.d(TAG, "onResult 结束 order: " + order);
             if (isLast) {
                 Log.d(TAG, "is Last onResult 结束 order: " + order);
-                if (!order.equals("") && order.length() > 3 && !order.startsWith("我在")) {
-                    // 调用chatGlm服务 获得语句输入
-                    MainView.ttsService.tts("好的，我想一下");
-                    RequestBody request = RequestUtil.getGptResponse("2", order);
-                    HttpUtil.sendOkHttpResponse("http://192.168.31.108:5002/glm", request, new Callback() {
-                        @Override
-                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                            Log.e(TAG, "GPT服务请求失败:" + e.getMessage());
-                            MainView.baiduWakeup.start();
-                        }
-
-                        @Override
-                        public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
-                            String responseData = Objects.requireNonNull(response.body()).string();
-                            Log.d(TAG, "GPT回答： " + responseData);
-                            MainView.ttsService.tts(responseData);
-                            MainView.baiduWakeup.start();
-                        }
-                    });
-                } else {
-                    MainView.baiduWakeup.start();
-                }
+                MainView.ttsService.tts("收到");
+                MainView.baiduWakeup.start();
+//                if (!order.equals("") && order.length() > 3 && !order.startsWith("我在")) {
+//                    // 调用chatGlm服务 获得语句输入
+//                    MainView.ttsService.tts("好的，我想一下");
+//                    RequestBody request = RequestUtil.getGptResponse("2", order);
+//                    HttpUtil.sendOkHttpResponse("http://192.168.31.108:5002/glm", request, new Callback() {
+//                        @Override
+//                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                            Log.e(TAG, "GPT服务请求失败:" + e.getMessage());
+//                            MainView.baiduWakeup.start();
+//                        }
+//
+//                        @Override
+//                        public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
+//                            String responseData = Objects.requireNonNull(response.body()).string();
+//                            Log.d(TAG, "GPT回答： " + responseData);
+//                            MainView.ttsService.tts(responseData);
+//                            MainView.baiduWakeup.start();
+//                        }
+//                    });
+//                } else {
+//                    MainView.baiduWakeup.start();
+//                }
             } else {
                 printResult(results);
             }

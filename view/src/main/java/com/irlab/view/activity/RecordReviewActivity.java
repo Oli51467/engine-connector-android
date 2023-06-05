@@ -22,6 +22,7 @@ import com.irlab.base.BaseActivity;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
 import com.irlab.view.models.Board;
+import com.irlab.view.models.Point;
 import com.irlab.view.network.api.ApiService;
 import com.irlab.view.utils.Drawer;
 import com.sdu.network.NetworkApi;
@@ -50,7 +51,6 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
         getInfo();
         initComponents();
         initBoard();
-        drawBoard();
     }
 
     private void initArgs() {
@@ -90,6 +90,7 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
                     public void onSuccess(JSONObject resp) {
                         List<String> steps = (List<String>) resp.getJSONObject("data").get("steps");
                         if (null != steps) {
+                            System.out.println(steps);
                             for (String step : steps) {
                                 String[] tmp = step.split(",");
                                 int x = Integer.parseInt(tmp[0]);
@@ -97,7 +98,7 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
                                 board.play(x, y);
                                 String json = JSON.toJSON(board.getBoard()).toString();
                                 int[][] tmpBoard = JSON.parseObject(json, int[][].class);
-                                movesState[ ++ cnt] = tmpBoard;
+                                movesState[ cnt ++ ] = tmpBoard;
                             }
                         }
                     }
@@ -115,6 +116,7 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
         }
         movesState[0] = tmp;
         board = new Board(WIDTH, HEIGHT, 0);
+        drawBoard();
     }
 
     @Override
@@ -135,11 +137,11 @@ public class RecordReviewActivity extends BaseActivity implements View.OnClickLi
             if (pointer > 0) pointer --;
             drawBoard();
         } else if (vid == R.id.iv_proceed) {
-            if (pointer < cnt) pointer ++;
+            if (pointer < cnt - 1) pointer ++;
             drawBoard();
         } else if (vid == R.id.iv_fast_proceed) {
             for (int i = 0; i < 5; i ++ ) {
-                if (pointer < cnt) pointer ++;
+                if (pointer < cnt - 1) pointer ++;
                 else break;
             }
             drawBoard();

@@ -77,7 +77,8 @@ public interface ApiService {
     @GET("/api/record/getMy/")
     Observable<JSONObject> getMyRecords(@Header("Authorization") String token,
                                         @Query("user_id") Long userid,
-                                        @Query("pageNum") Integer pageNum);
+                                        @Query("pageNum") Integer pageNum,
+                                        @Query("pageSize") Integer pageSize);
 
     /**
      * 获取其他人棋谱信息

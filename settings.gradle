@@ -20,7 +20,6 @@ rootProject.name = "go-robot"
 include ':app'
 include ':base'
 include ':view'
-include ':opencv'
 include ':network'
 include ':iFLYTEK'
 include ':components'

@@ -19,6 +19,7 @@ public class Board {
 
     private final int[][] board;
     private int player;
+    private int idx;
     public int playCount;
     public StringBuilder sgfRecord;
     private Point blackForbidden;
@@ -140,15 +141,12 @@ public class Board {
             return false;
         } else {
             if (player == WHITE) {
-                sgfRecord.append('W');
                 whiteForbidden.setXY(-1, -1);
                 forbiddenList.push(new Point(blackForbidden.getX(), blackForbidden.getY()));    // 这里一定要new新的 否则传进去的值会被修改
             } else {
-                sgfRecord.append('B');
                 blackForbidden.setXY(-1, -1);
                 forbiddenList.push(new Point(whiteForbidden.getX(), whiteForbidden.getY()));
             }
-            sgfRecord.append('[').append(x).append(',').append(y).append(']');
             steps.push(new Point(x, y));
             playCount++;
             capturedStones.addAll(tmpCaptured);
@@ -157,6 +155,25 @@ public class Board {
             saveState();
             return true;
         }
+    }
+
+    private void transSgf(Stack<Point> steps) {
+        if (steps.isEmpty()) {
+            return;
+        }
+
+        Point step = steps.pop();
+        transSgf(steps);
+        if (idx % 2 == 0) sgfRecord.append("B");
+        else sgfRecord.append("W");
+        idx ++;
+        sgfRecord.append('[').append(step.getX()).append(',').append(step.getY()).append(']');
+    }
+
+    public String transSgf() {
+        idx = 0;
+        transSgf(this.steps);
+        return sgfRecord.toString();
     }
 
     private void saveState() {
@@ -169,13 +186,8 @@ public class Board {
         this.gameRecord.push(res.toString());
     }
 
-    public String getSgf() {
-        return sgfRecord.toString();
-    }
-
-    public boolean regretPlay(Integer player) {
-        if (playCount == 0) return false;
-        if (playCount == 1 && player == WHITE) return false;
+    public void regretPlay(Integer player) {
+        //if (playCount == 0 || playCount == 1) return;
         this.gameRecord.pop();
         this.steps.pop();
         this.forbiddenList.pop();
@@ -196,8 +208,8 @@ public class Board {
             this.blackForbidden = new Point(-1, -1);
         }
         // 3. 还原落子方
-        this.player = player;
-        return true;
+        this.playCount --;
+        changePlayer();
     }
 
     public String getState2Engine() {

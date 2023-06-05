@@ -2,6 +2,7 @@ package com.irlab.view.activity;
 
 import static com.irlab.base.MyApplication.ENGINE_INIT_URL;
 import static com.irlab.base.MyApplication.ENGINE_PLAY_URL;
+import static com.irlab.base.MyApplication.ENGINE_REGRET_URL;
 import static com.irlab.base.MyApplication.ENGINE_RESIGN_URL;
 import static com.irlab.base.utils.SPUtils.getHeaders;
 import static com.irlab.view.common.Constants.*;
@@ -51,10 +52,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
+import cn.hutool.core.util.RandomUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.RequestBody;
@@ -71,7 +74,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private Board board;
     private ImageView boardImageView;
     private Bitmap boardBitmap;
-    private Button chooseSide, chooseLevel;
+    private Button chooseSide, chooseLevel, btnRegret;
     private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
 
     private Integer side, level, engineLastX, engineLastY;
@@ -98,13 +101,15 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         initSerial = false;
         showDialog = true;
         receivedBoardState = new int[WIDTH + 1][WIDTH + 1];
-        userid = SPUtils.getString("user_id");
+        String random = RandomUtil.randomString(4);
+        userid = SPUtils.getString("user_id") + random;
     }
 
     public void initComponents() {
         boardBitmap = Bitmap.createBitmap(BOARD_WIDTH, BOARD_HEIGHT, Bitmap.Config.ARGB_8888);
         chooseSide = findViewById(R.id.btn_choose_side);
         chooseLevel = findViewById(R.id.btn_choose_level);
+        btnRegret = findViewById(R.id.btn_regret);
         boardImageView = findViewById(R.id.iv_board);
         layoutBeforePlay = findViewById(R.id.layout_before_play);
         layoutAfterPlay = findViewById(R.id.layout_after_play);
@@ -113,6 +118,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         findViewById(R.id.btn_resign).setOnClickListener(this);
         chooseSide.setOnClickListener(this);
         chooseLevel.setOnClickListener(this);
+        btnRegret.setOnClickListener(this);
+        btnRegret.setEnabled(false);
     }
 
     /**
@@ -134,6 +141,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     public void onClick(View v) {
         int vid = v.getId();
+        // 返回主界面
         if (vid == R.id.header_back) {
             // 点击返回时，如果玩家在对局中，提示玩家先结束对局
             if (playing) {
@@ -149,7 +157,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
-        } else if (vid == R.id.btn_begin) {
+        }
+        // 开始对弈
+        else if (vid == R.id.btn_begin) {
             // 必须选择难度和黑白方后才能开始下棋
             if (chooseSide.getText().equals(DEFAULT_SIDE) || chooseLevel.getText().equals(DEFAULT_LEVEL)) {
                 SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "请选择黑白及段位", null);
@@ -161,7 +171,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 side = WHITE;
             }
             initEngine();
-        } else if (vid == R.id.btn_resign) {
+        }
+        // 认输
+        else if (vid == R.id.btn_resign) {
             if (showDialog) {
                 showDialog = false;
                 OnConformClickListener listener = () -> {
@@ -178,13 +190,33 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 SmileDialog dialog = buildErrorDialogWithConfirmAndCancel(this, "您确定认输吗", listener);
                 runOnUiThread(dialog::show);
             }
-        } else if (vid == R.id.btn_choose_side) {
+        }
+        // 选择黑白
+        else if (vid == R.id.btn_choose_side) {
             if (chooseSide.getText().equals(DEFAULT_SIDE)) chooseSide.setText(BLACK_SIDE);
             else if (chooseSide.getText().equals(BLACK_SIDE)) chooseSide.setText(WHITE_SIDE);
             else if (chooseSide.getText().equals(WHITE_SIDE)) chooseSide.setText(BLACK_SIDE);
-        } else if (vid == R.id.btn_choose_level) {
+        }
+        // 选择难度
+        else if (vid == R.id.btn_choose_level) {
             chooseLevel.setText(LEVELS[level++]);
             level %= 10;
+        }
+        // 悔棋
+        else if (vid == R.id.btn_regret) {
+            if (this.board.playCount < 2) return;
+            // 1.请求引擎悔棋接口
+            regret();
+            // 2.复位Board棋盘
+            if (side == BLACK) {
+                this.board.regretPlay(WHITE);
+                this.board.regretPlay(BLACK);
+            } else {
+                this.board.regretPlay(BLACK);
+                this.board.regretPlay(WHITE);
+            }
+            this.drawBoard();
+            // TODO: 3.指示下位机熄灭上一步引擎亮的灯
         }
     }
 
@@ -211,6 +243,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
      */
     @Override
     public void readData(String path, byte[] bytes, int size) {
+        System.out.println(Arrays.toString(bytes));
         if (size != 365) return;
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
@@ -298,6 +331,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             drawBoard();
             // 7.指示下位机落子
             sendMoves2LowerComputer(engineLastX, engineLastY);
+            // 8.引擎落子完成后才可以进行悔棋操作
+            btnRegret.setEnabled(true);
             return true;
         }
     }
@@ -366,8 +401,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                             }
                             playing = true;
                             // 开启串口轮训发送指令线程
-                            Serial serial = new Serial();
-                            serial.start();
+                            //Serial serial = new Serial();
+                            //serial.start();
                             engineLastX = firstIndexes.first;
                             engineLastY = firstIndexes.second;
                             initBoard();
@@ -382,8 +417,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                             }
                             playing = true;
                             // 开启串口轮训发送指令线程
-                            Serial serial = new Serial();
-                            serial.start();
+                            //Serial serial = new Serial();
+                            //serial.start();
                         }
                     } else {
                         SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "引擎未开启，请重新选择", null);
@@ -470,15 +505,15 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         long blackId, whiteId;
         String result;
         if (side == BLACK) {
-            blackId = Long.parseLong(userid);
+            blackId = Long.parseLong(SPUtils.getString("user_id"));
             whiteId = -1L;
             result = "白中盘胜";
         } else {
             blackId = -1L;
-            whiteId = Long.parseLong(userid);
+            whiteId = Long.parseLong(SPUtils.getString("user_id"));
             result = "黑中盘胜";
         }
-        saveRecord(blackId, whiteId, result, board.getSgf(), board.getState2Engine());
+        saveRecord(blackId, whiteId, result, board.transSgf(), board.getState2Engine());
     }
 
     @SuppressLint("checkResult")
@@ -496,6 +531,24 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                         Log.e(Logger, "save record on Failure" + e.getMessage());
                     }
                 }));
+    }
+
+    /**
+     * 悔棋接口
+     */
+    private void regret() {
+        RequestBody requestBody = RequestUtil.getResignRequestBody(userid);
+        HttpUtil.sendOkHttpResponse(ENGINE_REGRET_URL, requestBody, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(Logger, "悔棋出错:" + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) {
+
+            }
+        });
     }
 
     private void drawBoard() {

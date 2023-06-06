@@ -37,7 +37,6 @@ import com.irlab.view.entity.Response;
 import com.irlab.view.models.Board;
 import com.irlab.view.models.Point;
 import com.irlab.view.network.api.ApiService;
-import com.irlab.view.serial.Serial;
 import com.irlab.view.serial.SerialInter;
 import com.irlab.view.serial.SerialManager;
 import com.irlab.view.utils.BoardUtil;
@@ -52,7 +51,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -243,8 +241,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
      */
     @Override
     public void readData(String path, byte[] bytes, int size) {
-        System.out.println(Arrays.toString(bytes));
         if (size != 365) return;
+        String tag = ByteArrToHexList(bytes, 0, 2).get(1);
+        if (side == BLACK && tag.equals("82") || side == WHITE && tag.equals("81")) return;
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
         // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState
@@ -400,9 +399,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                                 initSerial();
                             }
                             playing = true;
-                            // 开启串口轮训发送指令线程
-                            //Serial serial = new Serial();
-                            //serial.start();
                             engineLastX = firstIndexes.first;
                             engineLastY = firstIndexes.second;
                             initBoard();
@@ -416,9 +412,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                                 initSerial();
                             }
                             playing = true;
-                            // 开启串口轮训发送指令线程
-                            //Serial serial = new Serial();
-                            //serial.start();
                         }
                     } else {
                         SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "引擎未开启，请重新选择", null);

@@ -8,6 +8,9 @@ import static com.irlab.view.common.Constants.WIDTH;
 import com.irlab.view.utils.BoardUtil;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Stack;
 
@@ -15,6 +18,7 @@ import java.util.Stack;
 public class Board {
     private final int height;
     private final int width;
+    private final int handicap;
     private final boolean[][] st;
 
     private final int[][] board;
@@ -29,14 +33,17 @@ public class Board {
     public Stack<Point> forbiddenList;
     public Stack<Point> steps;
     public Set<Point> capturedStones, tmpCaptured;
+    public List<Double> winRateList;
 
     public Board(int width, int height, int handicap) {
         this.width = width;
         this.height = height;
+        this.handicap = handicap;
         board = new int[width + 1][height + 1];
         st = new boolean[this.width + 1][this.height + 1];
         blackForbidden = new Point(-1, -1);
         whiteForbidden = new Point(-1, -1);
+        winRateList = new LinkedList<>();
         capturedStones = new HashSet<>();
         tmpCaptured = new HashSet<>();
         sgfRecord = new StringBuilder();    // 这步棋走完后的局面
@@ -57,6 +64,33 @@ public class Board {
         }
         gameRecord.push(tmp.toString());
         if (handicap == 0) player = BLACK;
+        else player = WHITE;
+    }
+
+    public void resetBoard() {
+        blackForbidden = new Point(-1, -1);
+        whiteForbidden = new Point(-1, -1);
+        winRateList = new LinkedList<>();
+        capturedStones = new HashSet<>();
+        tmpCaptured = new HashSet<>();
+        sgfRecord = new StringBuilder();    // 这步棋走完后的局面
+        gameRecord = new Stack<>();         // 每一步棋走完后的局面
+        forbiddenList = new Stack<>();      // 每一步走完后对方的禁入点
+        steps = new Stack<>();              // 记录每一步
+        steps.push(blackForbidden);         // 初始为空
+        forbiddenList.push(blackForbidden); // 初始黑棋没有打劫禁入点
+        playCount = 0;
+        // 初始化棋盘
+        StringBuilder tmp = new StringBuilder();
+        for (int x = 1; x <= this.width; x++) {
+            for (int y = 1; y <= this.height; y++) {
+                board[x][y] = EMPTY;
+                st[x][y] = false;
+                tmp.append(EMPTY);
+            }
+        }
+        gameRecord.push(tmp.toString());
+        if (this.handicap == 0) player = BLACK;
         else player = WHITE;
     }
 
@@ -155,6 +189,17 @@ public class Board {
             saveState();
             return true;
         }
+    }
+
+    public String getWinRate() {
+        StringBuilder res = new StringBuilder();
+        boolean flag = true;
+        for (Double winRatePerStep : winRateList) {
+            if (!flag) res.append(",");
+            else flag = false;
+            res.append(String.format(Locale.CHINA, "%.1f", winRatePerStep));
+        }
+        return res.toString();
     }
 
     private void transSgf(Stack<Point> steps) {

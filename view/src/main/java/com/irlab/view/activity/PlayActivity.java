@@ -11,6 +11,7 @@ import static com.irlab.view.utils.BoardUtil.getPositionByIndex;
 import static com.irlab.view.utils.BoardUtil.transformIndex;
 import static com.irlab.view.utils.DialogUtil.buildErrorDialogWithConfirm;
 import static com.irlab.view.utils.DialogUtil.buildErrorDialogWithConfirmAndCancel;
+import static com.irlab.view.utils.DialogUtil.buildSuccessDialogWithConfirm;
 import static com.irlab.view.utils.DialogUtil.buildWarningDialogWithConfirm;
 import static com.irlab.view.utils.SerialUtil.ByteArrToHexList;
 
@@ -37,6 +38,7 @@ import com.irlab.view.entity.Response;
 import com.irlab.view.models.Board;
 import com.irlab.view.models.Point;
 import com.irlab.view.network.api.ApiService;
+import com.irlab.view.serial.Serial;
 import com.irlab.view.serial.SerialInter;
 import com.irlab.view.serial.SerialManager;
 import com.irlab.view.utils.BoardUtil;
@@ -55,7 +57,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-import cn.hutool.core.util.RandomUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.RequestBody;
@@ -69,7 +70,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private final Drawer drawer = new Drawer();
     private final OnConformClickListener onConformClickListener = () -> showDialog = true;
 
-    private Board board;
+    private Board board = null;
     private ImageView boardImageView;
     private Bitmap boardBitmap;
     private Button chooseSide, chooseLevel, btnRegret;
@@ -79,6 +80,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private String userid;
     private int[][] receivedBoardState;
     private boolean initSerial, showDialog;
+
+    private int successiveLowWinrateThreshold, lowWinRateCount;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,8 +102,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         initSerial = false;
         showDialog = true;
         receivedBoardState = new int[WIDTH + 1][WIDTH + 1];
-        String random = RandomUtil.randomString(4);
-        userid = SPUtils.getString("user_id") + random;
+        userid = "acc" + SPUtils.getString("user_id");
     }
 
     public void initComponents() {
@@ -133,7 +135,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     }
 
     private void initBoard() {
-        board = new Board(WIDTH, HEIGHT, 0);
+        if (null == board) board = new Board(WIDTH, HEIGHT, 0);
+        else board.resetBoard();
     }
 
     @Override
@@ -242,8 +245,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     public void readData(String path, byte[] bytes, int size) {
         if (size != 365) return;
-        String tag = ByteArrToHexList(bytes, 0, 2).get(1);
-        if (side == BLACK && tag.equals("82") || side == WHITE && tag.equals("81")) return;
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
         // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState
@@ -319,7 +320,18 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             String playPosition = getPositionByIndex(x, y);
             // 3.请求引擎下一步的位置，并返回引擎的落子位置的棋盘坐标
             String engineResp = enginePlay(playPosition);
-            if (engineResp.equals("failed")) return false;
+            if (engineResp.equals(FAILED_STATUS)) return false;
+            else if (engineResp.equals(ENGINE_RESIGN)) {
+                playing = false;
+                SmileDialog dialog = buildSuccessDialogWithConfirm(PlayActivity.this, "引擎认输，你赢了！", null);
+                runOnUiThread(() -> {
+                    layoutBeforePlay.setVisibility(View.VISIBLE);
+                    layoutAfterPlay.setVisibility(View.GONE);
+                    dialog.show();
+                });
+                saveRecord();
+                return false;
+            }
             // 4.将棋盘坐标转回轴坐标
             Pair<Integer, Integer> indexes = transformIndex(engineResp);
             // 5.数据结构记录引擎落子位置并得出下一步局面
@@ -384,35 +396,35 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 try {
                     JSONObject jsonObject = new JSONObject(resp);
                     int code = jsonObject.getInt("code");
-                    if (code == 1000) {
+                    if (code == ENGINE_SUCCESS_CODE) {
                         Log.d(Logger, "初始化成功");
                         runOnUiThread(() -> {
                             layoutBeforePlay.setVisibility(View.GONE);
                             layoutAfterPlay.setVisibility(View.VISIBLE);
                         });
+                        // 如果没有初始化串口，则初始化
+                        if (!initSerial) {
+                            initSerial();
+                            resetUnderMachine();
+                        }
+                        initBoard();
+                        runOnUiThread(() -> drawBoard());
                         // 如果用户选择白棋，引擎会先走一步黑棋，将黑棋落子落上
                         if (side == WHITE) {
                             String indexes = jsonObject.getJSONObject("data").getString("move");
                             Pair<Integer, Integer> firstIndexes = transformIndex(indexes);
-                            // 如果没有初始化串口，则初始化
-                            if (!initSerial) {
-                                initSerial();
-                            }
-                            playing = true;
                             engineLastX = firstIndexes.first;
                             engineLastY = firstIndexes.second;
-                            initBoard();
                             board.play(engineLastX, engineLastY);
                             sendMoves2LowerComputer(engineLastX, engineLastY);
                             runOnUiThread(() -> drawBoard());
-                        } else {
-                            initBoard();
-                            // 如果没有初始化串口，则初始化
-                            if (!initSerial) {
-                                initSerial();
-                            }
-                            playing = true;
                         }
+                        // 开启串口轮训发送指令线程
+                        playing = true;
+                        Serial serial = new Serial();
+                        serial.start();
+                        successiveLowWinrateThreshold = 3;
+                        lowWinRateCount = 0;
                     } else {
                         SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "引擎未开启，请重新选择", null);
                         runOnUiThread(dialog::show);
@@ -450,15 +462,29 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                 try {
                     JSONObject jsonObject = new JSONObject(responseData);
                     int code = jsonObject.getInt("code");
-                    if (code == 1000) {
-                        String playPosition;
-                        JSONObject callBackData = jsonObject.getJSONObject("data");
-                        playPosition = callBackData.getString("move");
-                        Log.d(Logger, "引擎落子坐标: " + playPosition);
-                        result[0] = playPosition;
-                    } else if (code == 4001) {
-                        Log.e(Logger, "这里不可以落子");
-                        result[0] = FAILED_STATUS;
+                    // 成功返回落子坐标
+                    if (code == ENGINE_SUCCESS_CODE) {
+                        // 更新低胜率阈值
+                        if (board.playCount % 100 == 0 || board.playCount % 101 == 0) successiveLowWinrateThreshold /= 2;
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        String playPosition = data.getString("move");
+                        double winRate = data.getDouble("winrate");
+                        // 更新棋盘胜率
+                        board.winRateList.add(winRate * 100);
+                        if (winRate < 0.9f) {
+                            lowWinRateCount ++;
+                            // 引擎连续x步低于胜率阈值，则视为引擎认输
+                            if (lowWinRateCount >= successiveLowWinrateThreshold) {
+                                result[0] = ENGINE_RESIGN;
+                                resetUnderMachine();
+                            } else {
+                                result[0] = playPosition;
+                            }
+                        } else {
+                            // 否则引擎继续落子
+                            lowWinRateCount = 0;
+                            result[0] = playPosition;
+                        }
                     } else {
                         result[0] = FAILED_STATUS;
                     }
@@ -506,13 +532,13 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             whiteId = Long.parseLong(SPUtils.getString("user_id"));
             result = "黑中盘胜";
         }
-        saveRecord(blackId, whiteId, result, board.transSgf(), board.getState2Engine());
+        saveRecord(blackId, whiteId, result, board.transSgf(), board.getWinRate());
     }
 
     @SuppressLint("checkResult")
-    private void saveRecord(long blackId, long whiteId, String result, String steps, String boardState) {
+    private void saveRecord(long blackId, long whiteId, String result, String steps, String winrate) {
         NetworkApi.createService(ApiService.class)
-                .saveRecord(getHeaders(), blackId, whiteId, result, steps, "p", boardState)
+                .saveRecord(getHeaders(), blackId, whiteId, result, steps, "p", winrate)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(Response response) {

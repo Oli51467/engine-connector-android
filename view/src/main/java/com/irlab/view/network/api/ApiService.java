@@ -124,6 +124,6 @@ public interface ApiService {
                                     @Query("result") String result,
                                     @Query("steps") String steps,
                                     @Query("level") String level,
-                                    @Query("board_state") String boardState);
+                                    @Query("winrate") String winrate);
 }
 

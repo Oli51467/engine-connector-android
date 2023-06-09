@@ -423,7 +423,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                         playing = true;
                         Serial serial = new Serial();
                         serial.start();
-                        successiveLowWinrateThreshold = 3;
+                        successiveLowWinrateThreshold = 40;
                         lowWinRateCount = 0;
                     } else {
                         SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "引擎未开启，请重新选择", null);
@@ -471,7 +471,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                         double winRate = data.getDouble("winrate");
                         // 更新棋盘胜率
                         board.winRateList.add(winRate * 100);
-                        if (winRate < 0.9f) {
+                        if (winRate < 0.05f) {
                             lowWinRateCount ++;
                             // 引擎连续x步低于胜率阈值，则视为引擎认输
                             if (lowWinRateCount >= successiveLowWinrateThreshold) {

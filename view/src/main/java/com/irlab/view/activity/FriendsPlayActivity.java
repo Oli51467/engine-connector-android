@@ -10,8 +10,20 @@ import static com.irlab.view.common.Constants.TURN_OFF_LIGHT_ORDER;
 import static com.irlab.view.common.Constants.WHITE;
 import static com.irlab.view.common.Constants.WIDTH;
 import static com.irlab.view.common.Constants.WRONG_SIDE;
-import static com.irlab.view.common.MessageType.*;
-import static com.irlab.view.utils.DialogUtil.*;
+import static com.irlab.view.common.MessageType.ACCEPT_INVITATION;
+import static com.irlab.view.common.MessageType.CANCEL_REQUEST;
+import static com.irlab.view.common.MessageType.FRIEND_NOT_ONLINE;
+import static com.irlab.view.common.MessageType.FRIEND_REFUSE;
+import static com.irlab.view.common.MessageType.PLAY;
+import static com.irlab.view.common.MessageType.READY_STATUS;
+import static com.irlab.view.common.MessageType.REFUSE_INVITATION;
+import static com.irlab.view.common.MessageType.REQUEST_PLAY;
+import static com.irlab.view.common.MessageType.START;
+import static com.irlab.view.utils.DialogUtil.buildErrorDialogWithConfirmAndCancel;
+import static com.irlab.view.utils.DialogUtil.buildSuccessDialogWithConfirm;
+import static com.irlab.view.utils.DialogUtil.buildSuccessDialogWithConfirmAndCancel;
+import static com.irlab.view.utils.DialogUtil.buildWarningDialogWithCancel;
+import static com.irlab.view.utils.DialogUtil.buildWarningDialogWithConfirm;
 import static com.irlab.view.utils.SerialUtil.ByteArrToHexList;
 
 import android.content.ComponentName;
@@ -38,6 +50,7 @@ import com.irlab.view.fragment.FriendPlayFragment;
 import com.irlab.view.listener.FragmentEventListener;
 import com.irlab.view.listener.FragmentReceiveListener;
 import com.irlab.view.listener.WebSocketCallbackListener;
+import com.irlab.view.serial.FriendPlaySerial;
 import com.irlab.view.serial.SerialInter;
 import com.irlab.view.serial.SerialManager;
 import com.irlab.view.service.WebSocketService;
@@ -297,6 +310,8 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                 // 打开串口
                 playing = true;
                 initSerial();
+                FriendPlaySerial serial = new FriendPlaySerial();
+                serial.start();
             }
             // 接受到另一端的落子
             else if (type.equals(PLAY)) {
@@ -446,8 +461,6 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void readData(String path, byte[] bytes, int size) {
         if (size != 365) return;
-        String header = ByteArrToHexList(bytes, 0, 2).get(1);
-        if (side == BLACK && header.equals("82") || side == WHITE && header.equals("81")) return;
         // 1.接收到的字节数组转化为16进制字符串列表
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
         // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState

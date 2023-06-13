@@ -7,6 +7,8 @@ import static com.irlab.view.common.Constants.INVALID_PLAY;
 import static com.irlab.view.common.Constants.PLAY_SUCCESSFULLY;
 import static com.irlab.view.common.Constants.RESET_BOARD_ORDER;
 import static com.irlab.view.common.Constants.TURN_OFF_LIGHT_ORDER;
+import static com.irlab.view.common.Constants.TURN_ON_BLACK_LIGHT_ORDER;
+import static com.irlab.view.common.Constants.TURN_ON_WHITE_LIGHT_ORDER;
 import static com.irlab.view.common.Constants.WHITE;
 import static com.irlab.view.common.Constants.WIDTH;
 import static com.irlab.view.common.Constants.WRONG_SIDE;
@@ -15,7 +17,6 @@ import static com.irlab.view.common.MessageType.CANCEL_REQUEST;
 import static com.irlab.view.common.MessageType.FRIEND_NOT_ONLINE;
 import static com.irlab.view.common.MessageType.FRIEND_REFUSE;
 import static com.irlab.view.common.MessageType.PLAY;
-import static com.irlab.view.common.MessageType.READY_STATUS;
 import static com.irlab.view.common.MessageType.REFUSE_INVITATION;
 import static com.irlab.view.common.MessageType.REQUEST_PLAY;
 import static com.irlab.view.common.MessageType.START;
@@ -237,7 +238,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             String type = resp.getString("event");
             // 收到某个好友的对局邀请
             if (type.equals(REQUEST_PLAY)) {
-                Long friendId = resp.getLong("id");
+                Long friendId = resp.getLong("request_id");
                 OnConformClickListener confirmListener = () -> {
                     JSONObject sendReq = new JSONObject();
                     sendReq.put("event", ACCEPT_INVITATION);
@@ -274,15 +275,12 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             else if (type.equals(CANCEL_REQUEST)) {
                 smileDialog.dismiss();
             }
-            // 双方准备好，进入对局界面
-            else if (type.equals(READY_STATUS)) {
+            // 对局开始
+            else if (type.equals(START)) {
                 FriendsPlayActivity.this.runOnUiThread(() -> {
                     smileDialog.dismiss();
                     setTabSelection(2);
                 });
-            }
-            // 对局开始
-            else if (type.equals(START)) {
                 // 双方准备好后，首先解析对局信息并展示
                 String blackId = resp.getJSONObject("game").getLong("black_id").toString();
                 String opponentUsername = resp.getString("opponent_username");
@@ -317,13 +315,15 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             else if (type.equals(PLAY)) {
                 int current = resp.getInteger("current");
                 // 判断接受到的是本方发送过去的落子还是对方发来的合法落子
-                if (current == side) {
-                    // 接受到对方发来的落子
-                    int opponentPlayX = resp.getInteger("last_x");
-                    int opponentPlayY = resp.getInteger("last_y");
-                    sendMoves2LowerComputer(opponentPlayX, opponentPlayY);
-                    // 另一方通过Websocket拿到局面后，通过communication接口发送到子Fragment:mListener.communication(state)
-                    mListener.communication(opponentPlayX, opponentPlayY, false);
+                if (resp.getString("valid").equals("y")) {
+                    if (current == side) {
+                        // 接受到对方发来的落子
+                        int opponentPlayX = resp.getInteger("last_x");
+                        int opponentPlayY = resp.getInteger("last_y");
+                        sendMoves2LowerComputer(opponentPlayX, opponentPlayY);
+                        // 另一方通过Websocket拿到局面后，通过communication接口发送到子Fragment:mListener.communication(state)
+                        mListener.communication(opponentPlayX, opponentPlayY, false);
+                    }
                 }
             }
             // 对局结束，返回好友界面
@@ -431,15 +431,16 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         if (moveX <= 15) hexX = "0" + hexX;
         if (moveY <= 15) hexY = "0" + hexY;
         // 3.根据通信协议构建指令
-        StringBuilder order = new StringBuilder();
-        order.append("EE");
-        if (side == BLACK) order.append("32");
-        else order.append("31");
-        order.append(hexX).append(hexY).append("FC").append("FF");
+        StringBuilder lightOrder = new StringBuilder();
+        lightOrder.append("EE").append("36").append(hexX).append(hexY).append("00").append("FF").append("00").append("FC").append("FF");
+        if (side == BLACK) {
+            SerialManager.getInstance().send(TURN_ON_BLACK_LIGHT_ORDER);
+        } else {
+            SerialManager.getInstance().send(TURN_ON_WHITE_LIGHT_ORDER);
+        }
         // 4.通过串口类发送数据
-        SerialManager.getInstance().send(order.toString());
-        SerialManager.getInstance().send(order.toString());
-        SerialManager.getInstance().send(order.toString());
+        SerialManager.getInstance().send(lightOrder.toString());
+        SerialManager.getInstance().send(lightOrder.toString());
     }
 
     /**

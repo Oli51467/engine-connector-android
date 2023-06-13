@@ -4,10 +4,6 @@ public class MessageType {
 
     public static final String START = "start";
 
-    public static final String READY_STATUS = "ready";
-
-    public static final String CANCEL = "cancel";
-
     public static final String PLAY = "play";
 
     public static final String REQUEST_PLAY = "request_play";

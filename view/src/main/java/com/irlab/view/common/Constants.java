@@ -11,6 +11,8 @@ public class Constants {
     public static final int BLACK = 1;
     public static final int WHITE = 2;
     public static final int BOARD_WIDTH = 1000, BOARD_HEIGHT = 1000;
+    public static final String TURN_ON_BLACK_LIGHT_ORDER = "EE31FCFF";
+    public static final String TURN_ON_WHITE_LIGHT_ORDER = "EE32FCFF";
     public static final String TURN_OFF_LIGHT_ORDER = "EE34FCFF";
     public static final String RESET_BOARD_ORDER = "EE35FCFF";
     public static final String BLACK_SIDE = "执黑";

@@ -232,7 +232,7 @@ public class Board {
     }
 
     public void regretPlay(Integer player) {
-        //if (playCount == 0 || playCount == 1) return;
+        if (playCount == 0 || playCount == 1) return;
         this.gameRecord.pop();
         this.steps.pop();
         this.forbiddenList.pop();
@@ -255,6 +255,8 @@ public class Board {
         // 3. 还原落子方
         this.playCount --;
         changePlayer();
+        // 4.胜率弹出
+        this.winRateList.remove(winRateList.size() - 1);
     }
 
     public String getState2Engine() {

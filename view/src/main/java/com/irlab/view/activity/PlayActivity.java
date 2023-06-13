@@ -17,11 +17,15 @@ import static com.irlab.view.utils.SerialUtil.ByteArrToHexList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -30,8 +34,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.irlab.base.BaseActivity;
+import com.irlab.base.response.ResponseCode;
 import com.irlab.base.utils.HttpUtil;
 import com.irlab.base.utils.SPUtils;
+import com.irlab.base.utils.ToastUtil;
 import com.irlab.view.MainView;
 import com.irlab.view.R;
 import com.irlab.view.entity.Response;
@@ -96,7 +102,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
     private void initArgs() {
         playing = false;    // 是否在对局的状态标识
         side = BLACK;           // 标识玩家是黑方还是白方
-        level = 3;              // 标识初始难度
+        level = 5;              // 标识初始难度
         engineLastX = -1;
         engineLastY = -1;
         initSerial = false;
@@ -208,16 +214,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             if (this.board.playCount < 2) return;
             // 1.请求引擎悔棋接口
             regret();
-            // 2.复位Board棋盘
-            if (side == BLACK) {
-                this.board.regretPlay(WHITE);
-                this.board.regretPlay(BLACK);
-            } else {
-                this.board.regretPlay(BLACK);
-                this.board.regretPlay(WHITE);
-            }
-            this.drawBoard();
-            // TODO: 3.指示下位机熄灭上一步引擎亮的灯
         }
     }
 
@@ -238,21 +234,22 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     /**
      * 从串口接收数据
-     * @param path 串口地址(当有多个串口需要统一处理时，可以用地址来区分)
+     *
+     * @param path  串口地址(当有多个串口需要统一处理时，可以用地址来区分)
      * @param bytes 读取到的数据
-     * @param size 数据长度
+     * @param size  数据长度
      */
     @Override
     public void readData(String path, byte[] bytes, int size) {
         if (size != 365) return;
         // 1.接收到的字节数组转化为16进制字符串列表
+        btnRegret.setEnabled(false);
         List<String> receivedHexString = ByteArrToHexList(bytes, 2, size - 2);
         // 2.遍历16进制字符串列表，将每个位置转化为0/1/2的十进制数 并写进receivedBoardState
         int cnt, k;
         for (cnt = 0, k = 0; k < receivedHexString.size(); k++, cnt++) {
             receivedBoardState[cnt / 19 + 1][(cnt % 19) + 1] = Integer.parseInt(receivedHexString.get(k), 16);
         }
-        //Log.d(serialLogger, Arrays.deepToString(receivedBoardState));
         // 3.对比接收到的棋盘数据与维护的棋盘数据的差别
         List<Integer> checkResp = checkState(receivedBoardState, board.getBoard(), engineLastX, engineLastY, board.getPlayer(), board.getCapturedStones());
         int res = checkResp.get(0);
@@ -363,15 +360,16 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 //        Log.d(serialLogger, "引擎落子：" + engineLastX + " " + engineLastY);
 //        Log.d(serialLogger, "发下位机：" + hexX + " " + hexY);
         // 3.根据通信协议构建指令
-        StringBuilder order = new StringBuilder();
-        order.append("EE");
-        if (side == BLACK) order.append("32");
-        else order.append("31");
-        order.append(hexX).append(hexY).append("FC").append("FF");
+        StringBuilder lightOrder = new StringBuilder();
+        lightOrder.append("EE").append("36").append(hexX).append(hexY).append("00").append("FF").append("00").append("FC").append("FF");
+        if (side == BLACK) {
+            SerialManager.getInstance().send(TURN_ON_BLACK_LIGHT_ORDER);
+        } else {
+            SerialManager.getInstance().send(TURN_ON_WHITE_LIGHT_ORDER);
+        }
         // 4.通过串口类发送数据
-        SerialManager.getInstance().send(order.toString());
-        SerialManager.getInstance().send(order.toString());
-        SerialManager.getInstance().send(order.toString());
+        SerialManager.getInstance().send(lightOrder.toString());
+        SerialManager.getInstance().send(lightOrder.toString());
     }
 
     /**
@@ -408,7 +406,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                             resetUnderMachine();
                         }
                         initBoard();
-                        runOnUiThread(() -> drawBoard());
+                        drawBoard();
                         // 如果用户选择白棋，引擎会先走一步黑棋，将黑棋落子落上
                         if (side == WHITE) {
                             String indexes = jsonObject.getJSONObject("data").getString("move");
@@ -417,7 +415,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                             engineLastY = firstIndexes.second;
                             board.play(engineLastX, engineLastY);
                             sendMoves2LowerComputer(engineLastX, engineLastY);
-                            runOnUiThread(() -> drawBoard());
+                            drawBoard();
                         }
                         // 开启串口轮训发送指令线程
                         playing = true;
@@ -440,6 +438,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     /**
      * 请求引擎落子
+     *
      * @param playPosition 上一步的落子位置
      * @return 引擎的落子位置
      */
@@ -465,14 +464,15 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                     // 成功返回落子坐标
                     if (code == ENGINE_SUCCESS_CODE) {
                         // 更新低胜率阈值
-                        if (board.playCount % 100 == 0 || board.playCount % 101 == 0) successiveLowWinrateThreshold /= 2;
+                        if (board.playCount % 100 == 0 || board.playCount % 101 == 0)
+                            successiveLowWinrateThreshold /= 2;
                         JSONObject data = jsonObject.getJSONObject("data");
                         String playPosition = data.getString("move");
                         double winRate = data.getDouble("winrate");
                         // 更新棋盘胜率
                         board.winRateList.add(winRate * 100);
                         if (winRate < 0.05f) {
-                            lowWinRateCount ++;
+                            lowWinRateCount++;
                             // 引擎连续x步低于胜率阈值，则视为引擎认输
                             if (lowWinRateCount >= successiveLowWinrateThreshold) {
                                 result[0] = ENGINE_RESIGN;
@@ -514,7 +514,6 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) {
-
             }
         });
     }
@@ -537,17 +536,26 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     @SuppressLint("checkResult")
     private void saveRecord(long blackId, long whiteId, String result, String steps, String winrate) {
+        Message msg = new Message();
+        msg.obj = PlayActivity.this;
         NetworkApi.createService(ApiService.class)
                 .saveRecord(getHeaders(), blackId, whiteId, result, steps, "p", winrate)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
                     public void onSuccess(Response response) {
-                        Log.d(Logger, "保存棋谱成功");
+                        int code = response.getCode();
+                        if (code == ResponseCode.SUCCESS.getCode()) {
+                            msg.what = ResponseCode.SAVE_RECORD_SUCCESSFULLY.getCode();
+                            handler.sendMessage(msg);
+                        } else {
+                            msg.what = ResponseCode.SAVE_RECORD_FAILED.getCode();
+                            handler.sendMessage(msg);
+                        }
                     }
 
                     @Override
                     public void onFailure(Throwable e) {
-                        Log.e(Logger, "save record on Failure" + e.getMessage());
+                        runOnUiThread(() -> ToastUtil.show(PlayActivity.this, "保存棋谱接口失败"));
                     }
                 }));
     }
@@ -560,12 +568,44 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         HttpUtil.sendOkHttpResponse(ENGINE_REGRET_URL, requestBody, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(Logger, "悔棋出错:" + e.getMessage());
+                runOnUiThread(() -> ToastUtil.show(PlayActivity.this, "悔棋接口失败1"));
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) {
-
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
+                String responseData = Objects.requireNonNull(response.body()).string();
+                try {
+                    JSONObject jsonObject = new JSONObject(responseData);
+                    if (jsonObject.getInt("code") == ENGINE_SUCCESS_CODE) {
+                        // 1.指示下位机熄灭上一步引擎亮的灯
+                        int lastX = board.steps.peek().getX();
+                        int lastY = board.steps.peek().getY();
+                        // 2.将引擎的落子位置转化成16进制
+                        String hexX = Integer.toHexString(lastX);
+                        String hexY = Integer.toHexString(lastY);
+                        // 3.如果小于15 要补0
+                        if (lastX <= 15) hexX = "0" + hexX;
+                        if (lastY <= 15) hexY = "0" + hexY;
+                        StringBuilder turnOffLightOrder = new StringBuilder();
+                        turnOffLightOrder.append("EE").append("36").append(hexX).append(hexY).append("00").append("00").append("00").append("FC").append("FF");
+                        // 4.复位Board棋盘
+                        if (side == BLACK) {
+                            board.regretPlay(WHITE);
+                            board.regretPlay(BLACK);
+                        } else {
+                            board.regretPlay(BLACK);
+                            board.regretPlay(WHITE);
+                        }
+                        engineLastX = board.steps.peek().getX();
+                        engineLastY = board.steps.peek().getY();
+                        // 5.画棋盘
+                        drawBoard();
+                    } else {
+                        runOnUiThread(() -> ToastUtil.show(PlayActivity.this, "悔棋接口失败2"));
+                    }
+                } catch (JSONException e) {
+                    runOnUiThread(() -> ToastUtil.show(PlayActivity.this, "悔棋失败"));
+                }
             }
         });
     }
@@ -576,4 +616,16 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             boardImageView.setImageBitmap(board);
         });
     }
+
+    private final Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == ResponseCode.SAVE_RECORD_SUCCESSFULLY.getCode()) {
+                ToastUtil.show((AppCompatActivity) msg.obj, ResponseCode.SAVE_RECORD_SUCCESSFULLY.getMsg());
+            } else if (msg.what == ResponseCode.SAVE_RECORD_FAILED.getCode()) {
+                ToastUtil.show((AppCompatActivity) msg.obj, ResponseCode.SAVE_RECORD_FAILED.getMsg());
+            }
+        }
+    };
 }

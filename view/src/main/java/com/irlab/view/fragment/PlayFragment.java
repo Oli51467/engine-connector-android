@@ -25,7 +25,7 @@ public class PlayFragment extends Fragment {
             new MyFunction("我的对局", R.drawable.icon_mygame),
             new MyFunction("联机对弈", R.drawable.icon_friends_play),
             new MyFunction("连接WiFi", R.drawable.icon_wifi),
-            new MyFunction("语音对话", R.drawable.icon_speech),
+            new MyFunction("系统设置", R.drawable.icon_set_level),
     };
     private final List<MyFunction> funcList = new ArrayList<>();
 

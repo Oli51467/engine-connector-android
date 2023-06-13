@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:ignore="MissingDefaultResource">
 
     <RelativeLayout
         android:id="@+id/header"
@@ -17,20 +19,60 @@
 
         <TextView
             android:id="@+id/header_title"
-            android:text="选择棋力"
+            android:text="系统设置"
             style="@style/large_header_textview"/>
 
     </RelativeLayout>
 
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/play_setting_item"
+        <TextView
+            android:id="@+id/tv_brightness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:gravity="center"
+            android:text="当前亮度"
+            android:textSize="36sp" />
+
+        <SeekBar
+            android:id="@+id/brightness_seekBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
+            android:layout_height="64sp"
+            android:layout_margin="60dp"
+            android:max="10" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:gravity="center"
+            android:text="当前音量"
+            android:textSize="36sp" />
+
+
+        <SeekBar
+            android:id="@+id/volume_seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="64sp"
+            android:layout_margin="60dp"
+            android:max="10" />
+
+    </LinearLayout>
+
 
 </LinearLayout>

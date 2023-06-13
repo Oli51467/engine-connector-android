@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 
 import androidx.core.content.ContextCompat;
 
@@ -23,9 +22,7 @@ public final class PermissionUtil {
     }
 
     private static boolean isGranted(final String permission, final Context context) {
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M
-                || PackageManager.PERMISSION_GRANTED
-                == ContextCompat.checkSelfPermission(context, permission);
+        return PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(context, permission);
     }
 
     /**
@@ -52,13 +49,7 @@ public final class PermissionUtil {
             }
         }
 
-        if (needPerms.size() == 0) {
-            return;
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                activity.requestPermissions(needPerms.toArray(new String[needPerms.size()]), requestCode);
-            }
-        }
+        activity.requestPermissions(needPerms.toArray(new String[0]), requestCode);
     }
 
 

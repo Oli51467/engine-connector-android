@@ -8,7 +8,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.widget.Toast;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;
@@ -75,6 +78,44 @@ public class MainActivity extends BaseActivity {
         dialog.setCanceledOnTouchOutside(false);
     }
 
+    private void allowModifySettings() {
+        // Settings.System.canWrite(MainActivity.this)
+        // 检测是否拥有写入系统 Settings 的权限
+        if (!Settings.System.canWrite(MainActivity.this)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this,
+                    android.R.style.Theme_Material_Light_Dialog_Alert);
+            builder.setTitle("请开启修改屏幕亮度权限");
+            builder.setMessage("请点击允许开启");
+            // 拒绝, 无法修改
+            builder.setNegativeButton("拒绝",
+                    (dialog, which) -> Toast.makeText(MainActivity.this,
+                                    "您已拒绝修系统Setting的屏幕亮度权限", Toast.LENGTH_SHORT)
+                            .show());
+            builder.setPositiveButton("去开启",
+                    (dialog, which) -> {
+                        // 打开允许修改Setting 权限的界面
+                        Intent intent = new Intent(
+                                Settings.ACTION_MANAGE_WRITE_SETTINGS, Uri
+                                .parse("package:"
+                                        + getPackageName()));
+                        startActivityForResult(intent,
+                                PERMISSION_REQUEST_CODE);
+                    });
+            builder.setCancelable(false);
+            builder.show();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (!Settings.System.canWrite(getApplicationContext())) {
+                Toast.makeText(MainActivity.this, "您已拒绝修系统Setting的屏幕亮度权限", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -98,6 +139,7 @@ public class MainActivity extends BaseActivity {
      * 跳转到主界面
      */
     private void enter() {
+        allowModifySettings();
         if (!PermissionUtil.isGranted(mContext, permissions)) {
             requestPermissions();
         } else {

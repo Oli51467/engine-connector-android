@@ -53,8 +53,8 @@
     <!--主页面的每个fragment的顶部Bar-->
     <style name="fragment_bar_style">
         <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">54dp</item>
-        <item name="android:background">@color/white</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:background">#F5f5f5</item>
         <item name="android:gravity">center_vertical</item>
     </style>
 

@@ -155,6 +155,8 @@
         android:visibility="invisible">
 
         <LinearLayout
+            android:gravity="center_vertical"
+            android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="80dp">
 
@@ -192,6 +194,17 @@
                 livebutton:backgroundColor="@color/color_pumpkin"
                 livebutton:shadowColor="@color/color_pomegranate"/>
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/error_message"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="64dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="48sp"
+            android:textColor="@color/red"
+            />
     </LinearLayout>
 
 

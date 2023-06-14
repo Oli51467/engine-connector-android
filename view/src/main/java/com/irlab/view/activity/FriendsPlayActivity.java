@@ -217,7 +217,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                 webSocketService.send(req.toJSONString());
                 setTabSelection(1);
             };
-            SmileDialog smileDialog = buildErrorDialogWithConfirmAndCancel(FriendsPlayActivity.this, "你确定认输吗", listener);
+            SmileDialog smileDialog = buildErrorDialogWithConfirmAndCancel(FriendsPlayActivity.this, "你确定认输吗", listener, null);
             runOnUiThread(smileDialog::show);
         } else if (vid == R.id.btn_regret) {
             String[] indexes = input.getText().toString().split(" ");

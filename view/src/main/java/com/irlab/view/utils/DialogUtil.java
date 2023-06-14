@@ -39,7 +39,7 @@ public class DialogUtil {
                 .build();
     }
 
-    public static SmileDialog buildErrorDialogWithConfirmAndCancel(AppCompatActivity activity, String text, OnConformClickListener listener) {
+    public static SmileDialog buildErrorDialogWithConfirmAndCancel(AppCompatActivity activity, String text, OnConformClickListener listener, OnCancelClickListener cancelClickListener) {
         return new SmileDialogBuilder(activity, SmileDialogType.ERROR)
                 .hideTitle(true)
                 .setContentText(text)
@@ -48,7 +48,7 @@ public class DialogUtil {
                 .setConformBgResColor(R.color.delete)
                 .setConformTextColor(Color.WHITE)
                 .setCancelTextColor(Color.BLACK)
-                .setCancelButton(R.string.cancel)
+                .setCancelButton(R.string.cancel, cancelClickListener)
                 .setCancelBgResColor(R.color.whiteSmoke)
                 .setWindowAnimations(R.style.dialog_style)
                 .setConformButton(R.string.confirm, listener)

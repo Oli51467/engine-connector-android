@@ -32,6 +32,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.irlab.base.BaseActivity;
 import com.irlab.base.response.ResponseCode;
@@ -51,6 +52,7 @@ import com.irlab.view.utils.BoardUtil;
 import com.irlab.view.utils.Drawer;
 import com.irlab.view.utils.RequestUtil;
 import com.rosefinches.dialog.SmileDialog;
+import com.rosefinches.dialog.interfac.OnCancelClickListener;
 import com.rosefinches.dialog.interfac.OnConformClickListener;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
@@ -78,6 +80,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     private Board board = null;
     private ImageView boardImageView;
+    private TextView errorMessage;
     private Bitmap boardBitmap;
     private Button chooseSide, chooseLevel, btnRegret;
     private LinearLayout layoutBeforePlay = null, layoutAfterPlay = null;
@@ -113,6 +116,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
 
     public void initComponents() {
         boardBitmap = Bitmap.createBitmap(BOARD_WIDTH, BOARD_HEIGHT, Bitmap.Config.ARGB_8888);
+        errorMessage = findViewById(R.id.error_message);
         chooseSide = findViewById(R.id.btn_choose_side);
         chooseLevel = findViewById(R.id.btn_choose_level);
         btnRegret = findViewById(R.id.btn_regret);
@@ -194,7 +198,8 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                     saveRecord();
                     resign();
                 };
-                SmileDialog dialog = buildErrorDialogWithConfirmAndCancel(this, "您确定认输吗", listener);
+                OnCancelClickListener cancelClickListener = () -> showDialog = true;
+                SmileDialog dialog = buildErrorDialogWithConfirmAndCancel(this, "您确定认输吗", listener, cancelClickListener);
                 runOnUiThread(dialog::show);
             }
         }
@@ -239,6 +244,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
      * @param bytes 读取到的数据
      * @param size  数据长度
      */
+    @SuppressLint("SetTextI18n")
     @Override
     public void readData(String path, byte[] bytes, int size) {
         if (size != 365) return;
@@ -254,30 +260,21 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         List<Integer> checkResp = checkState(receivedBoardState, board.getBoard(), engineLastX, engineLastY, board.getPlayer(), board.getCapturedStones());
         int res = checkResp.get(0);
         // 3.1 轮到黑棋落子 却在棋盘上放白棋 或反之
+        if (res == DETECTION_NO_STONE) {
+            runOnUiThread(() -> errorMessage.setText(""));
+        }
         if (res == WRONG_SIDE) {
             String wrongPosition = getPositionByIndex(checkResp.get(1), checkResp.get(2));
-            if (showDialog && playing) {
-                showDialog = false;
-                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "错误的落子方 " + wrongPosition, onConformClickListener);
-                runOnUiThread(dialog::show);
-            }
+            runOnUiThread(() -> errorMessage.setText("错误的落子方" + wrongPosition));
         }
         // 3.2 缺少棋子提示
         else if (res == DETECTION_LACK_STONE) {
             String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
-            if (showDialog && playing) {
-                showDialog = false;
-                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "缺少棋子 " + lackStonePosition, onConformClickListener);
-                runOnUiThread(dialog::show);
-            }
+            runOnUiThread(() -> errorMessage.setText(lackStonePosition + "缺少棋子"));
         }
         // 3.3 多余棋子提示
         else if (res == DETECTION_UNNECESSARY_STONE) {
-            if (showDialog && playing) {
-                showDialog = false;
-                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "多余棋子", onConformClickListener);
-                runOnUiThread(dialog::show);
-            }
+            runOnUiThread(() -> errorMessage.setText("多余棋子"));
         }
         // 3.4 正常落子 但还未判断是否合法
         else if (res == NORMAL_PLAY) {
@@ -286,12 +283,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             Integer playY = checkResp.get(2);
             // 5. 判断是否落子位置是否合法
             if (!playOnBoardAndRequestEngine(playX, playY)) {
+                String wrongPosition = BoardUtil.getPositionByIndex(playX, playY);
                 // 无法落子提示
-                if (showDialog && playing) {
-                    showDialog = false;
-                    SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "不允许落子，请及时取走", onConformClickListener);
-                    runOnUiThread(dialog::show);
-                }
+                runOnUiThread(() -> errorMessage.setText(wrongPosition + "不允许落子，请及时取走"));
             }
         }
     }
@@ -305,6 +299,7 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         }
         // 可以落子
         else {
+            errorMessage.setText("");
             Log.d(serialLogger, "比较落子位置: " + x + " " + y);
             // 1.将可以落下的棋子标记在棋盘上并刷新棋盘
             engineLastX = x;
@@ -357,19 +352,18 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
         // 2.如果小于15 要补0
         if (moveX <= 15) hexX = "0" + hexX;
         if (moveY <= 15) hexY = "0" + hexY;
-//        Log.d(serialLogger, "引擎落子：" + engineLastX + " " + engineLastY);
-//        Log.d(serialLogger, "发下位机：" + hexX + " " + hexY);
         // 3.根据通信协议构建指令
-        StringBuilder lightOrder = new StringBuilder();
-        lightOrder.append("EE").append("36").append(hexX).append(hexY).append("00").append("FF").append("00").append("FC").append("FF");
+        StringBuilder order = new StringBuilder();
+        order.append("EE36").append(hexX).append(hexY).append("00FF00FCFF");
+        //Log.d(serialLogger, "发下位机落子：" + order);
         if (side == BLACK) {
             SerialManager.getInstance().send(TURN_ON_BLACK_LIGHT_ORDER);
         } else {
             SerialManager.getInstance().send(TURN_ON_WHITE_LIGHT_ORDER);
         }
         // 4.通过串口类发送数据
-        SerialManager.getInstance().send(lightOrder.toString());
-        SerialManager.getInstance().send(lightOrder.toString());
+        SerialManager.getInstance().send(order.toString());
+        SerialManager.getInstance().send(order.toString());
     }
 
     /**

@@ -2,6 +2,7 @@ package com.irlab.view.activity;
 
 import static com.irlab.base.utils.SPUtils.getHeaders;
 import static com.irlab.base.utils.SPUtils.saveString;
+import static com.irlab.view.utils.DialogUtil.buildErrorDialogWithConfirm;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -38,8 +39,6 @@ import java.util.Map;
 @SuppressLint("CheckResult")
 @Route(path = "/auth/login")
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
-
-    private final String Logger = LoginActivity.class.getName();
 
     private EditText etUsername, etPassword, etPhoneNumber, etVerCode;
     private TextView tvVerCodeLogin, tvPasswordLogin;
@@ -132,7 +131,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                     msg.what = ResponseCode.SEND_VER_CODE_SUCCESSFULLY.getCode();
                                     handler.sendMessage(msg);
                                 } else {
-                                    ToastUtil.show(mContext, response.getMsg());
+                                    ToastUtil.show(mContext, response.getData().toString());
                                 }
                             }
 
@@ -158,8 +157,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                                 if (response.getCode() == ResponseCode.SUCCESS.getCode()) {
                                     String jwt = (String) response.getData();
                                     getUserInfoViaJsonWebToken(jwt, msg);
+                                } else if (response.getCode() == 10004) {
+                                    runOnUiThread(() -> buildErrorDialogWithConfirm(LoginActivity.this, response.getMsg(), null));
                                 } else {
-                                    ToastUtil.show(mContext, response.getMsg());
+                                    runOnUiThread(() -> buildErrorDialogWithConfirm(LoginActivity.this, response.getData().toString(), null));
                                 }
                             }
 
@@ -205,9 +206,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 .addCompanyDevice(header, deviceId)
                 .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                     @Override
-                    public void onSuccess(Response response) {
-                        // TODO:需要添加替换策略
-                    }
+                    public void onSuccess(Response response) {}
 
                     @Override
                     public void onFailure(Throwable e) {
@@ -241,13 +240,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 }));
     }
 
-    @SuppressLint("HandlerLeak")
     private final Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == ResponseCode.LOGIN_SUCCESSFULLY.getCode()) {
-                ToastUtil.show((Context) msg.obj, ResponseCode.LOGIN_SUCCESSFULLY.getMsg());
                 ARouter.getInstance().build("/view/main").withFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP).navigation();
                 finish();
             } else if (msg.what == ResponseCode.SERVER_FAILED.getCode()) {

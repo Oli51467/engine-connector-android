@@ -10,6 +10,7 @@ import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,8 +26,11 @@ import com.irlab.view.utils.RegexUtils;
 import com.irlab.view.watcher.HideTextWatcher;
 import com.irlab.view.watcher.ValidationWatcher;
 import com.irlab.view.R;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.sdu.network.NetworkApi;
 import com.sdu.network.observer.BaseObserver;
+
+import cn.hutool.core.lang.UUID;
 
 @SuppressLint("checkResult")
 public class RegisterActivity extends BaseActivity implements View.OnClickListener {
@@ -35,8 +39,10 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     private Context mContext;
 
     // 声明组件
-    private EditText userName, password, passwordConfirm, phoneNumber, verCode;
+    private EditText userName, password, passwordConfirm, phoneNumber, verCode, etImageCode;
     private Button btnRegister, btnReturn, btnSendVerCode;
+    private ImageView imageCode;
+    private String uuid;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,7 +69,16 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         btnRegister = findViewById(R.id.btn_register);
         phoneNumber = findViewById(R.id.et_phone);
         verCode = findViewById(R.id.et_verification_code);
+        etImageCode = findViewById(R.id.et_image_code);
         btnSendVerCode = findViewById(R.id.send_ver_code);
+        imageCode = findViewById(R.id.iv_image_code);
+        imageCode.setOnClickListener(this);
+        loadImage();
+    }
+
+    private void loadImage() {
+        uuid = UUID.randomUUID().toString().substring(0, 8);
+        ImageLoader.getInstance().displayImage("https://web.fcjznkj.com/api/kaptcha/image/" + uuid, imageCode);
     }
 
     private void setListener() {
@@ -82,23 +97,30 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onClick(View v) {
         int vid = v.getId();
-        if (vid == R.id.btn_register) {
+        if (vid == R.id.iv_image_code) {
+            loadImage();
+        }
+        else if (vid == R.id.btn_register) {
             String username = this.userName.getText().toString();
             String password = this.password.getText().toString();
             String passwordConfirm = this.passwordConfirm.getText().toString();
             String phoneNum = this.phoneNumber.getText().toString();
             String verificationCode = this.verCode.getText().toString();
+            String imageCode = this.etImageCode.getText().toString();
+            if (imageCode.trim().equals("") || imageCode.equals("")) {
+                runOnUiThread(() -> ToastUtil.show(this, "请先输入图形验证码"));
+            }
             if (!password.equals(passwordConfirm)) {
-                ToastUtil.show(this, "两次输入的密码不一致!");
+                runOnUiThread(() -> ToastUtil.show(this, "两次输入的密码不一致!"));
                 return;
             } else if (RegexUtils.isPhoneInvalid(phoneNum)) {
-                ToastUtil.show(this, "手机号格式不正确!");
+                runOnUiThread(() -> ToastUtil.show(this, "手机号格式不正确!"));
                 return;
             }
             Message msg = new Message();
             msg.obj = this;
             NetworkApi.createService(ApiService.class)
-                    .register(username, password, phoneNum, verificationCode)
+                    .register(username, password, phoneNum, verificationCode, imageCode, uuid)
                     .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                         @Override
                         public void onSuccess(Response response) {
@@ -123,14 +145,18 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         } else if (vid == R.id.send_ver_code) {
-            if (RegexUtils.isPhoneInvalid(phoneNumber.getText().toString())) {
+            String imageCode = this.etImageCode.getText().toString();
+            if (imageCode.equals("") || imageCode.trim().equals("")) {
+                ToastUtil.show(this, "请先输入图形验证码!");
+            }
+            else if (RegexUtils.isPhoneInvalid(phoneNumber.getText().toString())) {
                 ToastUtil.show(this, "手机号格式不正确!");
             } else {
                 new Thread(new SendSmsCountDownTimer(handler, btnSendVerCode)).start();
                 Message msg = new Message();
                 msg.obj = this;
                 NetworkApi.createService(ApiService.class)
-                        .sendRegisterVerificationCode(phoneNumber.getText().toString())
+                        .sendRegisterVerificationCode(phoneNumber.getText().toString(), imageCode, uuid)
                         .compose(NetworkApi.applySchedulers(new BaseObserver<>() {
                             @Override
                             public void onSuccess(Response response) {
@@ -140,7 +166,7 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
                                     msg.what = ResponseCode.SEND_VER_CODE_SUCCESSFULLY.getCode();
                                     handler.sendMessage(msg);
                                 } else {
-                                    ToastUtil.show(mContext, response.getMsg());
+                                    runOnUiThread(() -> ToastUtil.show(mContext, response.getData().toString()));
                                 }
                             }
 

@@ -45,7 +45,9 @@ public interface ApiService {
     Observable<Response> register(@Query("username") String username,
                                   @Query("password") String password,
                                   @Query("phone_number") String phoneNumber,
-                                  @Query("verification_code") String verificationCode);
+                                  @Query("verification_code") String verificationCode,
+                                  @Query("image_code") String imageCode,
+                                  @Query("image_code_token") String imageCodeToken);
 
     /**
      * 给指定手机发送验证码登陆
@@ -59,7 +61,9 @@ public interface ApiService {
      * @param phoneNumber 手机号
      */
     @POST("/api/account/verification/")
-    Observable<Response> sendRegisterVerificationCode(@Query("phone_number") String phoneNumber);
+    Observable<Response> sendRegisterVerificationCode(@Query("phone_number") String phoneNumber,
+                                                      @Query("image_code") String imageCode,
+                                                      @Query("image_code_token") String imageCodeToken);
 
     /**
      * 获取用户信息

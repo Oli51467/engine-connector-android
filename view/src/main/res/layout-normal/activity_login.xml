@@ -11,6 +11,10 @@
         android:id="@+id/header"
         style="@style/fragment_bar_style">
 
+        <ImageView
+            android:id="@+id/header_back"
+            style="@style/normal_header_imageview" />
+
         <TextView
             android:id="@+id/header_title"
             android:text="登陆"

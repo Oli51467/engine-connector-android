@@ -23,6 +23,7 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.irlab.base.BaseActivity;
 import com.irlab.base.MyApplication;
 import com.irlab.base.response.ResponseCode;
+import com.irlab.view.MainView;
 import com.irlab.view.common.Type;
 import com.irlab.view.network.api.ApiService;
 import com.irlab.view.entity.Response;
@@ -69,6 +70,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         tvVerCodeLogin = findViewById(R.id.tv_ver_code_login);
         tvPasswordLogin = findViewById(R.id.tv_password_login);
         btnSendVerCode = findViewById(R.id.send_ver_code);
+        findViewById(R.id.header_back).setOnClickListener(this);
     }
 
     private void setEvent() {
@@ -105,7 +107,12 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         int vid = v.getId();
-        if (vid == R.id.tv_password_login) {
+        if (vid == R.id.header_back) {
+            Intent intent = new Intent(this, MainView.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+        else if (vid == R.id.tv_password_login) {
             switchMode();
         } else if (vid == R.id.tv_ver_code_login) {
             switchMode();

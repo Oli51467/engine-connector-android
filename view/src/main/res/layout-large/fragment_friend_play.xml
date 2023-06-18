@@ -140,9 +140,12 @@
             livebutton:shadowColor="@color/color_pomegranate" />
     </LinearLayout>
 
-    <EditText
-        android:id="@+id/et_input"
+    <TextView
+        android:id="@+id/tv_error_message"
+        android:textColor="@color/red"
+        android:textSize="32sp"
         android:layout_width="match_parent"
+        android:layout_marginTop="16dp"
         android:layout_height="100dp"/>
 
 </LinearLayout>

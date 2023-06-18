@@ -312,7 +312,16 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
             String playPosition = getPositionByIndex(x, y);
             // 3.请求引擎下一步的位置，并返回引擎的落子位置的棋盘坐标
             String engineResp = enginePlay(playPosition);
-            if (engineResp.equals(FAILED_STATUS)) return false;
+            if (engineResp.equals(FAILED_STATUS)) {
+                playing = false;
+                SmileDialog dialog = buildWarningDialogWithConfirm(PlayActivity.this, "引擎出错啦，稍等再下吧", null);
+                runOnUiThread(() -> {
+                    layoutBeforePlay.setVisibility(View.VISIBLE);
+                    layoutAfterPlay.setVisibility(View.GONE);
+                    dialog.show();
+                });
+                return false;
+            }
             else if (engineResp.equals(ENGINE_RESIGN)) {
                 playing = false;
                 SmileDialog dialog = buildSuccessDialogWithConfirm(PlayActivity.this, "引擎认输，你赢了！", null);
@@ -580,8 +589,9 @@ public class PlayActivity extends BaseActivity implements View.OnClickListener, 
                         // 3.如果小于15 要补0
                         if (lastX <= 15) hexX = "0" + hexX;
                         if (lastY <= 15) hexY = "0" + hexY;
-                        StringBuilder turnOffLightOrder = new StringBuilder();
-                        turnOffLightOrder.append("EE").append("36").append(hexX).append(hexY).append("00").append("00").append("00").append("FC").append("FF");
+                        String turnOffLightOrder = "EE36" + hexX + hexY + "000000FCFF";
+                        SerialManager.getInstance().send(turnOffLightOrder);
+                        SerialManager.getInstance().send(turnOffLightOrder);
                         // 4.复位Board棋盘
                         if (side == BLACK) {
                             board.regretPlay(WHITE);

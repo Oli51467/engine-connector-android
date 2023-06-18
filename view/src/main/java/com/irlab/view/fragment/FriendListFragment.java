@@ -74,6 +74,7 @@ public class FriendListFragment extends Fragment {
             request.put("event", REQUEST_PLAY);
             request.put("request_id", userid);
             request.put("friend_id", friendsList.get(position).getId());
+            request.put("size", 19);
             // 通过接口实现Fragment向宿主Activity传递数据，在接口在onAttach时绑定
             mListener.process(request.toJSONString(), friendsList.get(position).getId());
         });

@@ -2,6 +2,8 @@ package com.irlab.view.fragment;
 
 import static com.irlab.view.common.Constants.BOARD_HEIGHT;
 import static com.irlab.view.common.Constants.BOARD_WIDTH;
+import static com.irlab.view.common.Constants.DETECTION_LACK_STONE;
+import static com.irlab.view.common.Constants.DETECTION_NO_STONE;
 import static com.irlab.view.common.Constants.DETECTION_UNNECESSARY_STONE;
 import static com.irlab.view.common.Constants.INVALID_PLAY;
 import static com.irlab.view.common.Constants.NORMAL_PLAY;
@@ -27,6 +29,7 @@ import com.irlab.view.listener.FragmentEventListener;
 import com.irlab.view.listener.FragmentReceiveListener;
 import com.irlab.view.models.Board;
 import com.irlab.view.models.Point;
+import com.irlab.view.utils.BoardUtil;
 import com.irlab.view.utils.Drawer;
 
 import java.util.List;
@@ -105,19 +108,26 @@ public class FriendPlayFragment extends Fragment implements FragmentReceiveListe
         // 1.对比接收到的棋盘数据与维护的棋盘数据的差别，如果不合法，则不发送到服务器
         List<Integer> checkResp = checkState(boardState, board.getBoard(), lastX, lastY, board.getPlayer(), board.getCapturedStones());
         Integer res = checkResp.get(0);
-        if (res.equals(WRONG_SIDE)) {
+        // 没有检测到落子
+        if (res.equals(DETECTION_NO_STONE)) {
+            fragmentEventListener.event(DETECTION_NO_STONE, -1, -1, "");
+        }
+        // 错误的落子方
+        else if (res.equals(WRONG_SIDE)) {
             String wrongPosition = getPositionByIndex(checkResp.get(1), checkResp.get(2));
             fragmentEventListener.event(WRONG_SIDE, -1, -1, wrongPosition);
         }
-//        else if (res.equals(DETECTION_LACK_STONE)) {
-//            // 缺少棋子提示
-//            String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
-//            fragmentEventListener.event(DETECTION_LACK_STONE, -1, -1, lackStonePosition);
-//        }
+        // 缺少棋子提示
+        else if (res.equals(DETECTION_LACK_STONE)) {
+            String lackStonePosition = BoardUtil.getPositionByIndex(checkResp.get(1), checkResp.get(2));
+            fragmentEventListener.event(DETECTION_LACK_STONE, -1, -1, lackStonePosition);
+        }
+        // 多余棋子提示
         else if (res.equals(DETECTION_UNNECESSARY_STONE)) {
-            // 多余棋子提示
             fragmentEventListener.event(DETECTION_UNNECESSARY_STONE, -1, -1, "多余棋子");
-        } else if (res.equals(NORMAL_PLAY)) {
+        }
+        // 正常落子
+        else if (res.equals(NORMAL_PLAY)) {
             Integer playX = checkResp.get(1);
             Integer playY = checkResp.get(2);
             // 如果合法，Activity通过Websocket发送到服务器，服务器将局面发送给另一方

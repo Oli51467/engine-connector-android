@@ -6,9 +6,9 @@ public class MessageType {
 
     public static final String PLAY = "play";
 
-    public static final String REQUEST_PLAY = "request_play";
+    public static final String EVENT_RESULT = "result";
 
-    public static final String REQUEST_DRAW = "request_draw";
+    public static final String REQUEST_PLAY = "request_play";
 
     public static final String CANCEL_REQUEST = "request_cancel";
 
@@ -16,15 +16,7 @@ public class MessageType {
 
     public static final String ACCEPT_INVITATION = "accept_invitation";
 
-    public static final String ACCEPT_DRAW = "accept_draw";
-
-    public static final String ENGINE_PLAY = "engine_play";
-
-    public static final String REQUEST_REGRET = "request_regret";
-
-    public static final String ACCEPT_REGRET = "accept_regret";
-
     public static final String FRIEND_REFUSE = "friend_refuse";
 
-    public static final String FRIEND_NOT_ONLINE = "friend_not_online";
+    public static final String FRIEND_NOT_ONLINE = "not_online";
 }

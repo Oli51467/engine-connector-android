@@ -2,6 +2,7 @@ package com.irlab.view.activity;
 
 import static com.irlab.view.common.Constants.BLACK;
 import static com.irlab.view.common.Constants.DETECTION_LACK_STONE;
+import static com.irlab.view.common.Constants.DETECTION_NO_STONE;
 import static com.irlab.view.common.Constants.DETECTION_UNNECESSARY_STONE;
 import static com.irlab.view.common.Constants.INVALID_PLAY;
 import static com.irlab.view.common.Constants.PLAY_SUCCESSFULLY;
@@ -14,6 +15,7 @@ import static com.irlab.view.common.Constants.WIDTH;
 import static com.irlab.view.common.Constants.WRONG_SIDE;
 import static com.irlab.view.common.MessageType.ACCEPT_INVITATION;
 import static com.irlab.view.common.MessageType.CANCEL_REQUEST;
+import static com.irlab.view.common.MessageType.EVENT_RESULT;
 import static com.irlab.view.common.MessageType.FRIEND_NOT_ONLINE;
 import static com.irlab.view.common.MessageType.FRIEND_REFUSE;
 import static com.irlab.view.common.MessageType.PLAY;
@@ -27,6 +29,7 @@ import static com.irlab.view.utils.DialogUtil.buildWarningDialogWithCancel;
 import static com.irlab.view.utils.DialogUtil.buildWarningDialogWithConfirm;
 import static com.irlab.view.utils.SerialUtil.ByteArrToHexList;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -34,7 +37,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -67,8 +69,6 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     private static final String Logger = FriendsPlayActivity.class.getName();
     public static boolean playing = false;
 
-    private final OnConformClickListener onConformClickListener = () -> showDialog = true;
-
     // View Components
     private ImageView headerBack, blackAvatar, whiteAvatar;
     private TextView blackInfo, whiteInfo;
@@ -84,11 +84,11 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
     // normal variables
     private int[][] receivedBoardState;
     private String userid;
-    private boolean initSerial, showDialog;
+    private boolean initSerial;
     private Integer side;
 
-    // temp
-    private EditText input;
+    // 展示错误信息
+    private TextView errorMessage;
 
     /**
      * 当服务绑定时，绑定是异步的．bindService()会立即返回，它不会返回IBinder给客户端．要接收IBinder，
@@ -140,7 +140,6 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         userid = SPUtils.getString("user_id");
         receivedBoardState = new int[WIDTH + 1][WIDTH + 1];
         initSerial = false;
-        showDialog = true;
     }
 
     public void initFragmentComponents() {
@@ -151,7 +150,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         whiteAvatar = findViewById(R.id.white_avatar);
         whiteInfo = findViewById(R.id.white_info);
 
-        input = findViewById(R.id.et_input);
+        errorMessage = findViewById(R.id.tv_error_message);
     }
 
     // 将两个Fragment绑定到主Activity上
@@ -219,11 +218,6 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             };
             SmileDialog smileDialog = buildErrorDialogWithConfirmAndCancel(FriendsPlayActivity.this, "你确定认输吗", listener, null);
             runOnUiThread(smileDialog::show);
-        } else if (vid == R.id.btn_regret) {
-            String[] indexes = input.getText().toString().split(" ");
-            int x = Integer.parseInt(indexes[0]);
-            int y = Integer.parseInt(indexes[1]);
-            mListener.communication(x, y, true);
         }
     }
 
@@ -242,8 +236,8 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                 OnConformClickListener confirmListener = () -> {
                     JSONObject sendReq = new JSONObject();
                     sendReq.put("event", ACCEPT_INVITATION);
-                    sendReq.put("user_id", userid);
                     sendReq.put("friend_id", friendId);
+                    sendReq.put("size", 19);
                     webSocketService.send(sendReq.toJSONString());
                 };
                 OnCancelClickListener cancelListener = () -> {
@@ -327,7 +321,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
                 }
             }
             // 对局结束，返回好友界面
-            else if (type.equals("result")) {
+            else if (type.equals(EVENT_RESULT)) {
                 playing = false;
                 FriendsPlayActivity.this.runOnUiThread(() -> {
                     OnConformClickListener listener = () -> {
@@ -370,13 +364,12 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         runOnUiThread(() -> smileDialog.show());
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void event(int eventCode, int x, int y, String msg) {
         // 无法落子回调
-        if (eventCode == INVALID_PLAY && showDialog) {
-            showDialog = false;
-            SmileDialog smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "无法落子", onConformClickListener);
-            runOnUiThread(smileDialog::show);
+        if (eventCode == INVALID_PLAY) {
+            runOnUiThread(() -> errorMessage.setText("无法落子"));
         } else if (eventCode == PLAY_SUCCESSFULLY) {
             // 落子合法，将该位置通过Websocket发送给另一端
             JSONObject req = new JSONObject();
@@ -384,18 +377,15 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
             req.put("x", x);
             req.put("y", y);
             webSocketService.send(req.toJSONString());
-        } else if (eventCode == WRONG_SIDE && showDialog) {
-            showDialog = false;
-            SmileDialog smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "错误的落子方 " + msg, onConformClickListener);
-            runOnUiThread(smileDialog::show);
-        } else if (eventCode == DETECTION_LACK_STONE && showDialog) {
-            showDialog = false;
-            SmileDialog smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "缺少棋子 " + msg, onConformClickListener);
-            runOnUiThread(smileDialog::show);
-        } else if (eventCode == DETECTION_UNNECESSARY_STONE && showDialog) {
-            showDialog = false;
-            SmileDialog smileDialog = buildWarningDialogWithConfirm(FriendsPlayActivity.this, "多余棋子", onConformClickListener);
-            runOnUiThread(smileDialog::show);
+        }
+        if (eventCode == DETECTION_NO_STONE) {
+            runOnUiThread(() -> errorMessage.setText(""));
+        } else if (eventCode == WRONG_SIDE) {
+            runOnUiThread(() -> errorMessage.setText("错误的落子方 " + msg));
+        } else if (eventCode == DETECTION_LACK_STONE) {
+            runOnUiThread(() -> errorMessage.setText("缺少棋子 " + msg));
+        } else if (eventCode == DETECTION_UNNECESSARY_STONE) {
+            runOnUiThread(() -> errorMessage.setText("多余棋子"));
         }
     }
 
@@ -432,7 +422,7 @@ public class FriendsPlayActivity extends BaseActivity implements View.OnClickLis
         if (moveY <= 15) hexY = "0" + hexY;
         // 3.根据通信协议构建指令
         StringBuilder lightOrder = new StringBuilder();
-        lightOrder.append("EE").append("36").append(hexX).append(hexY).append("00").append("FF").append("00").append("FC").append("FF");
+        lightOrder.append("EE36").append(hexX).append(hexY).append("00FF00FCFF");
         if (side == BLACK) {
             SerialManager.getInstance().send(TURN_ON_BLACK_LIGHT_ORDER);
         } else {
